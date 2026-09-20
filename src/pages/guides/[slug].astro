@@ -21,7 +21,7 @@ interface Props {
 const { guide } = Astro.props;
 const relatedDecision = DECISIONS.find((d) => d.slug === guide.relatedDecisionSlug);
 
-const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decisiontools.org';
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.practicaltools.org';
 const guideUrl = `${siteUrl}/guides/${guide.slug}`;
 
 const articleSchema: Record<string, any> = {

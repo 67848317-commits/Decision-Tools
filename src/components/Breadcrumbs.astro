@@ -18,7 +18,7 @@ const schemaData = {
     '@type': 'ListItem',
     position: index + 1,
     name: item.label,
-    ...(item.href ? { item: new URL(item.href, Astro.site || 'https://decisiontools.org').href } : {}),
+    ...(item.href ? { item: new URL(item.href, Astro.site || 'https://decision-tools.practicaltools.org').href } : {}),
   })),
 };
 ---

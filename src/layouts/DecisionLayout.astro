@@ -48,16 +48,18 @@ const crumbs: CrumbItem[] = [
   { label: h1 },
 ];
 
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.practicaltools.org';
+
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
   name: title,
   description: metaDescription,
-  url: `https://decisiontools.org${canonicalPath}`,
+  url: `${siteUrl}${canonicalPath}`,
   isPartOf: {
     '@type': 'WebSite',
     name: 'Decision Tools',
-    url: 'https://decisiontools.org',
+    url: siteUrl,
   },
 };
 ---

@@ -19,7 +19,7 @@ const {
   structuredData,
 } = Astro.props;
 
-const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decisiontools.org';
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.practicaltools.org';
 const canonicalUrl = `${siteUrl}${canonicalPath || Astro.url.pathname}`;
 const fullTitle = title.includes('Decision Tools') ? title : `${title} | Decision Tools`;
 

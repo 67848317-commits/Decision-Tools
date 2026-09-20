@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
-  site: 'https://decisiontools.org',
+  site: 'https://decision-tools.practicaltools.org',
   integrations: [
     sitemap(),
     {
