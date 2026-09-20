@@ -696,7 +696,6 @@ const faqList: FAQItem[] = [
   .input-field {
     width: 100%;
     padding: var(--space-2) var(--space-3);
-    padding-left: var(--space-6);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background-color: var(--color-surface);
@@ -704,6 +703,13 @@ const faqList: FAQItem[] = [
     font-size: 0.95rem;
     min-height: 44px;
     box-sizing: border-box;
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    caret-color: var(--color-brand-accent);
+  }
+
+  .input-with-unit .unit-prefix ~ .input-field {
+    padding-left: var(--space-7);
   }
 
   .input-with-unit .unit-addon ~ .input-field {
