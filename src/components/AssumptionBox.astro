@@ -1,0 +1,146 @@
+---
+interface Props {
+  assumptions: string[];
+  exclusions: string[];
+  disclaimerNote?: string;
+}
+
+const {
+  assumptions,
+  exclusions,
+  disclaimerNote = 'This model provides comparative mathematical estimates based strictly on the parameters entered. It is designed for educational and planning purposes and does not constitute financial, legal, or investment advice.',
+} = Astro.props;
+---
+
+<div class="assumption-box" id="assumptions-exclusions-box">
+  <div class="assumption-grid">
+    <div class="assumption-col assumes-col">
+      <div class="assumption-col-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="col-icon">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <h3 class="assumption-title">What this estimate assumes</h3>
+      </div>
+      <ul class="assumption-list">
+        {assumptions.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="assumption-col excludes-col">
+      <div class="assumption-col-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="col-icon">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+        </svg>
+        <h3 class="assumption-title">What this estimate does not include</h3>
+      </div>
+      <ul class="assumption-list">
+        {exclusions.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  {disclaimerNote && (
+    <div class="assumption-disclaimer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <p>{disclaimerNote}</p>
+    </div>
+  )}
+</div>
+
+<style>
+  .assumption-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-8);
+  }
+
+  .assumption-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (max-width: 768px) {
+    .assumption-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
+
+  .assumption-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .assumption-col-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .assumes-col .col-icon {
+    color: var(--color-opt-b-text);
+  }
+
+  .excludes-col .col-icon {
+    color: var(--color-text-subtle);
+  }
+
+  .assumption-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-text-main);
+  }
+
+  .assumption-list {
+    margin: 0;
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+  }
+
+  .assumption-list li {
+    padding-left: var(--space-1);
+  }
+
+  .assumption-disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.8rem;
+    color: var(--color-text-subtle);
+    line-height: 1.5;
+  }
+
+  .assumption-disclaimer svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .assumption-disclaimer p {
+    margin: 0;
+  }
+</style>

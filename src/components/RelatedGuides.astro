@@ -1,0 +1,202 @@
+---
+import {
+  GUIDES,
+  getRelatedGuidesForDecision,
+  getRelatedGuidesForGuide,
+  type GuideItem,
+} from '../data/guides';
+
+interface GuideLink {
+  title: string;
+  slug: string;
+  readTime: string;
+  summary: string;
+  topicTag?: string;
+}
+
+interface Props {
+  decisionSlug?: string;
+  currentGuideSlug?: string;
+  guideSlugs?: string[];
+  guides?: GuideLink[];
+  maxCount?: number;
+  title?: string;
+  kicker?: string;
+}
+
+const {
+  decisionSlug,
+  currentGuideSlug,
+  guideSlugs,
+  guides: explicitGuides,
+  maxCount = 2,
+  title = 'Read the Methodology Behind the Numbers',
+  kicker = 'Foundational Guides',
+} = Astro.props;
+
+let matchedGuides: GuideLink[] = [];
+
+if (explicitGuides && explicitGuides.length > 0) {
+  // Verify that any explicit guides match an existing guide
+  matchedGuides = explicitGuides.filter((eg) => GUIDES.some((g) => g.slug === eg.slug));
+} else if (guideSlugs && guideSlugs.length > 0) {
+  // Resolve from guide slugs against existing published GUIDES
+  matchedGuides = guideSlugs
+    .map((s) => GUIDES.find((g) => g.slug === s))
+    .filter(Boolean)
+    .map((g) => ({
+      title: g!.title,
+      slug: g!.slug,
+      readTime: g!.readTime,
+      summary: g!.description,
+      topicTag: g!.topicTag,
+    }));
+} else if (decisionSlug) {
+  // Use data-driven resolver for calculator pages
+  const resolved = getRelatedGuidesForDecision(decisionSlug, maxCount);
+  matchedGuides = resolved.map((g) => ({
+    title: g.title,
+    slug: g.slug,
+    readTime: g.readTime,
+    summary: g.description,
+    topicTag: g.topicTag,
+  }));
+} else if (currentGuideSlug) {
+  // Use data-driven resolver for guide pages
+  const resolved = getRelatedGuidesForGuide(currentGuideSlug, maxCount);
+  matchedGuides = resolved.map((g) => ({
+    title: g.title,
+    slug: g.slug,
+    readTime: g.readTime,
+    summary: g.description,
+    topicTag: g.topicTag,
+  }));
+} else {
+  // Fallback to top published guides
+  matchedGuides = GUIDES.slice(0, maxCount).map((g) => ({
+    title: g.title,
+    slug: g.slug,
+    readTime: g.readTime,
+    summary: g.description,
+    topicTag: g.topicTag,
+  }));
+}
+---
+
+{matchedGuides.length > 0 && (
+  <section class="related-guides-section" aria-label="Related Decision Guides">
+    <div class="related-header">
+      <span class="related-kicker">{kicker}</span>
+      <h3 class="related-title">{title}</h3>
+    </div>
+
+    <div class="related-guides-grid">
+      {matchedGuides.map((g) => (
+        <a href={`/guides/${g.slug}`} class="related-guide-card" id={`related-guide-${g.slug}`}>
+          <div class="guide-meta">
+            <span class="badge badge-neutral">{g.topicTag || 'Guide'}</span>
+            <span class="guide-time">{g.readTime}</span>
+          </div>
+          <h4 class="guide-title">{g.title}</h4>
+          <p class="guide-summary">{g.summary}</p>
+          <span class="guide-read-link">Read guide →</span>
+        </a>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .related-guides-section {
+    margin-top: var(--space-8);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .related-header {
+    margin-bottom: var(--space-5);
+  }
+
+  .related-kicker {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-brand-accent);
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+
+  .related-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-text-main);
+  }
+
+  .related-guides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-5);
+  }
+
+  .related-guide-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    text-decoration: none;
+    color: var(--color-text-main);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s ease;
+  }
+
+  .related-guide-card:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+
+  .related-guide-card:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+
+  .guide-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2);
+  }
+
+  .guide-time {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .guide-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: var(--space-1);
+    color: var(--color-text-main);
+  }
+
+  .guide-summary {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-bottom: var(--space-3);
+    flex-grow: 1;
+  }
+
+  .guide-read-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-brand-accent);
+  }
+</style>

@@ -1,0 +1,386 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { DECISIONS, CATEGORIES } from '../../data/decisions';
+
+const activeSlugs = [
+  'rent-vs-buy',
+  'job-offer',
+  'gas-vs-ev',
+  'lease-vs-buy',
+  'debt-vs-invest',
+  'buy-vs-repair',
+  'diy-vs-hire',
+  'buy-vs-subscribe',
+  'new-vs-used',
+  'bulk-buy',
+];
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Decision Tools Directory | Objective Comparative Models',
+  description: 'Explore our catalog of 10 decision tools designed to compare costs, time, and trade-offs.',
+  url: 'https://decisiontools.org/decisions',
+};
+---
+
+<BaseLayout
+  title="Decision Tools Directory | Compare Costs, Time & Trade-offs"
+  description="Explore our collection of 10 practical decision tools to compare everyday choices objectively across housing, career, transportation, and finance."
+  canonicalPath="/decisions"
+  structuredData={structuredData}
+>
+  <div class="directory-page">
+    <div class="container">
+      <div class="directory-breadcrumbs">
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Decision Tools' }]} />
+      </div>
+
+      <header class="directory-header">
+        <span class="directory-kicker">Analytical Catalog</span>
+        <h1 class="directory-title" id="directory-heading">Decision Tools Directory</h1>
+        <p class="directory-lead">
+          Explore tools designed to clarify major life and financial trade-offs. Each model calculates estimates based strictly on your assumptions with zero commercial bias and no automated recommendations.
+        </p>
+      </header>
+
+      <!-- Category Filter Navigation -->
+      <nav class="category-nav" aria-label="Life Areas">
+        <span class="category-nav-label">Jump to:</span>
+        <ul class="category-pills">
+          {CATEGORIES.map((cat) => (
+            <li>
+              <a href={`#category-${cat.id}`} class="category-pill-link">
+                {cat.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <!-- Decisions Grouped by Category -->
+      <div class="categories-list">
+        {CATEGORIES.map((cat) => {
+          const catDecisions = DECISIONS.filter((d) => d.category === cat.id);
+          return (
+            <section class="category-section" id={`category-${cat.id}`} aria-labelledby={`cat-title-${cat.id}`}>
+              <div class="category-header">
+                <div>
+                  <h2 class="category-heading" id={`cat-title-${cat.id}`}>{cat.name}</h2>
+                  <p class="category-summary">{cat.description}</p>
+                </div>
+                <span class="category-count">{catDecisions.length} models</span>
+              </div>
+
+              <div class="tools-grid">
+                {catDecisions.map((dec) => {
+                  const isActive = activeSlugs.includes(dec.slug);
+                  return (
+                    <div class={`tool-card ${isActive ? 'tool-active' : 'tool-coming-soon'}`} id={`tool-card-${dec.slug}`}>
+                      <div class="tool-card-header">
+                        <span class={`badge ${isActive ? 'badge-primary' : 'badge-neutral'}`}>
+                          {isActive ? 'Active Calculator' : 'Coming Soon'}
+                        </span>
+                        <span class="tool-time">{dec.timeToEstimate}</span>
+                      </div>
+
+                      <h3 class="tool-title">
+                        {isActive ? (
+                          <a href={`/decisions/${dec.slug}`} class="tool-link">
+                            {dec.title}
+                          </a>
+                        ) : (
+                          <span>{dec.title}</span>
+                        )}
+                      </h3>
+
+                      <p class="tool-desc">{dec.description}</p>
+
+                      <div class="tool-options-compare">
+                        <span class="compare-tag opt-a-tag">{dec.optionAName}</span>
+                        <span class="compare-vs">vs</span>
+                        <span class="compare-tag opt-b-tag">{dec.optionBName}</span>
+                      </div>
+
+                      <div class="tool-card-footer">
+                        {isActive ? (
+                          <a href={`/decisions/${dec.slug}`} class="btn btn-primary btn-sm" id={`btn-open-${dec.slug}`}>
+                            Open Calculator
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <line x1="5" y1="12" x2="19" y2="12"></line>
+                              <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                          </a>
+                        ) : (
+                          <span class="coming-soon-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Model in development
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .directory-page {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-16);
+  }
+
+  .directory-breadcrumbs {
+    margin-bottom: var(--space-6);
+  }
+
+  .directory-header {
+    max-width: 800px;
+    margin-bottom: var(--space-8);
+  }
+
+  .directory-kicker {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-brand-accent);
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+
+  .directory-title {
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--color-text-main);
+    margin-top: 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .directory-lead {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+  }
+
+  .category-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-10);
+    overflow-x: auto;
+  }
+
+  .category-nav-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+    white-space: nowrap;
+  }
+
+  .category-pills {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: var(--space-2);
+    white-space: nowrap;
+  }
+
+  .category-pill-link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    transition: all 0.15s ease;
+  }
+
+  .category-pill-link:hover {
+    color: var(--color-brand-accent);
+    border-color: var(--color-border-strong);
+    background-color: var(--color-surface);
+  }
+
+  .categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+
+  .category-section {
+    scroll-margin-top: 6rem;
+  }
+
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-3);
+    border-bottom: 2px solid var(--color-border-strong);
+  }
+
+  .category-heading {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-top: 0;
+    margin-bottom: var(--space-1);
+    color: var(--color-text-main);
+  }
+
+  .category-summary {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .category-count {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-subtle);
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-6);
+  }
+
+  .tool-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s ease;
+  }
+
+  .tool-active {
+    border-color: var(--color-border-strong);
+  }
+
+  .tool-active:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-brand-accent);
+  }
+
+  .tool-coming-soon {
+    opacity: 0.85;
+    background-color: var(--color-surface-subtle);
+  }
+
+  .tool-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+
+  .tool-time {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .tool-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+  }
+
+  .tool-link {
+    color: var(--color-text-main);
+    text-decoration: none;
+  }
+
+  .tool-link:hover {
+    color: var(--color-brand-accent);
+  }
+
+  .tool-desc {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-4);
+    flex-grow: 1;
+  }
+
+  .tool-options-compare {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    margin-bottom: var(--space-5);
+    padding: var(--space-2) var(--space-3);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .compare-tag {
+    font-weight: 600;
+  }
+
+  .opt-a-tag {
+    color: var(--color-opt-a-text);
+  }
+
+  .opt-b-tag {
+    color: var(--color-opt-b-text);
+  }
+
+  .compare-vs {
+    color: var(--color-text-subtle);
+  }
+
+  .tool-card-footer {
+    display: flex;
+    align-items: center;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .coming-soon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .btn-sm {
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.85rem;
+    width: 100%;
+    justify-content: center;
+  }
+</style>

@@ -1,0 +1,608 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import { LEASE_VS_BUY_DEFAULTS, calculateLeaseVsBuy, type LeaseVsBuyResult } from '../../lib/decisions/leaseVsBuy';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+const initialResult: LeaseVsBuyResult = calculateLeaseVsBuy(LEASE_VS_BUY_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: `Estimated Net Cost (${LEASE_VS_BUY_DEFAULTS.analysisTermMonths} Months)`,
+    optionAValue: `$${initialResult.leaseNetCost.toLocaleString()}`,
+    optionBValue: `$${initialResult.purchaseNetCost.toLocaleString()}`,
+    difference: `$${initialResult.netDifference.toLocaleString()}`,
+    helpNote: 'Lease: total payments minus $0 equity. Buy: total cash outflows minus retained vehicle asset equity.',
+  },
+  {
+    metric: 'Monthly Payment Commitment',
+    optionAValue: `$${LEASE_VS_BUY_DEFAULTS.leaseMonthlyPayment.toLocaleString()} / mo`,
+    optionBValue: `$${initialResult.purchaseLoanMonthlyPayment.toLocaleString()} / mo`,
+    difference: `$${Math.abs(LEASE_VS_BUY_DEFAULTS.leaseMonthlyPayment - initialResult.purchaseLoanMonthlyPayment).toLocaleString()} / mo`,
+    helpNote: `Lease runs ${LEASE_VS_BUY_DEFAULTS.analysisTermMonths} mos. Purchase loan runs ${LEASE_VS_BUY_DEFAULTS.loanTermMonths} mos @ ${LEASE_VS_BUY_DEFAULTS.loanInterestRatePercent}% APR.`,
+  },
+  {
+    metric: 'Total Cumulative Cash Outflow',
+    optionAValue: `$${initialResult.leaseTotalCashOutflow.toLocaleString()}`,
+    optionBValue: `$${initialResult.purchaseTotalCashOutflow.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.leaseTotalCashOutflow - initialResult.purchaseTotalCashOutflow).toLocaleString()}`,
+    helpNote: 'Includes down payments, fees, loan/lease payments, taxes, maintenance, and insurance.',
+  },
+  {
+    metric: `Estimated Asset Equity at Month ${LEASE_VS_BUY_DEFAULTS.analysisTermMonths}`,
+    optionAValue: '$0',
+    optionBValue: `$${initialResult.purchaseEndEquity.toLocaleString()}`,
+    difference: `$${initialResult.purchaseEndEquity.toLocaleString()}`,
+    helpNote: 'Estimated vehicle resale market value minus remaining loan balance owed to lender.',
+  },
+  {
+    metric: 'Initial Upfront Cash Required',
+    optionAValue: `$${initialResult.leaseTotalUpfront.toLocaleString()}`,
+    optionBValue: `$${initialResult.purchaseTotalUpfront.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.leaseTotalUpfront - initialResult.purchaseTotalUpfront).toLocaleString()}`,
+    helpNote: 'Lease: down payment + acquisition fees. Buy: down payment + state sales tax.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Upfront Capital & Deal Inception Fees',
+    optionAAmount: initialResult.leaseTotalUpfront,
+    optionBAmount: initialResult.purchaseTotalUpfront,
+    note: 'Lease: Down payment ($2,500) + fees ($950). Buy: Down payment ($5,000) + sales tax.',
+  },
+  {
+    category: `${LEASE_VS_BUY_DEFAULTS.analysisTermMonths}-Month Payment Stream`,
+    optionAAmount: initialResult.leaseTotalPayments,
+    optionBAmount: initialResult.purchaseTotalPrincipalAndInterest,
+    note: 'Sum of regular monthly installments paid during the 36-month horizon.',
+  },
+  {
+    category: 'Insurance & Maintenance Upkeep',
+    optionAAmount: initialResult.leaseTotalOperating,
+    optionBAmount: initialResult.purchaseTotalOperating,
+    note: 'Lease maintenance is typically lower due to 3-year factory bumper-to-bumper warranty.',
+  },
+  {
+    category: 'Retained Asset Equity Credit (Subtracted)',
+    optionAAmount: 0,
+    optionBAmount: -initialResult.purchaseEndEquity,
+    note: 'Vehicle market value minus unpaid loan payoff at end of term.',
+  },
+];
+
+const assumptions = [
+  {
+    label: 'Analysis Duration',
+    value: `${LEASE_VS_BUY_DEFAULTS.analysisTermMonths} Months (3 Years)`,
+    explanation: 'Standard consumer automotive lease duration benchmark.',
+  },
+  {
+    label: 'Depreciation & Residual Value',
+    value: `${LEASE_VS_BUY_DEFAULTS.vehicleResaleValuePercent}% residual value after 36 months`,
+    explanation: 'Based on average vehicle 3-year retention curves across passenger vehicles.',
+  },
+  {
+    label: 'Purchase Loan Financing Terms',
+    value: `${LEASE_VS_BUY_DEFAULTS.loanTermMonths}-month term @ ${LEASE_VS_BUY_DEFAULTS.loanInterestRatePercent}% APR`,
+    explanation: 'Standard 60-month auto financing structure.',
+  },
+  {
+    label: 'Warranty Coverage Factor',
+    value: 'Lease: $250/yr vs Purchase: $650/yr',
+    explanation: 'Leased vehicles remain under bumper-to-bumper factory coverage for the entire term.',
+  },
+];
+
+const faqs: FAQItem[] = [
+  {
+    question: 'Why does leasing typically result in a lower monthly payment?',
+    answer: 'A lease payment only finances the anticipated depreciation of the vehicle over 36 months plus a financing fee (money factor), rather than amortizing the entire purchase price of the vehicle.',
+  },
+  {
+    question: 'What happens at the end of the term in both options?',
+    answer: 'At lease termination, you return the keys and walk away with $0 asset equity, subject to condition and mileage checks. In a purchase, you retain ownership of the vehicle and any positive equity (market value minus remaining loan balance).',
+  },
+  {
+    question: 'How do mileage restrictions affect leasing?',
+    answer: 'Standard consumer leases allocate 10,000 to 15,000 miles per year. Exceeding your allowance incurs per-mile penalties (commonly $0.15 to $0.25 per excess mile) at turn-in.',
+  },
+];
+
+const relatedGuides = [
+  {
+    slug: 'true-cost-of-leasing-a-car',
+    title: 'The True Cost of Leasing a Car vs. Purchasing',
+    description: 'Understanding money factors, residual values, and the cycle of perpetual car payments.',
+    readTime: '7 min read',
+    topicTag: 'Transportation',
+  },
+  {
+    slug: 'gas-vs-ev-cost',
+    title: 'Gas vs. EV: The Real Cost of Ownership Over 5 Years',
+    description: 'Evaluating total ownership costs across fuel, charging, and maintenance curves.',
+    readTime: '6 min read',
+    topicTag: 'Transportation',
+  },
+];
+---
+
+<DecisionLayout
+  title="Car Lease vs. Buy Comparison Calculator"
+  description="Compare cumulative cash outflows, retained equity, and net ownership costs between vehicle leasing and financing."
+  category="transportation"
+  timeToEstimate="3 min"
+  slug="lease-vs-buy"
+  keyMetric="Net Cost Difference After Term"
+  optionAName="Lease Vehicle"
+  optionBName="Purchase Vehicle"
+  assumptions={assumptions}
+  faqs={faqs}
+  relatedDecisions={['gas-vs-ev', 'new-vs-used']}
+  relatedGuides={relatedGuides}
+>
+  <!-- 1. INPUTS -->
+  <div slot="inputs" class="inputs-container">
+    <!-- INPUT CONTROLS -->
+    <div class="calculator-inputs-grid" id="calculator-inputs">
+    <!-- Shared Analysis Duration -->
+    <div class="shared-params-card">
+      <h3 class="shared-title">Vehicle Baseline & Evaluation Horizon</h3>
+      <div class="shared-inputs-row">
+        <div class="form-group">
+          <label for="input-vehicle-msrp">Vehicle Price / MSRP</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-vehicle-msrp" value={LEASE_VS_BUY_DEFAULTS.vehicleMSRP} min="10000" max="250000" step="500" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-term-months">Analysis Term</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-term-months" value={LEASE_VS_BUY_DEFAULTS.analysisTermMonths} min="12" max="60" step="12" />
+            <span class="unit-label">months</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option A Panel: Lease -->
+    <OptionPanel title="Lease Option" optionLabel="Option A" badgeClass="badge-neutral">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-lease-down">Down Payment (Cap Reduction)</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-lease-down" value={LEASE_VS_BUY_DEFAULTS.leaseDownPayment} min="0" max="25000" step="250" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-lease-monthly">Monthly Lease Payment</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-lease-monthly" value={LEASE_VS_BUY_DEFAULTS.leaseMonthlyPayment} min="100" max="5000" step="10" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-lease-fees">Acquisition & Turn-in Fees</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-lease-fees" value={LEASE_VS_BUY_DEFAULTS.leaseFees} min="0" max="5000" step="50" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-lease-insurance">Annual Insurance</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-lease-insurance" value={LEASE_VS_BUY_DEFAULTS.leaseAnnualInsurance} min="0" max="15000" step="50" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-lease-maint">Annual Routine Upkeep</label>
+        <div class="input-with-prefix">
+          <span class="currency-prefix">$</span>
+          <input type="number" id="input-lease-maint" value={LEASE_VS_BUY_DEFAULTS.leaseAnnualMaintenance} min="0" max="5000" step="50" />
+        </div>
+      </div>
+    </OptionPanel>
+
+    <!-- Option B Panel: Purchase -->
+    <OptionPanel title="Purchase / Financing Option" optionLabel="Option B" badgeClass="badge-primary">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-buy-down">Down Payment</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-buy-down" value={LEASE_VS_BUY_DEFAULTS.purchaseDownPayment} min="0" max="100000" step="500" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-loan-term">Loan Term</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-loan-term" value={LEASE_VS_BUY_DEFAULTS.loanTermMonths} min="24" max="84" step="12" />
+            <span class="unit-label">months</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-loan-rate">Loan Interest Rate (APR)</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-loan-rate" value={LEASE_VS_BUY_DEFAULTS.loanInterestRatePercent} min="0" max="25" step="0.1" />
+            <span class="unit-label">% APR</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-sales-tax">State / Local Sales Tax</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-sales-tax" value={LEASE_VS_BUY_DEFAULTS.salesTaxPercent} min="0" max="15" step="0.1" />
+            <span class="unit-label">%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-buy-insurance">Annual Insurance</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-buy-insurance" value={LEASE_VS_BUY_DEFAULTS.buyAnnualInsurance} min="0" max="15000" step="50" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-buy-maint">Annual Maintenance</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-buy-maint" value={LEASE_VS_BUY_DEFAULTS.buyAnnualMaintenance} min="0" max="5000" step="50" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-buy-resale">Estimated Retained Value at Month {LEASE_VS_BUY_DEFAULTS.analysisTermMonths} (%)</label>
+        <div class="input-with-unit">
+          <input type="number" id="input-buy-resale" value={LEASE_VS_BUY_DEFAULTS.vehicleResaleValuePercent} min="10" max="90" step="1" />
+          <span class="unit-label">% of MSRP</span>
+        </div>
+      </div>
+    </OptionPanel>
+  </div>
+
+  <!-- Actions: Reset -->
+  <div class="form-actions-bar">
+    <button type="button" class="btn btn-secondary" id="btn-reset-lease-buy">
+      Reset to Defaults
+    </button>
+    <span class="form-status-note">
+      Calculations update deterministically based on entered parameters.
+    </span>
+  </div>
+  </div>
+
+  <!-- 2. RESULTS -->
+  <div slot="results" class="results-wrapper">
+    <!-- Summary Box -->
+    <div class="summary-box" id="result-summary-box">
+      <div class="summary-header">
+        <span class="summary-badge">Comparative Projection</span>
+        <span class="summary-horizon" id="summary-term-badge">{LEASE_VS_BUY_DEFAULTS.analysisTermMonths}-Month Horizon</span>
+      </div>
+      <div class="summary-metrics">
+        <div class="summary-metric">
+          <span class="metric-lbl">Lease Net Cost</span>
+          <span class="metric-val" id="summary-lease-cost">${initialResult.leaseNetCost.toLocaleString()}</span>
+        </div>
+        <div class="summary-metric">
+          <span class="metric-lbl">Purchase Net Cost</span>
+          <span class="metric-val" id="summary-buy-cost">${initialResult.purchaseNetCost.toLocaleString()}</span>
+        </div>
+        <div class="summary-metric highlight">
+          <span class="metric-lbl">Net Cost Difference</span>
+          <span class="metric-val" id="summary-difference">${initialResult.netDifference.toLocaleString()}</span>
+          <span class="metric-sub" id="summary-lower-option">Lower net cost: {initialResult.lowerNetCostOption === 'buy' ? 'Purchase Vehicle' : 'Lease Vehicle'}</span>
+        </div>
+      </div>
+      <p class="summary-text" id="summary-narrative">{initialResult.summaryText}</p>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div class="section-block" id="comparison-section">
+      <div class="section-header">
+        <h2>Metric by Metric Comparison</h2>
+        <p>Side-by-side analysis of monthly commitments, upfront cash requirements, and end-of-term equity.</p>
+      </div>
+      <ComparisonTable
+        optionAName="Lease Vehicle"
+        optionBName="Purchase Vehicle"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- COST BREAKDOWN -->
+    <div class="section-block" id="cost-breakdown-section">
+      <div class="section-header">
+        <h2>Cumulative Cost Components</h2>
+        <p>Comprehensive accounting of upfront cash, installments, upkeep, and equity offsets.</p>
+      </div>
+      <CostBreakdown
+        optionAName="Lease Vehicle"
+        optionBName="Purchase Vehicle"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+</DecisionLayout>
+
+<script>
+  import { calculateLeaseVsBuy, LEASE_VS_BUY_DEFAULTS, type LeaseVsBuyInput } from '../../lib/decisions/leaseVsBuy';
+
+  function initCalculator() {
+    const inputs = {
+      vehicleMSRP: document.getElementById('input-vehicle-msrp') as HTMLInputElement,
+      analysisTermMonths: document.getElementById('input-term-months') as HTMLInputElement,
+      leaseDownPayment: document.getElementById('input-lease-down') as HTMLInputElement,
+      leaseMonthlyPayment: document.getElementById('input-lease-monthly') as HTMLInputElement,
+      leaseFees: document.getElementById('input-lease-fees') as HTMLInputElement,
+      leaseAnnualInsurance: document.getElementById('input-lease-insurance') as HTMLInputElement,
+      leaseAnnualMaintenance: document.getElementById('input-lease-maint') as HTMLInputElement,
+      purchaseDownPayment: document.getElementById('input-buy-down') as HTMLInputElement,
+      loanTermMonths: document.getElementById('input-loan-term') as HTMLInputElement,
+      loanInterestRatePercent: document.getElementById('input-loan-rate') as HTMLInputElement,
+      salesTaxPercent: document.getElementById('input-sales-tax') as HTMLInputElement,
+      buyAnnualInsurance: document.getElementById('input-buy-insurance') as HTMLInputElement,
+      buyAnnualMaintenance: document.getElementById('input-buy-maint') as HTMLInputElement,
+      vehicleResaleValuePercent: document.getElementById('input-buy-resale') as HTMLInputElement,
+    };
+
+    function recalculate() {
+      const currentInput: LeaseVsBuyInput = {
+        vehicleMSRP: Number(inputs.vehicleMSRP.value) || LEASE_VS_BUY_DEFAULTS.vehicleMSRP,
+        purchasePrice: Number(inputs.vehicleMSRP.value) || LEASE_VS_BUY_DEFAULTS.vehicleMSRP,
+        analysisTermMonths: Number(inputs.analysisTermMonths.value) || LEASE_VS_BUY_DEFAULTS.analysisTermMonths,
+        leaseDownPayment: Number(inputs.leaseDownPayment.value) || 0,
+        leaseMonthlyPayment: Number(inputs.leaseMonthlyPayment.value) || LEASE_VS_BUY_DEFAULTS.leaseMonthlyPayment,
+        leaseFees: Number(inputs.leaseFees.value) || 0,
+        leaseAnnualInsurance: Number(inputs.leaseAnnualInsurance.value) || LEASE_VS_BUY_DEFAULTS.leaseAnnualInsurance,
+        leaseAnnualMaintenance: Number(inputs.leaseAnnualMaintenance.value) || LEASE_VS_BUY_DEFAULTS.leaseAnnualMaintenance,
+        purchaseDownPayment: Number(inputs.purchaseDownPayment.value) || LEASE_VS_BUY_DEFAULTS.purchaseDownPayment,
+        loanTermMonths: Number(inputs.loanTermMonths.value) || LEASE_VS_BUY_DEFAULTS.loanTermMonths,
+        loanInterestRatePercent: Number(inputs.loanInterestRatePercent.value) || LEASE_VS_BUY_DEFAULTS.loanInterestRatePercent,
+        salesTaxPercent: Number(inputs.salesTaxPercent.value) || LEASE_VS_BUY_DEFAULTS.salesTaxPercent,
+        buyAnnualInsurance: Number(inputs.buyAnnualInsurance.value) || LEASE_VS_BUY_DEFAULTS.buyAnnualInsurance,
+        buyAnnualMaintenance: Number(inputs.buyAnnualMaintenance.value) || LEASE_VS_BUY_DEFAULTS.buyAnnualMaintenance,
+        vehicleResaleValuePercent: Number(inputs.vehicleResaleValuePercent.value) || LEASE_VS_BUY_DEFAULTS.vehicleResaleValuePercent,
+      };
+
+      const result = calculateLeaseVsBuy(currentInput);
+
+      const leaseCostEl = document.getElementById('summary-lease-cost');
+      const buyCostEl = document.getElementById('summary-buy-cost');
+      const diffEl = document.getElementById('summary-difference');
+      const lowerEl = document.getElementById('summary-lower-option');
+      const narrativeEl = document.getElementById('summary-narrative');
+      const termBadge = document.getElementById('summary-term-badge');
+
+      if (leaseCostEl) leaseCostEl.textContent = `$${result.leaseNetCost.toLocaleString()}`;
+      if (buyCostEl) buyCostEl.textContent = `$${result.purchaseNetCost.toLocaleString()}`;
+      if (diffEl) diffEl.textContent = `$${result.netDifference.toLocaleString()}`;
+      if (lowerEl) {
+        lowerEl.textContent = `Lower net cost: ${result.lowerNetCostOption === 'buy' ? 'Purchase Vehicle' : 'Lease Vehicle'}`;
+      }
+      if (narrativeEl) narrativeEl.textContent = result.summaryText;
+      if (termBadge) termBadge.textContent = `${result.analysisTermMonths}-Month Horizon`;
+    }
+
+    Object.values(inputs).forEach((input) => {
+      if (input) {
+        input.addEventListener('input', recalculate);
+        input.addEventListener('change', recalculate);
+      }
+    });
+
+    document.getElementById('btn-reset-lease-buy')?.addEventListener('click', () => {
+      inputs.vehicleMSRP.value = String(LEASE_VS_BUY_DEFAULTS.vehicleMSRP);
+      inputs.analysisTermMonths.value = String(LEASE_VS_BUY_DEFAULTS.analysisTermMonths);
+      inputs.leaseDownPayment.value = String(LEASE_VS_BUY_DEFAULTS.leaseDownPayment);
+      inputs.leaseMonthlyPayment.value = String(LEASE_VS_BUY_DEFAULTS.leaseMonthlyPayment);
+      inputs.leaseFees.value = String(LEASE_VS_BUY_DEFAULTS.leaseFees);
+      inputs.leaseAnnualInsurance.value = String(LEASE_VS_BUY_DEFAULTS.leaseAnnualInsurance);
+      inputs.leaseAnnualMaintenance.value = String(LEASE_VS_BUY_DEFAULTS.leaseAnnualMaintenance);
+      inputs.purchaseDownPayment.value = String(LEASE_VS_BUY_DEFAULTS.purchaseDownPayment);
+      inputs.loanTermMonths.value = String(LEASE_VS_BUY_DEFAULTS.loanTermMonths);
+      inputs.loanInterestRatePercent.value = String(LEASE_VS_BUY_DEFAULTS.loanInterestRatePercent);
+      inputs.salesTaxPercent.value = String(LEASE_VS_BUY_DEFAULTS.salesTaxPercent);
+      inputs.buyAnnualInsurance.value = String(LEASE_VS_BUY_DEFAULTS.buyAnnualInsurance);
+      inputs.buyAnnualMaintenance.value = String(LEASE_VS_BUY_DEFAULTS.buyAnnualMaintenance);
+      inputs.vehicleResaleValuePercent.value = String(LEASE_VS_BUY_DEFAULTS.vehicleResaleValuePercent);
+      recalculate();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculator);
+  } else {
+    initCalculator();
+  }
+</script>
+
+<style>
+  .summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+  .summary-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-primary);
+  }
+  .summary-horizon {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .summary-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-4);
+  }
+  .summary-metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .metric-lbl {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .metric-val {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+  .summary-metric.highlight .metric-val {
+    color: var(--color-primary);
+  }
+  .metric-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+  .summary-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+  .calculator-inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+  }
+  @media (min-width: 900px) {
+    .calculator-inputs-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .shared-params-card {
+      grid-column: 1 / -1;
+    }
+  }
+  .shared-params-card {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .shared-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+  }
+  .shared-inputs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  @media (max-width: 580px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+  .input-with-prefix, .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .currency-prefix {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .unit-label {
+    position: absolute;
+    right: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .input-with-prefix input {
+    padding-left: var(--space-7);
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .input-with-unit input {
+    padding-right: var(--space-14);
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .section-block {
+    margin-top: var(--space-10);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+  .section-header {
+    margin-bottom: var(--space-6);
+  }
+  .section-header h2 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-2);
+  }
+  .section-header p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+</style>

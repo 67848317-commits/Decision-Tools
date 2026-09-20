@@ -1,0 +1,151 @@
+---
+import type { DecisionItem } from '../types';
+import { CATEGORIES } from '../data/decisions';
+
+interface Props {
+  decision: DecisionItem;
+  badgeText?: string;
+}
+
+const { decision, badgeText } = Astro.props;
+const categoryObj = CATEGORIES.find((c) => c.id === decision.category);
+const categoryName = categoryObj ? categoryObj.name : decision.category;
+---
+
+<a href={`/decisions/${decision.slug}`} class="decision-card" id={`card-${decision.slug}`}>
+  <div class="decision-card-top">
+    <span class="badge badge-neutral">{badgeText || categoryName}</span>
+    <span class="decision-card-est" aria-label={`Estimated completion time: ${decision.timeToEstimate}`}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      {decision.timeToEstimate}
+    </span>
+  </div>
+
+  <h3 class="decision-card-title">{decision.title}</h3>
+  <p class="decision-card-desc">{decision.tagline || decision.description}</p>
+
+  <div class="decision-card-footer">
+    <span class="decision-card-metric">
+      <span class="metric-label">Key trade-off:</span>
+      <span class="metric-value">{decision.keyMetric}</span>
+    </span>
+    <span class="decision-card-action" aria-hidden="true">
+      Compare
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </span>
+  </div>
+</a>
+
+<style>
+  .decision-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    text-decoration: none;
+    color: var(--color-text-main);
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    height: 100%;
+  }
+
+  .decision-card:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  .decision-card:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+
+  .decision-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+
+  .decision-card-est {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .decision-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+
+  .decision-card-desc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-6);
+    flex-grow: 1;
+  }
+
+  .decision-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .decision-card-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.75rem;
+    max-width: 70%;
+  }
+
+  .metric-label {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-subtle);
+    font-weight: 600;
+    font-size: 0.7rem;
+  }
+
+  .metric-value {
+    color: var(--color-text-main);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .decision-card-action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-brand-accent);
+    white-space: nowrap;
+  }
+
+  .decision-card:hover .decision-card-action {
+    color: var(--color-brand-accent-hover);
+  }
+</style>

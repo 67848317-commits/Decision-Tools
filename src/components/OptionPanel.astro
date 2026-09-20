@@ -1,0 +1,77 @@
+---
+interface Props {
+  optionLabel: string;
+  title: string;
+  description?: string;
+  panelVariant?: 'option-a' | 'option-b' | 'neutral';
+}
+
+const {
+  optionLabel,
+  title,
+  description,
+  panelVariant = 'neutral',
+} = Astro.props;
+---
+
+<div class={`option-panel panel-${panelVariant}`} id={`panel-${optionLabel.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}>
+  <div class="panel-header">
+    <span class={`badge badge-${panelVariant === 'option-a' ? 'opt-a' : panelVariant === 'option-b' ? 'opt-b' : 'neutral'}`}>
+      {optionLabel}
+    </span>
+    <h3 class="panel-title">{title}</h3>
+    {description && <p class="panel-desc">{description}</p>}
+  </div>
+
+  <div class="panel-body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .option-panel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .panel-option-a {
+    border-top: 3px solid var(--color-opt-a-text);
+  }
+
+  .panel-option-b {
+    border-top: 3px solid var(--color-opt-b-text);
+  }
+
+  .panel-header {
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .panel-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-1);
+    color: var(--color-text-main);
+  }
+
+  .panel-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+
+  .panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+</style>

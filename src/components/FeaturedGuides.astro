@@ -1,0 +1,158 @@
+---
+interface GuideCardItem {
+  slug: string;
+  title: string;
+  description: string;
+  readTime: string;
+  topicTag: string;
+}
+
+interface Props {
+  guides?: GuideCardItem[];
+}
+
+const defaultGuides: GuideCardItem[] = [
+  {
+    slug: 'rent-vs-buy',
+    title: 'Rent vs. Buy: The Hidden Financial Trade-Offs',
+    description: 'Why the decision isn’t just mortgage versus rent. How maintenance, property taxes, transaction costs, and investment opportunity costs shape the outcome.',
+    readTime: '6 min read',
+    topicTag: 'Housing',
+  },
+  {
+    slug: 'how-to-compare-job-offers',
+    title: 'How to Compare Job Offers Beyond Base Salary',
+    description: 'A quantitative framework for evaluating retirement matches, employer healthcare premiums, commute burnout, and intangible workplace benefits.',
+    readTime: '5 min read',
+    topicTag: 'Career',
+  },
+  {
+    slug: 'true-cost-of-leasing-a-car',
+    title: 'The True Cost of Leasing a Car vs. Purchasing',
+    description: 'Understanding depreciation money factors, acquisition charges, residual valuations, and the perpetual cycle of vehicle lease renewals.',
+    readTime: '7 min read',
+    topicTag: 'Transportation',
+  },
+  {
+    slug: 'buy-vs-repair',
+    title: 'When Does Repairing an Appliance Make Mathematical Sense?',
+    description: 'Applying the 50% lifespan rule, replacement efficiency improvements, and reliability risk curves to household items.',
+    readTime: '4 min read',
+    topicTag: 'Lifestyle',
+  },
+];
+
+const { guides = defaultGuides } = Astro.props;
+---
+
+<div class="guides-grid">
+  {guides.map((guide) => (
+    <a href={`/guides/${guide.slug}`} class="guide-card" id={`guide-card-${guide.slug}`}>
+      <div class="guide-card-top">
+        <span class="badge badge-neutral">{guide.topicTag}</span>
+        <span class="guide-read-time">{guide.readTime}</span>
+      </div>
+      <h3 class="guide-card-title">{guide.title}</h3>
+      <p class="guide-card-desc">{guide.description}</p>
+      <div class="guide-card-footer">
+        <span class="guide-card-cta">
+          Read Guide
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </span>
+      </div>
+    </a>
+  ))}
+</div>
+
+<style>
+  .guides-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
+  }
+
+  @media (max-width: 768px) {
+    .guides-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+  }
+
+  .guide-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    text-decoration: none;
+    color: var(--color-text-main);
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+
+  .guide-card:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  .guide-card:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+
+  .guide-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+
+  .guide-read-time {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .guide-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+
+  .guide-card-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-5);
+    flex-grow: 1;
+  }
+
+  .guide-card-footer {
+    display: flex;
+    align-items: center;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .guide-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-brand-accent);
+  }
+
+  .guide-card:hover .guide-card-cta {
+    color: var(--color-brand-accent-hover);
+  }
+</style>

@@ -1,0 +1,931 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import {
+  BUY_VS_SUBSCRIBE_DEFAULTS,
+  calculateBuyVsSubscribe,
+  type BuyVsSubscribeResult,
+} from '../../lib/decisions/buyVsSubscribe';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+const initialResult: BuyVsSubscribeResult = calculateBuyVsSubscribe(BUY_VS_SUBSCRIBE_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: `Total Estimated Cost (${BUY_VS_SUBSCRIBE_DEFAULTS.horizonYears}-Year Horizon)`,
+    optionAValue: `$${initialResult.totalBuyCost.toLocaleString()}`,
+    optionBValue: `$${initialResult.totalSubscribeCost.toLocaleString()}`,
+    difference: `$${initialResult.costDifference.toLocaleString()}`,
+    helpNote: 'Cumulative net cash outflows accounting for purchase, fees, maintenance, and expected residual resale value.',
+  },
+  {
+    metric: 'Annualized Equivalent Cost',
+    optionAValue: `$${initialResult.annualizedBuyCost.toLocaleString()} / yr`,
+    optionBValue: `$${initialResult.annualizedSubscribeCost.toLocaleString()} / yr`,
+    difference: `$${Math.abs(initialResult.annualizedBuyCost - initialResult.annualizedSubscribeCost).toLocaleString()} / yr`,
+    helpNote: 'Total cost divided by comparison horizon years.',
+  },
+  {
+    metric: '3-Year Cumulative Cost',
+    optionAValue: `$${initialResult.buyCost3Year.toLocaleString()}`,
+    optionBValue: `$${initialResult.subscribeCost3Year.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.buyCost3Year - initialResult.subscribeCost3Year).toLocaleString()}`,
+    helpNote: 'Projected net cumulative cost after 36 months.',
+  },
+  {
+    metric: '5-Year Cumulative Cost',
+    optionAValue: `$${initialResult.buyCost5Year.toLocaleString()}`,
+    optionBValue: `$${initialResult.subscribeCost5Year.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.buyCost5Year - initialResult.subscribeCost5Year).toLocaleString()}`,
+    helpNote: 'Projected net cumulative cost after 60 months.',
+  },
+  {
+    metric: 'Immediate Upfront Cash Outlay',
+    optionAValue: `$${(BUY_VS_SUBSCRIBE_DEFAULTS.purchasePrice + BUY_VS_SUBSCRIBE_DEFAULTS.setupOrActivationCost).toLocaleString()}`,
+    optionBValue: `$${(BUY_VS_SUBSCRIBE_DEFAULTS.signupFee + BUY_VS_SUBSCRIBE_DEFAULTS.monthlySubscriptionPrice).toLocaleString()}`,
+    difference: `$${Math.abs((BUY_VS_SUBSCRIBE_DEFAULTS.purchasePrice + BUY_VS_SUBSCRIBE_DEFAULTS.setupOrActivationCost) - (BUY_VS_SUBSCRIBE_DEFAULTS.signupFee + BUY_VS_SUBSCRIBE_DEFAULTS.monthlySubscriptionPrice)).toLocaleString()}`,
+    helpNote: 'Upfront cash needed to initiate ownership or start subscription service.',
+  },
+  {
+    metric: 'Estimated Break-Even Point',
+    optionAValue: initialResult.breakEvenMonths !== null ? `${initialResult.breakEvenMonths} months (~${(initialResult.breakEvenMonths / 12).toFixed(1)} yrs)` : 'N/A',
+    optionBValue: 'Ongoing recurring expense',
+    difference: initialResult.breakEvenMonths !== null ? `Month ${initialResult.breakEvenMonths}` : 'No threshold',
+    helpNote: 'Duration required for cumulative subscription fees to exceed the net purchase outlay.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Upfront Acquisition & Activation',
+    optionAAmount: BUY_VS_SUBSCRIBE_DEFAULTS.purchasePrice + BUY_VS_SUBSCRIBE_DEFAULTS.setupOrActivationCost,
+    optionBAmount: BUY_VS_SUBSCRIBE_DEFAULTS.signupFee,
+    note: 'Initial retail price + setup fees vs. initial signup fee.',
+  },
+  {
+    category: `${BUY_VS_SUBSCRIBE_DEFAULTS.horizonYears}-Year Recurring Fees / Maintenance`,
+    optionAAmount: BUY_VS_SUBSCRIBE_DEFAULTS.annualMaintenanceCost * BUY_VS_SUBSCRIBE_DEFAULTS.horizonYears,
+    optionBAmount: initialResult.effectiveAnnualSubscriptionRate * BUY_VS_SUBSCRIBE_DEFAULTS.horizonYears,
+    note: 'Annual upkeep / upgrade expenses vs. cumulative subscription charges.',
+  },
+  {
+    category: 'Residual Resale Value (Asset Credit)',
+    optionAAmount: -BUY_VS_SUBSCRIBE_DEFAULTS.estimatedResaleValue,
+    optionBAmount: 0,
+    note: 'Estimated residual equity recovered if the purchased item is resold at end of horizon.',
+  },
+];
+
+const assumptions = [
+  'Subscription rates remain level throughout the selected horizon with no unexpected price hikes.',
+  'Maintenance costs for the purchased item occur smoothly at the specified annual rate.',
+  'Resale value represents a non-guaranteed estimate recovered at the exact end of the comparison horizon.',
+  'Subscription access terminates immediately when payments cease, leaving zero residual equity.',
+  'No inflation adjustments or investment opportunity cost discounting applied.',
+];
+
+const exclusions = [
+  'Tax treatment differences (e.g. Section 179 capital depreciation vs. operating expense deductions).',
+  'Software version lock-in or future proprietary format obsolescence.',
+  'Opportunity cost of investing upfront capital elsewhere.',
+  'Discounts for multi-year prepaid subscriptions beyond standard annual billing.',
+];
+
+const faqList: FAQItem[] = [
+  {
+    question: 'How is the subscription break-even point calculated?',
+    answer: 'The break-even point represents the number of months required for cumulative subscription charges to equal the net cost of purchasing the asset (purchase price plus setup and maintenance, minus estimated residual resale value).',
+  },
+  {
+    question: 'Why is residual resale value subtracted from the purchase cost?',
+    answer: 'When you purchase an item outright, you own a physical or digital asset that may retain market value. Recovering capital upon resale lowers your net economic cost of ownership, provided a liquid resale market exists.',
+  },
+  {
+    question: 'What advantages do subscriptions offer beyond lower initial costs?',
+    answer: 'Subscriptions frequently bundle continuous version upgrades, cloud infrastructure, customer support, and the flexibility to cancel without carrying obsolescence risk or selling an asset.',
+  },
+  {
+    question: 'Does buying always save money over long horizons?',
+    answer: 'Not always. If the purchased item requires high recurring maintenance or rapidly becomes technologically obsolete, ongoing ownership overhead can equal or exceed subscription costs.',
+  },
+];
+---
+
+<DecisionLayout
+  title="Buy vs. Subscribe Calculator | Compare Ownership vs Subscription Cost"
+  metaDescription="Compare the multi-year cost of buying equipment or software outright versus paying for a monthly or annual subscription. Calculate break-even thresholds neutrally."
+  canonicalPath="/decisions/buy-vs-subscribe"
+  decisionSlug="buy-vs-subscribe"
+  category="Goods & Spending"
+  h1="Buy vs. Subscribe Calculator"
+  intro="Evaluate the total financial cost of purchasing an asset outright versus paying an ongoing subscription over your chosen time horizon. Calculate cumulative fees, maintenance, residual resale value, and the estimated break-even period."
+  faqItems={faqList}
+  relatedSlugs={['bulk-buy', 'buy-vs-repair', 'lease-vs-buy']}
+>
+  <!-- INPUTS SLOT -->
+  <div slot="inputs" class="inputs-container">
+    <div class="inputs-header">
+      <div class="time-horizon-panel">
+        <label for="input-horizon-years" class="label-inline">
+          <strong>Comparison Time Horizon:</strong>
+        </label>
+        <div class="input-with-unit horizon-input-group">
+          <input
+            type="number"
+            id="input-horizon-years"
+            name="horizonYears"
+            value={BUY_VS_SUBSCRIBE_DEFAULTS.horizonYears}
+            min="1"
+            max="20"
+            step="1"
+            class="input-field"
+            aria-describedby="horizon-help"
+          />
+          <span class="unit-addon">years</span>
+        </div>
+        <span id="horizon-help" class="field-help">Length of time you anticipate actively using the asset or software.</span>
+      </div>
+    </div>
+
+    <!-- 2 Column Options Grid -->
+    <div class="options-grid">
+      <!-- OPTION A: BUY -->
+      <OptionPanel
+        optionLabel="Option A"
+        title="Buy Outright"
+        description="One-time capital outlay and ongoing maintenance."
+        panelVariant="option-a"
+      >
+        <div class="form-group">
+          <label for="input-purchase-price" class="field-label">Purchase price</label>
+          <div class="input-with-unit">
+            <span class="unit-prefix">$</span>
+            <input
+              type="number"
+              id="input-purchase-price"
+              value={BUY_VS_SUBSCRIBE_DEFAULTS.purchasePrice}
+              min="0"
+              step="25"
+              class="input-field"
+            />
+          </div>
+          <span class="validation-error" id="err-purchase-price" role="alert"></span>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-setup-cost" class="field-label">Setup / activation cost</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-setup-cost"
+                value={BUY_VS_SUBSCRIBE_DEFAULTS.setupOrActivationCost}
+                min="0"
+                step="10"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-setup-cost" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-annual-maint" class="field-label">Annual maintenance / upkeep</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-annual-maint"
+                value={BUY_VS_SUBSCRIBE_DEFAULTS.annualMaintenanceCost}
+                min="0"
+                step="10"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-annual-maint" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="input-resale-val" class="field-label">Expected resale / residual value</label>
+          <div class="input-with-unit">
+            <span class="unit-prefix">$</span>
+            <input
+              type="number"
+              id="input-resale-val"
+              value={BUY_VS_SUBSCRIBE_DEFAULTS.estimatedResaleValue}
+              min="0"
+              step="25"
+              class="input-field"
+            />
+          </div>
+          <p class="field-help">Estimated market value recovered if sold at the end of the horizon. Non-guaranteed.</p>
+          <span class="validation-error" id="err-resale-val" role="alert"></span>
+        </div>
+      </OptionPanel>
+
+      <!-- OPTION B: SUBSCRIBE -->
+      <OptionPanel
+        optionLabel="Option B"
+        title="Subscribe"
+        description="Recurring payments with ongoing support and updates."
+        panelVariant="option-b"
+      >
+        <div class="form-group">
+          <label for="input-billing-cycle" class="field-label">Active billing structure</label>
+          <select id="input-billing-cycle" class="input-field select-field">
+            <option value="monthly" selected>Monthly Billing</option>
+            <option value="annual">Annual Billing</option>
+          </select>
+          <p class="field-help">Determines which recurring rate is used to avoid double counting.</p>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group" id="group-monthly-sub">
+            <label for="input-monthly-sub" class="field-label">Monthly subscription price</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-monthly-sub"
+                value={BUY_VS_SUBSCRIBE_DEFAULTS.monthlySubscriptionPrice}
+                min="0"
+                step="5"
+                class="input-field"
+              />
+              <span class="unit-addon">/ mo</span>
+            </div>
+            <span class="validation-error" id="err-monthly-sub" role="alert"></span>
+          </div>
+
+          <div class="form-group" id="group-annual-sub">
+            <label for="input-annual-sub" class="field-label">Annual subscription price</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-annual-sub"
+                value={BUY_VS_SUBSCRIBE_DEFAULTS.annualSubscriptionPrice}
+                min="0"
+                step="25"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-annual-sub" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-signup-fee" class="field-label">One-time signup / setup fee</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-signup-fee"
+                value={BUY_VS_SUBSCRIBE_DEFAULTS.signupFee}
+                min="0"
+                step="5"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-signup-fee" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-annual-addons" class="field-label">Annual add-on / seat fees</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-annual-addons"
+                value={BUY_VS_SUBSCRIBE_DEFAULTS.annualRecurringFees}
+                min="0"
+                step="10"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-annual-addons" role="alert"></span>
+          </div>
+        </div>
+      </OptionPanel>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="form-actions-bar">
+      <button type="button" class="btn btn-primary" id="btn-calc-sub">
+        Calculate Comparison
+      </button>
+      <button type="button" class="btn btn-secondary" id="btn-reset-sub">
+        Reset to Defaults
+      </button>
+      <span class="form-status-note">
+        Calculations update deterministically based on entered parameters.
+      </span>
+    </div>
+  </div>
+
+  <!-- RESULTS SLOT -->
+  <div slot="results" class="results-wrapper">
+    <!-- Result Summary Box -->
+    <div class="result-summary-box" id="sub-summary-box">
+      <div class="summary-top">
+        <span class="badge badge-neutral">Comparative Outcome</span>
+        <span class="summary-period" id="summary-horizon-badge">{BUY_VS_SUBSCRIBE_DEFAULTS.horizonYears}-Year Total Cost</span>
+      </div>
+      <p class="summary-lead-text" id="sub-summary-lead">
+        {initialResult.summaryText}
+      </p>
+
+      <div class="summary-key-metrics">
+        <div class="metric-card">
+          <span class="metric-label">Buy Net Cost</span>
+          <span class="metric-value" id="summary-buy-cost">${initialResult.totalBuyCost.toLocaleString()}</span>
+          <span class="metric-detail" id="summary-buy-annual">${initialResult.annualizedBuyCost.toLocaleString()} / yr</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Subscribe Net Cost</span>
+          <span class="metric-value" id="summary-sub-cost">${initialResult.totalSubscribeCost.toLocaleString()}</span>
+          <span class="metric-detail" id="summary-sub-annual">${initialResult.annualizedSubscribeCost.toLocaleString()} / yr</span>
+        </div>
+        <div class="metric-card highlight-card">
+          <span class="metric-label">Estimated Difference</span>
+          <span class="metric-value highlight" id="summary-diff-val">${initialResult.costDifference.toLocaleString()}</span>
+          <span class="metric-detail" id="summary-diff-lead">
+            {initialResult.lowerCostOption === 'buy' ? 'Estimated purchase cost is lower' : initialResult.lowerCostOption === 'subscribe' ? 'Estimated subscription cost is lower' : 'Identical estimated cost'}
+          </span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Break-Even Point</span>
+          <span class="metric-value" id="summary-breakeven-val">
+            {initialResult.breakEvenMonths !== null ? `${initialResult.breakEvenMonths} mos` : 'None'}
+          </span>
+          <span class="metric-detail" id="summary-breakeven-detail">
+            {initialResult.breakEvenMonths !== null ? `~${(initialResult.breakEvenMonths / 12).toFixed(1)} years` : 'No break-even'}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="results-table-section">
+      <h3 class="section-title">Metric-by-Metric Comparison</h3>
+      <ComparisonTable
+        optionAName="Buy Outright"
+        optionBName="Subscribe"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div class="results-breakdown-section">
+      <h3 class="section-title">Expense Category Breakdown</h3>
+      <CostBreakdown
+        optionAName="Buy Outright"
+        optionBName="Subscribe"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+
+  <!-- ASSUMPTIONS SLOT -->
+  <div slot="assumptions">
+    <AssumptionBox
+      assumptions={assumptions}
+      exclusions={exclusions}
+    />
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The Buy vs. Subscribe evaluation model models net cumulative cash outflows over the user-selected horizon:
+    </p>
+    <ul>
+      <li>
+        <strong>Purchase Net Cost:</strong> Calculated as: <code>Purchase Price + Setup Costs + (Annual Maintenance × Horizon) - Estimated Resale Value</code>.
+      </li>
+      <li>
+        <strong>Subscription Cost:</strong> Calculated as: <code>Signup Fee + (Active Subscription Rate + Annual Recurring Fees) × Horizon</code>. When monthly billing is selected, the monthly fee is multiplied by 12.
+      </li>
+      <li>
+        <strong>Break-Even Threshold:</strong> Derived by dividing the net upfront purchase premium (<code>Purchase Price + Setup - Signup Fee - Resale Value</code>) by the monthly operating differential (<code>Monthly Subscription - Monthly Maintenance</code>). If maintenance equals or exceeds subscription fees, no break-even exists.
+      </li>
+      <li>
+        <strong>Residual Asset Value:</strong> Because purchasing confers ownership, residual resale value is treated as an asset credit deducted at the end of the horizon. Resale values are not guaranteed.
+      </li>
+    </ul>
+  </div>
+
+  <!-- WORKED EXAMPLE SLOT -->
+  <div slot="worked-example" class="worked-example-content">
+    <div class="example-meta">
+      <span class="badge badge-neutral">Hypothetical Scenario</span>
+      <span class="example-note">Fictional illustrative parameters for demonstration</span>
+    </div>
+    <h3 class="example-title">3-Year Professional Software / Equipment Comparison</h3>
+    <p>
+      Consider an individual evaluating whether to purchase a standalone perpetual tool or pay an ongoing software-as-a-service subscription over a 3-year horizon:
+    </p>
+    <div class="example-breakdown-grid">
+      <div class="example-col">
+        <h4>Option A: One-Time Purchase</h4>
+        <ul>
+          <li>Purchase Price: $600</li>
+          <li>Setup / Activation: $40</li>
+          <li>Annual Maintenance / Upgrades: $50 / yr ($150 total)</li>
+          <li>Resale / Residual Value: $120</li>
+          <li>Gross Cash Outflow: <strong>$790</strong></li>
+          <li>Net Economic Cost (after resale): <strong>$670</strong></li>
+        </ul>
+      </div>
+      <div class="example-col">
+        <h4>Option B: Monthly Subscription</h4>
+        <ul>
+          <li>Signup Fee: $20</li>
+          <li>Monthly Subscription: $30 / mo ($360 / yr)</li>
+          <li>3-Year Subscription Fees: $1,080</li>
+          <li>Residual Equity: $0</li>
+          <li>Gross Cash Outflow: <strong>$1,100</strong></li>
+          <li>Net Economic Cost: <strong>$1,100</strong></li>
+        </ul>
+      </div>
+    </div>
+    <p class="example-summary">
+      Under these parameters, the estimated 3-year purchase cost is $430 lower than subscribing ($670 vs. $1,100), with an estimated break-even point at approximately 21 months.
+    </p>
+  </div>
+</DecisionLayout>
+
+<script>
+  import {
+    calculateBuyVsSubscribe,
+    BUY_VS_SUBSCRIBE_DEFAULTS,
+    type BuyVsSubscribeInput,
+    type SubscriptionBillingCycle,
+  } from '../../lib/decisions/buyVsSubscribe';
+
+  function initBuyVsSubscribe() {
+    const horizonInput = document.getElementById('input-horizon-years') as HTMLInputElement;
+    const purchaseInput = document.getElementById('input-purchase-price') as HTMLInputElement;
+    const setupInput = document.getElementById('input-setup-cost') as HTMLInputElement;
+    const maintInput = document.getElementById('input-annual-maint') as HTMLInputElement;
+    const resaleInput = document.getElementById('input-resale-val') as HTMLInputElement;
+    const cycleSelect = document.getElementById('input-billing-cycle') as HTMLSelectElement;
+    const monthlySubInput = document.getElementById('input-monthly-sub') as HTMLInputElement;
+    const annualSubInput = document.getElementById('input-annual-sub') as HTMLInputElement;
+    const signupInput = document.getElementById('input-signup-fee') as HTMLInputElement;
+    const addonsInput = document.getElementById('input-annual-addons') as HTMLInputElement;
+
+    function recalculate() {
+      const horizonYears = Math.max(0.25, Math.min(25, Number(horizonInput?.value) || 3));
+      const purchasePrice = Math.max(0, Number(purchaseInput?.value) || 0);
+      const setupCost = Math.max(0, Number(setupInput?.value) || 0);
+      const annualMaint = Math.max(0, Number(maintInput?.value) || 0);
+      const resaleVal = Math.max(0, Number(resaleInput?.value) || 0);
+
+      const cycle = (cycleSelect?.value as SubscriptionBillingCycle) || 'monthly';
+      const monthlySub = Math.max(0, Number(monthlySubInput?.value) || 0);
+      const annualSub = Math.max(0, Number(annualSubInput?.value) || 0);
+      const signupFee = Math.max(0, Number(signupInput?.value) || 0);
+      const annualAddons = Math.max(0, Number(addonsInput?.value) || 0);
+
+      const input: BuyVsSubscribeInput = {
+        itemName: 'Software or Equipment',
+        horizonYears,
+        purchasePrice,
+        setupOrActivationCost: setupCost,
+        annualMaintenanceCost: annualMaint,
+        estimatedResaleValue: resaleVal,
+        billingCycle: cycle,
+        monthlySubscriptionPrice: monthlySub,
+        annualSubscriptionPrice: annualSub,
+        signupFee,
+        annualRecurringFees: annualAddons,
+      };
+
+      const result = calculateBuyVsSubscribe(input);
+
+      // Update Summary Lead & Metrics
+      const horizonBadge = document.getElementById('summary-horizon-badge');
+      const summaryLead = document.getElementById('sub-summary-lead');
+      const buyCostEl = document.getElementById('summary-buy-cost');
+      const buyAnnualEl = document.getElementById('summary-buy-annual');
+      const subCostEl = document.getElementById('summary-sub-cost');
+      const subAnnualEl = document.getElementById('summary-sub-annual');
+      const diffValEl = document.getElementById('summary-diff-val');
+      const diffLeadEl = document.getElementById('summary-diff-lead');
+      const beValEl = document.getElementById('summary-breakeven-val');
+      const beDetailEl = document.getElementById('summary-breakeven-detail');
+
+      if (horizonBadge) horizonBadge.textContent = `${result.horizonYears}-Year Total Cost`;
+      if (summaryLead) summaryLead.textContent = result.summaryText;
+      if (buyCostEl) buyCostEl.textContent = `$${result.totalBuyCost.toLocaleString()}`;
+      if (buyAnnualEl) buyAnnualEl.textContent = `$${result.annualizedBuyCost.toLocaleString()} / yr`;
+      if (subCostEl) subCostEl.textContent = `$${result.totalSubscribeCost.toLocaleString()}`;
+      if (subAnnualEl) subAnnualEl.textContent = `$${result.annualizedSubscribeCost.toLocaleString()} / yr`;
+      if (diffValEl) diffValEl.textContent = `$${result.costDifference.toLocaleString()}`;
+
+      if (diffLeadEl) {
+        if (result.lowerCostOption === 'buy') {
+          diffLeadEl.textContent = 'Estimated purchase cost is lower';
+        } else if (result.lowerCostOption === 'subscribe') {
+          diffLeadEl.textContent = 'Estimated subscription cost is lower';
+        } else {
+          diffLeadEl.textContent = 'Identical estimated cost';
+        }
+      }
+
+      if (beValEl) {
+        beValEl.textContent = result.breakEvenMonths !== null ? `${result.breakEvenMonths} mos` : 'None';
+      }
+      if (beDetailEl) {
+        beDetailEl.textContent = result.breakEvenMonths !== null
+          ? `~${(result.breakEvenMonths / 12).toFixed(1)} years`
+          : 'No break-even';
+      }
+    }
+
+    const allInputs = [
+      horizonInput,
+      purchaseInput,
+      setupInput,
+      maintInput,
+      resaleInput,
+      cycleSelect,
+      monthlySubInput,
+      annualSubInput,
+      signupInput,
+      addonsInput,
+    ];
+
+    allInputs.forEach((el) => {
+      if (el) {
+        el.addEventListener('input', recalculate);
+        el.addEventListener('change', recalculate);
+      }
+    });
+
+    document.getElementById('btn-calc-sub')?.addEventListener('click', recalculate);
+
+    document.getElementById('btn-reset-sub')?.addEventListener('click', () => {
+      if (horizonInput) horizonInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.horizonYears);
+      if (purchaseInput) purchaseInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.purchasePrice);
+      if (setupInput) setupInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.setupOrActivationCost);
+      if (maintInput) maintInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.annualMaintenanceCost);
+      if (resaleInput) resaleInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.estimatedResaleValue);
+      if (cycleSelect) cycleSelect.value = BUY_VS_SUBSCRIBE_DEFAULTS.billingCycle;
+      if (monthlySubInput) monthlySubInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.monthlySubscriptionPrice);
+      if (annualSubInput) annualSubInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.annualSubscriptionPrice);
+      if (signupInput) signupInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.signupFee);
+      if (addonsInput) addonsInput.value = String(BUY_VS_SUBSCRIBE_DEFAULTS.annualRecurringFees);
+      recalculate();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBuyVsSubscribe);
+  } else {
+    initBuyVsSubscribe();
+  }
+</script>
+
+<style>
+  .inputs-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .inputs-header {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .time-horizon-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .label-inline {
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+
+  .horizon-input-group {
+    width: 130px;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 900px) {
+    .options-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .field-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+
+  .field-help {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 580px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+
+  .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .unit-prefix {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .unit-addon {
+    position: absolute;
+    right: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    padding-left: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .input-with-unit .unit-addon ~ .input-field {
+    padding-right: 48px;
+  }
+
+  .select-field {
+    padding-left: var(--space-3);
+    cursor: pointer;
+  }
+
+  .validation-error {
+    font-size: 0.75rem;
+    color: var(--color-error);
+    display: none;
+  }
+
+  .form-actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+  }
+
+  .btn {
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-text-main);
+    border-color: var(--color-border);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-surface-hover, #f8f9fa);
+  }
+
+  .form-status-note {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .results-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .result-summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+
+  .summary-period {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .summary-lead-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+  }
+
+  .summary-key-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .metric-card {
+    background-color: var(--color-surface-subtle, #fbfcfd);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .highlight-card {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light, #f0f7ff);
+  }
+
+  .metric-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .metric-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+
+  .metric-value.highlight {
+    color: var(--color-primary);
+  }
+
+  .metric-detail {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-main);
+  }
+
+  .methodology-text p,
+  .methodology-text ul {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+
+  .methodology-text ul {
+    padding-left: var(--space-5);
+  }
+
+  .worked-example-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .example-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .example-note {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .example-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+
+  .example-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 700px) {
+    .example-breakdown-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .example-col {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+
+  .example-col h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .example-col ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+  }
+
+  .example-summary {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+</style>

@@ -1,0 +1,73 @@
+---
+import { DECISIONS, CATEGORIES } from '../data/decisions';
+
+const popularDecisions = DECISIONS.filter((d) => d.featured).slice(0, 5);
+---
+
+<footer class="site-footer" id="site-footer">
+  <div class="container">
+    <div class="footer-principles" id="footer-principles-box">
+      <h4>Our Core Principle</h4>
+      <p>
+        <strong>We don't tell you what to choose. We help you understand the trade-offs.</strong>
+        Every model displays its formulas, assumptions, and limitations transparently so you can make informed decisions.
+      </p>
+    </div>
+
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h5>Decision Tools</h5>
+        <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: var(--space-4);">
+          Clear, objective trade-off calculators for life’s most significant financial and practical decisions.
+        </p>
+        <p style="font-size: 0.8rem; color: var(--color-text-subtle);">
+          Independent analytical models with zero commercial bias.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h5>Popular Decisions</h5>
+        <ul>
+          {popularDecisions.map((d) => (
+            <li>
+              <a href={`/decisions/${d.slug}`}>{d.shortTitle}</a>
+            </li>
+          ))}
+          <li>
+            <a href="/decisions"><strong>View All 10 Tools →</strong></a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Browse by Category</h5>
+        <ul>
+          {CATEGORIES.map((cat) => (
+            <li>
+              <a href={`/decisions#category-${cat.id}`}>{cat.name}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Resources & Info</h5>
+        <ul>
+          <li><a href="/guides">Decision Guides</a></li>
+          <li><a href="/about">About & Methodology</a></li>
+          <li><a href="/about#principles">Editorial Principles</a></li>
+          <li><a href="/about#privacy">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>
+        © {new Date().getFullYear()} Decision Tools. Educational and analytical modeling. No financial advice.
+      </div>
+      <div>
+        <span>Built with transparent formulas and zero tracking.</span>
+      </div>
+    </div>
+  </div>
+</footer>

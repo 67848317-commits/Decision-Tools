@@ -1,0 +1,846 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import {
+  BULK_BUY_DEFAULTS,
+  calculateBulkBuy,
+  type BulkBuyResult,
+} from '../../lib/decisions/bulkBuy';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+const initialResult: BulkBuyResult = calculateBulkBuy(BULK_BUY_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: 'Equivalent Outlay for Usable Units',
+    optionAValue: `$${initialResult.effectiveNormalCostForUsable.toFixed(2)}`,
+    optionBValue: `$${initialResult.effectiveTotalBulkOutlay.toFixed(2)}`,
+    difference: `$${Math.abs(initialResult.effectiveSavings).toFixed(2)} ${initialResult.effectiveSavings >= 0 ? 'less in bulk' : 'more in bulk'}`,
+    helpNote: 'Comparison of purchasing the usable quantity at standard retail vs. paying the full bulk package outlay plus storage.',
+  },
+  {
+    metric: 'Nominal Unit Price (Sticker Price)',
+    optionAValue: `$${initialResult.normalCostPerUnit.toFixed(2)} / unit`,
+    optionBValue: `$${initialResult.nominalBulkCostPerUnit.toFixed(2)} / unit`,
+    difference: `$${Math.abs(initialResult.normalCostPerUnit - initialResult.nominalBulkCostPerUnit).toFixed(2)} / unit`,
+    helpNote: 'Sticker price divided by package units before factoring in spoilage or storage overhead.',
+  },
+  {
+    metric: 'Effective Cost per Usable Unit',
+    optionAValue: `$${initialResult.normalCostPerUnit.toFixed(2)} / unit`,
+    optionBValue: `$${initialResult.effectiveBulkCostPerUsableUnit.toFixed(2)} / unit`,
+    difference: `$${Math.abs(initialResult.normalCostPerUnit - initialResult.effectiveBulkCostPerUsableUnit).toFixed(2)} / unit`,
+    helpNote: 'Realized cost per non-spoiled unit consumed after absorbing discarded waste and storage expenses.',
+  },
+  {
+    metric: 'Break-Even Consumption Quantity',
+    optionAValue: 'Standard retail as needed',
+    optionBValue: `${initialResult.breakEvenUnits} units (of ${BULK_BUY_DEFAULTS.bulkQuantity})`,
+    difference: `${initialResult.breakEvenUnits} units`,
+    helpNote: 'Minimum units that must be utilized to recover the full bulk package purchase and storage outlay.',
+  },
+  {
+    metric: 'Maximum Tolerable Waste / Spoilage',
+    optionAValue: '0% waste assumed',
+    optionBValue: `${initialResult.breakEvenWastePercent}%`,
+    difference: `${initialResult.breakEvenWastePercent}% ceiling`,
+    helpNote: 'If spoilage exceeds this percentage, buying standard retail units as needed becomes less costly than bulk.',
+  },
+  {
+    metric: 'Time to Consume Package at Entered Rate',
+    optionAValue: 'Purchased as consumed',
+    optionBValue: `${initialResult.monthsToConsumeBulk} months (${initialResult.monthsToConsumeUsable} mos usable)`,
+    difference: `${initialResult.monthsToConsumeBulk} mos supply`,
+    helpNote: 'Months required to consume the bulk package based on your monthly usage rate.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Product Package Purchase Price',
+    optionAAmount: initialResult.nominalEquivalentCost,
+    optionBAmount: BULK_BUY_DEFAULTS.bulkPackagePrice,
+    note: 'Sticker cost of acquiring equivalent bulk quantity vs. bulk package price.',
+  },
+  {
+    category: 'Storage & Holding Overhead',
+    optionAAmount: 0,
+    optionBAmount: BULK_BUY_DEFAULTS.storageCost,
+    note: 'Dedicated bins, pantry organizing racks, or storage shelf space.',
+  },
+  {
+    category: 'Estimated Spoilage / Waste Loss',
+    optionAAmount: 0,
+    optionBAmount: Number(((BULK_BUY_DEFAULTS.bulkQuantity * (BULK_BUY_DEFAULTS.expectedWastePercent / 100)) * (BULK_BUY_DEFAULTS.bulkPackagePrice / BULK_BUY_DEFAULTS.bulkQuantity)).toFixed(2)),
+    note: 'Monetary value of expired or damaged product discarded before use.',
+  },
+];
+
+const assumptions = [
+  'Retail goods are purchased strictly as needed with zero spoilage waste.',
+  'Bulk package units are identical in quality and specifications to individual retail units.',
+  'Storage overhead represents the one-time or allocated cost of containers, shelving, or dedicated space.',
+  'Household consumption rate remains consistent across the storage duration.',
+];
+
+const exclusions = [
+  'Wholesale club annual membership fee amortization (unless entered as part of storage / holding overhead).',
+  'Fuel and vehicle wear incurred driving to distant wholesale club locations.',
+  'Capital opportunity cost of paying the lump-sum bulk price upfront.',
+  'Risk of household preference shifts before the bulk quantity is exhausted.',
+];
+
+const faqList: FAQItem[] = [
+  {
+    question: 'How is the effective cost per usable unit calculated?',
+    answer: 'Effective cost per usable unit divides the total bulk cash outlay (bulk purchase price plus storage overhead) by only the usable, non-spoiled units. For example, if a 12-pack costs $34 with $3 storage and 10% spoilage, only 10.8 units are usable, resulting in an effective unit cost of $3.43.',
+  },
+  {
+    question: 'What is the break-even waste percentage?',
+    answer: 'The break-even waste rate is the maximum percentage of bulk contents you can afford to discard before the effective cost per unit rises to equal standard retail prices. If your waste exceeds this threshold, buying individual units as needed costs less.',
+  },
+  {
+    question: 'How do storage costs impact bulk buying economics?',
+    answer: 'Buying in volume frequently necessitates dedicated organizational bins, pantry racks, or freezer capacity. Adding storage costs reduces realized net savings, particularly for low-cost goods with narrow volume margins.',
+  },
+  {
+    question: 'Which product categories benefit most from bulk purchasing?',
+    answer: 'Non-perishable essentials with indefinite shelf lives—such as paper towels, toilet paper, laundry detergent, and dry pet food—maximize savings because spoilage risk is essentially zero and holding costs are minimal.',
+  },
+];
+---
+
+<DecisionLayout
+  title="Bulk Buy Savings Calculator | Compare Retail vs Wholesale Cost"
+  metaDescription="Calculate whether buying in bulk saves money compared to regular retail purchases. Account for unit pricing, storage overhead, and spoilage waste."
+  canonicalPath="/decisions/bulk-buy"
+  decisionSlug="bulk-buy"
+  category="Goods & Spending"
+  h1="Bulk Buy Savings Calculator"
+  intro="Determine whether purchasing goods in bulk delivers genuine financial savings compared to regular retail quantities. Account for unit pricing, storage holding costs, and spoilage waste."
+  faqItems={faqList}
+  relatedSlugs={['buy-vs-subscribe', 'buy-vs-repair', 'diy-vs-hire']}
+>
+  <!-- INPUTS SLOT -->
+  <div slot="inputs" class="inputs-container">
+    <div class="inputs-header">
+      <div class="shared-params-row">
+        <div class="form-group-inline">
+          <label for="input-monthly-usage" class="field-label-inline">Monthly consumption / usage:</label>
+          <div class="input-with-unit small-input">
+            <input
+              type="number"
+              id="input-monthly-usage"
+              value={BULK_BUY_DEFAULTS.expectedMonthlyUsage}
+              min="0.5"
+              max="5000"
+              step="0.5"
+              class="input-field"
+            />
+            <span class="unit-addon">units</span>
+          </div>
+        </div>
+
+        <div class="form-group-inline">
+          <label for="input-storage-cost" class="field-label-inline">Storage / holding cost:</label>
+          <div class="input-with-unit small-input">
+            <span class="unit-prefix">$</span>
+            <input
+              type="number"
+              id="input-storage-cost"
+              value={BULK_BUY_DEFAULTS.storageCost}
+              min="0"
+              max="500"
+              step="1"
+              class="input-field"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 Column Options Grid -->
+    <div class="options-grid">
+      <!-- OPTION A: RETAIL -->
+      <OptionPanel
+        optionLabel="Option A"
+        title="Standard Retail Package"
+        description="Regular supermarket or convenience package."
+        panelVariant="option-a"
+      >
+        <div class="form-group">
+          <label for="input-normal-price" class="field-label">Retail package price</label>
+          <div class="input-with-unit">
+            <span class="unit-prefix">$</span>
+            <input
+              type="number"
+              id="input-normal-price"
+              value={BULK_BUY_DEFAULTS.normalUnitPrice}
+              min="0.10"
+              step="0.25"
+              class="input-field"
+            />
+          </div>
+          <span class="validation-error" id="err-normal-price" role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="input-normal-qty" class="field-label">Units per standard package</label>
+          <div class="input-with-unit">
+            <input
+              type="number"
+              id="input-normal-qty"
+              value={BULK_BUY_DEFAULTS.normalQuantity}
+              min="1"
+              step="1"
+              class="input-field"
+            />
+            <span class="unit-addon">units</span>
+          </div>
+          <p class="field-help">Count, rolls, ounces, or cans per standard retail pack.</p>
+          <span class="validation-error" id="err-normal-qty" role="alert"></span>
+        </div>
+      </OptionPanel>
+
+      <!-- OPTION B: BULK -->
+      <OptionPanel
+        optionLabel="Option B"
+        title="Wholesale Bulk Package"
+        description="High-volume carton or multi-pack from club store."
+        panelVariant="option-b"
+      >
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-bulk-price" class="field-label">Bulk package price</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-bulk-price"
+                value={BULK_BUY_DEFAULTS.bulkPackagePrice}
+                min="0.50"
+                step="0.50"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-bulk-price" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-bulk-qty" class="field-label">Total units in bulk package</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-bulk-qty"
+                value={BULK_BUY_DEFAULTS.bulkQuantity}
+                min="1"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">units</span>
+            </div>
+            <span class="validation-error" id="err-bulk-qty" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="input-waste-percent" class="field-label">Expected spoilage / waste rate</label>
+          <div class="input-with-unit">
+            <input
+              type="number"
+              id="input-waste-percent"
+              value={BULK_BUY_DEFAULTS.expectedWastePercent}
+              min="0"
+              max="90"
+              step="1"
+              class="input-field"
+            />
+            <span class="unit-addon">%</span>
+          </div>
+          <p class="field-help">% of bulk contents expired, damaged, or discarded before use.</p>
+          <span class="validation-error" id="err-waste-percent" role="alert"></span>
+        </div>
+      </OptionPanel>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="form-actions-bar">
+      <button type="button" class="btn btn-primary" id="btn-calc-bulk">
+        Calculate Comparison
+      </button>
+      <button type="button" class="btn btn-secondary" id="btn-reset-bulk">
+        Reset to Defaults
+      </button>
+      <span class="form-status-note">
+        Calculations update deterministically based on entered parameters.
+      </span>
+    </div>
+  </div>
+
+  <!-- RESULTS SLOT -->
+  <div slot="results" class="results-wrapper">
+    <!-- Result Summary Box -->
+    <div class="result-summary-box" id="bulk-summary-box">
+      <div class="summary-top">
+        <span class="badge badge-neutral">Comparative Outcome</span>
+        <span class="summary-period">{BULK_BUY_DEFAULTS.bulkQuantity}-Unit Package Comparison</span>
+      </div>
+      <p class="summary-lead-text" id="bulk-summary-lead">
+        {initialResult.summaryText}
+      </p>
+
+      <div class="summary-key-metrics">
+        <div class="metric-card">
+          <span class="metric-label">Retail Unit Price</span>
+          <span class="metric-value" id="summary-retail-unit">${initialResult.normalCostPerUnit.toFixed(2)}</span>
+          <span class="metric-detail">Standard unit cost</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Effective Bulk Unit Cost</span>
+          <span class="metric-value" id="summary-bulk-unit">${initialResult.effectiveBulkCostPerUsableUnit.toFixed(2)}</span>
+          <span class="metric-detail" id="summary-bulk-nominal">Sticker: ${initialResult.nominalBulkCostPerUnit.toFixed(2)} / unit</span>
+        </div>
+        <div class="metric-card highlight-card">
+          <span class="metric-label">Effective Net Savings</span>
+          <span class="metric-value highlight" id="summary-diff-val">${Math.abs(initialResult.effectiveSavings).toFixed(2)}</span>
+          <span class="metric-detail" id="summary-diff-lead">
+            {initialResult.effectiveSavings >= 0 ? `${initialResult.effectiveSavingsPercent}% savings vs. retail` : 'Bulk is more expensive'}
+          </span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Break-Even Units</span>
+          <span class="metric-value" id="summary-breakeven-val">{initialResult.breakEvenUnits}</span>
+          <span class="metric-detail">Of {BULK_BUY_DEFAULTS.bulkQuantity} units needed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="results-table-section">
+      <h3 class="section-title">Metric-by-Metric Comparison</h3>
+      <ComparisonTable
+        optionAName="Standard Retail"
+        optionBName="Wholesale Bulk"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div class="results-breakdown-section">
+      <h3 class="section-title">Cost & Overhead Component Breakdown</h3>
+      <CostBreakdown
+        optionAName="Standard Retail"
+        optionBName="Wholesale Bulk"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+
+  <!-- ASSUMPTIONS SLOT -->
+  <div slot="assumptions">
+    <AssumptionBox
+      assumptions={assumptions}
+      exclusions={exclusions}
+    />
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The Bulk Buy evaluation model determines whether purchasing larger quantities produces genuine net financial savings:
+    </p>
+    <ul>
+      <li>
+        <strong>Nominal vs. Effective Unit Price:</strong> Nominal unit price is sticker price divided by units (<code>$34.00 ÷ 12 = $2.83/unit</code>). Effective unit price factors in storage and discarded waste: <code>(Bulk Price + Storage) ÷ (Units × (1 - Waste%))</code>.
+      </li>
+      <li>
+        <strong>Break-Even Consumption Quantity:</strong> Represents the minimum number of units that must be used before the cash outlay equals buying individual units as needed: <code>(Bulk Price + Storage) ÷ Retail Unit Price</code>.
+      </li>
+      <li>
+        <strong>Maximum Tolerable Spoilage:</strong> The spoilage percentage where effective bulk cost matches standard retail: <code>1 - [(Bulk Price + Storage) ÷ (Bulk Units × Retail Unit Price)]</code>.
+      </li>
+      <li>
+        <strong>Zero-Waste Retail Baseline:</strong> Assumes standard units are acquired as needed with 0% expiration waste.
+      </li>
+    </ul>
+  </div>
+
+  <!-- WORKED EXAMPLE SLOT -->
+  <div slot="worked-example" class="worked-example-content">
+    <div class="example-meta">
+      <span class="badge badge-neutral">Hypothetical Scenario</span>
+      <span class="example-note">Fictional illustrative parameters for demonstration</span>
+    </div>
+    <h3 class="example-title">Pantry Goods: $4.50 Standard vs. 12-Pack at $34.00</h3>
+    <p>
+      Consider a household consuming 2 containers per month, deciding between buying single items at $4.50 versus a 12-pack at $34.00 with $3.00 in pantry bin storage overhead and an estimated 10% spoilage rate:
+    </p>
+    <div class="example-breakdown-grid">
+      <div class="example-col">
+        <h4>Option A: Standard Retail</h4>
+        <ul>
+          <li>Unit Price: $4.50 per item</li>
+          <li>Equivalent 12-Unit Cost: $54.00</li>
+          <li>Cost for 10.8 Usable Units: $48.60</li>
+          <li>Storage Overhead: $0.00</li>
+          <li>Spoilage Rate: 0%</li>
+        </ul>
+      </div>
+      <div class="example-col">
+        <h4>Option B: Wholesale Bulk Package</h4>
+        <ul>
+          <li>Bulk Package Price: $34.00 ($2.83 / unit sticker)</li>
+          <li>Storage Overhead: $3.00</li>
+          <li>Total Bulk Outlay: <strong>$37.00</strong></li>
+          <li>Spoilage Waste (10%): 1.2 units discarded</li>
+          <li>Effective Usable Quantity: 10.8 units</li>
+          <li>Effective Cost per Usable Unit: <strong>$3.43 / unit</strong></li>
+        </ul>
+      </div>
+    </div>
+    <p class="example-summary">
+      Under these parameters, bulk purchasing delivers an estimated net savings of $11.60 (23.9% savings) over buying usable units at retail ($37.00 vs. $48.60). You need to consume at least 8.2 units to break even, and spoilage can reach up to 31.5% before bulk becomes more expensive than retail.
+    </p>
+  </div>
+</DecisionLayout>
+
+<script>
+  import {
+    calculateBulkBuy,
+    BULK_BUY_DEFAULTS,
+    type BulkBuyInput,
+  } from '../../lib/decisions/bulkBuy';
+
+  function initBulkBuy() {
+    const normalPriceInput = document.getElementById('input-normal-price') as HTMLInputElement;
+    const normalQtyInput = document.getElementById('input-normal-qty') as HTMLInputElement;
+    const bulkPriceInput = document.getElementById('input-bulk-price') as HTMLInputElement;
+    const bulkQtyInput = document.getElementById('input-bulk-qty') as HTMLInputElement;
+    const monthlyUsageInput = document.getElementById('input-monthly-usage') as HTMLInputElement;
+    const storageInput = document.getElementById('input-storage-cost') as HTMLInputElement;
+    const wasteInput = document.getElementById('input-waste-percent') as HTMLInputElement;
+
+    function recalculate() {
+      const normalPrice = Math.max(0.01, Number(normalPriceInput?.value) || 0.01);
+      const normalQty = Math.max(1, Number(normalQtyInput?.value) || 1);
+      const bulkPrice = Math.max(0.01, Number(bulkPriceInput?.value) || 0.01);
+      const bulkQty = Math.max(1, Number(bulkQtyInput?.value) || 1);
+      const monthlyUsage = Math.max(0.1, Number(monthlyUsageInput?.value) || 1);
+      const storage = Math.max(0, Number(storageInput?.value) || 0);
+      const waste = Math.max(0, Math.min(99, Number(wasteInput?.value) || 0));
+
+      const input: BulkBuyInput = {
+        itemName: 'Pantry Goods / Paper Supplies',
+        normalUnitPrice: normalPrice,
+        normalQuantity: normalQty,
+        bulkPackagePrice: bulkPrice,
+        bulkQuantity: bulkQty,
+        expectedMonthlyUsage: monthlyUsage,
+        storageCost: storage,
+        expectedWastePercent: waste,
+      };
+
+      const result = calculateBulkBuy(input);
+
+      const summaryLead = document.getElementById('bulk-summary-lead');
+      const retailUnitEl = document.getElementById('summary-retail-unit');
+      const bulkUnitEl = document.getElementById('summary-bulk-unit');
+      const bulkNominalEl = document.getElementById('summary-bulk-nominal');
+      const diffValEl = document.getElementById('summary-diff-val');
+      const diffLeadEl = document.getElementById('summary-diff-lead');
+      const beValEl = document.getElementById('summary-breakeven-val');
+
+      if (summaryLead) summaryLead.textContent = result.summaryText;
+      if (retailUnitEl) retailUnitEl.textContent = `$${result.normalCostPerUnit.toFixed(2)}`;
+      if (bulkUnitEl) bulkUnitEl.textContent = `$${result.effectiveBulkCostPerUsableUnit.toFixed(2)}`;
+      if (bulkNominalEl) bulkNominalEl.textContent = `Sticker: $${result.nominalBulkCostPerUnit.toFixed(2)} / unit`;
+      if (diffValEl) diffValEl.textContent = `$${Math.abs(result.effectiveSavings).toFixed(2)}`;
+
+      if (diffLeadEl) {
+        if (result.effectiveSavings >= 0) {
+          diffLeadEl.textContent = `${result.effectiveSavingsPercent}% savings vs. retail`;
+        } else {
+          diffLeadEl.textContent = 'Bulk is more expensive';
+        }
+      }
+
+      if (beValEl) beValEl.textContent = `${result.breakEvenUnits}`;
+    }
+
+    const allInputs = [
+      normalPriceInput,
+      normalQtyInput,
+      bulkPriceInput,
+      bulkQtyInput,
+      monthlyUsageInput,
+      storageInput,
+      wasteInput,
+    ];
+
+    allInputs.forEach((el) => {
+      if (el) {
+        el.addEventListener('input', recalculate);
+        el.addEventListener('change', recalculate);
+      }
+    });
+
+    document.getElementById('btn-calc-bulk')?.addEventListener('click', recalculate);
+
+    document.getElementById('btn-reset-bulk')?.addEventListener('click', () => {
+      if (normalPriceInput) normalPriceInput.value = String(BULK_BUY_DEFAULTS.normalUnitPrice);
+      if (normalQtyInput) normalQtyInput.value = String(BULK_BUY_DEFAULTS.normalQuantity);
+      if (bulkPriceInput) bulkPriceInput.value = String(BULK_BUY_DEFAULTS.bulkPackagePrice);
+      if (bulkQtyInput) bulkQtyInput.value = String(BULK_BUY_DEFAULTS.bulkQuantity);
+      if (monthlyUsageInput) monthlyUsageInput.value = String(BULK_BUY_DEFAULTS.expectedMonthlyUsage);
+      if (storageInput) storageInput.value = String(BULK_BUY_DEFAULTS.storageCost);
+      if (wasteInput) wasteInput.value = String(BULK_BUY_DEFAULTS.expectedWastePercent);
+
+      recalculate();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBulkBuy);
+  } else {
+    initBulkBuy();
+  }
+</script>
+
+<style>
+  .inputs-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .inputs-header {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .shared-params-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .form-group-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .field-label-inline {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+
+  .small-input {
+    width: 120px;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 900px) {
+    .options-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .field-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+
+  .field-help {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 580px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+
+  .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .unit-prefix {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .unit-addon {
+    position: absolute;
+    right: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    padding-left: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .input-with-unit .unit-addon ~ .input-field {
+    padding-right: 48px;
+  }
+
+  .validation-error {
+    font-size: 0.75rem;
+    color: var(--color-error);
+    display: none;
+  }
+
+  .form-actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+  }
+
+  .btn {
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-text-main);
+    border-color: var(--color-border);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-surface-hover, #f8f9fa);
+  }
+
+  .form-status-note {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .results-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .result-summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+
+  .summary-period {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .summary-lead-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+  }
+
+  .summary-key-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .metric-card {
+    background-color: var(--color-surface-subtle, #fbfcfd);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .highlight-card {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light, #f0f7ff);
+  }
+
+  .metric-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .metric-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+
+  .metric-value.highlight {
+    color: var(--color-primary);
+  }
+
+  .metric-detail {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-main);
+  }
+
+  .methodology-text p,
+  .methodology-text ul {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+
+  .methodology-text ul {
+    padding-left: var(--space-5);
+  }
+
+  .worked-example-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .example-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .example-note {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .example-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+
+  .example-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 700px) {
+    .example-breakdown-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .example-col {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+
+  .example-col h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .example-col ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+  }
+
+  .example-summary {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+</style>

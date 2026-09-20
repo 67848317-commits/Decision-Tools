@@ -1,0 +1,175 @@
+---
+export interface ComparisonRow {
+  metric: string;
+  optionAValue: string;
+  optionBValue: string;
+  difference?: string;
+  helpNote?: string;
+}
+
+interface Props {
+  caption?: string;
+  optionAName: string;
+  optionBName: string;
+  rows: ComparisonRow[];
+}
+
+const {
+  caption = 'Comparative Analysis of Metrics',
+  optionAName,
+  optionBName,
+  rows,
+} = Astro.props;
+---
+
+<div class="comparison-table-wrapper" tabindex="0" role="region" aria-label="Comparison Table">
+  <table class="table-comparison">
+    {caption && <caption class="sr-only">{caption}</caption>}
+    <thead>
+      <tr>
+        <th scope="col" class="th-metric">Metric</th>
+        <th scope="col" class="th-option th-opt-a">
+          <span class="th-option-tag">Option A</span>
+          <span class="th-option-name">{optionAName}</span>
+        </th>
+        <th scope="col" class="th-option th-opt-b">
+          <span class="th-option-tag">Option B</span>
+          <span class="th-option-name">{optionBName}</span>
+        </th>
+        <th scope="col" class="th-difference">Estimated Difference</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          <td class="td-metric">
+            <span class="metric-label">{row.metric}</span>
+            {row.helpNote && <span class="metric-note">{row.helpNote}</span>}
+          </td>
+          <td class="td-value td-opt-a">{row.optionAValue}</td>
+          <td class="td-value td-opt-b">{row.optionBValue}</td>
+          <td class="td-diff">{row.difference || '—'}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .comparison-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-6);
+  }
+
+  .comparison-table-wrapper:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+
+  .table-comparison {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+    min-width: 540px;
+  }
+
+  .table-comparison thead {
+    background-color: var(--color-surface-subtle);
+    border-bottom: 2px solid var(--color-border-strong);
+  }
+
+  .table-comparison th {
+    padding: var(--space-3) var(--space-4);
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+
+  .th-metric {
+    width: 38%;
+  }
+
+  .th-option {
+    width: 24%;
+    text-align: right;
+  }
+
+  .th-difference {
+    width: 14%;
+    text-align: right;
+    color: var(--color-text-subtle);
+  }
+
+  .th-option-tag {
+    display: block;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+    letter-spacing: 0.05em;
+  }
+
+  .th-option-name {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+
+  .table-comparison tbody tr {
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 0.1s ease;
+  }
+
+  .table-comparison tbody tr:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    background-color: var(--color-surface-subtle);
+  }
+
+  .table-comparison td {
+    padding: var(--space-3) var(--space-4);
+    vertical-align: middle;
+  }
+
+  .metric-label {
+    display: block;
+    color: var(--color-text-main);
+  }
+
+  .metric-note {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    margin-top: 2px;
+  }
+
+  .td-value {
+    text-align: right;
+    font-family: var(--font-mono);
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+  }
+
+  .td-diff {
+    text-align: right;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

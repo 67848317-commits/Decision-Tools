@@ -1,0 +1,1154 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import { RENT_VS_BUY_DEFAULTS, calculateRentVsBuy, type RentVsBuyResult } from '../../lib/decisions/rentVsBuy';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+// Calculate initial defaults on server for instant SSR hydration
+const initialResult: RentVsBuyResult = calculateRentVsBuy(RENT_VS_BUY_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: `Estimated Net Housing Cost (${RENT_VS_BUY_DEFAULTS.horizonYears} yrs)`,
+    optionAValue: `$${initialResult.totalRentCost.toLocaleString()}`,
+    optionBValue: `$${initialResult.netOwnershipCost.toLocaleString()}`,
+    difference: `$${initialResult.netDifference.toLocaleString()}`,
+    helpNote: 'Rent: total rent paid. Buy: total cash outflows minus estimated home equity built.',
+  },
+  {
+    metric: 'Total Cumulative Cash Outflow',
+    optionAValue: `$${initialResult.totalRentCost.toLocaleString()}`,
+    optionBValue: `$${initialResult.totalOwnershipOutflow.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.totalRentCost - initialResult.totalOwnershipOutflow).toLocaleString()}`,
+    helpNote: 'Ownership includes down payment, closing costs, mortgage, taxes, insurance, and maintenance.',
+  },
+  {
+    metric: `Estimated Home Equity at Year ${RENT_VS_BUY_DEFAULTS.horizonYears}`,
+    optionAValue: '$0',
+    optionBValue: `$${initialResult.finalHomeEquity.toLocaleString()}`,
+    difference: `$${initialResult.finalHomeEquity.toLocaleString()}`,
+    helpNote: 'Estimated property value minus remaining unpaid mortgage balance.',
+  },
+  {
+    metric: 'Estimated Monthly Payment (Initial)',
+    optionAValue: `$${RENT_VS_BUY_DEFAULTS.monthlyRent.toLocaleString()} / mo`,
+    optionBValue: `$${initialResult.monthlyMortgagePayment.toLocaleString()} / mo (P&I)`,
+    difference: 'Varies',
+    helpNote: 'Buyer payment reflects Principal & Interest only. Taxes, insurance & maintenance are paid in addition.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Upfront Capital & Acquisition',
+    optionAAmount: 0,
+    optionBAmount: RENT_VS_BUY_DEFAULTS.downPayment + RENT_VS_BUY_DEFAULTS.closingCostsPurchase,
+    note: 'Buy: Down payment ($90,000) + closing charges ($9,000)',
+  },
+  {
+    category: 'Mortgage Principal & Interest Payments',
+    optionAAmount: 0,
+    optionBAmount: initialResult.breakdown.reduce((acc, y) => acc + (y.mortgagePrincipalPaidAnnual + y.mortgageInterestPaidAnnual), 0),
+    note: `${RENT_VS_BUY_DEFAULTS.horizonYears} years of monthly amortization ($${initialResult.monthlyMortgagePayment}/mo)`,
+  },
+  {
+    category: 'Property Taxes & Insurance',
+    optionAAmount: 0,
+    optionBAmount: Math.round(
+      initialResult.breakdown.reduce((acc, y) => acc + (y.ownershipAnnualCost - (y.mortgagePrincipalPaidAnnual + y.mortgageInterestPaidAnnual)), 0) * 0.65
+    ),
+    note: 'Municipal property tax and hazard insurance coverage',
+  },
+  {
+    category: 'Ongoing Maintenance & Repairs',
+    optionAAmount: 0,
+    optionBAmount: Math.round(
+      initialResult.breakdown.reduce((acc, y) => acc + (y.ownershipAnnualCost - (y.mortgagePrincipalPaidAnnual + y.mortgageInterestPaidAnnual)), 0) * 0.35
+    ),
+    note: 'Standard estimated upkeep budget (1.0% of home value annually)',
+  },
+  {
+    category: 'Cumulative Rent Payments',
+    optionAAmount: initialResult.totalRentCost,
+    optionBAmount: 0,
+    note: `Escalating by ${RENT_VS_BUY_DEFAULTS.annualRentIncreasePercent}% each year`,
+  },
+];
+
+const rentVsBuyAssumptions = [
+  'Mortgage interest rate remains fixed across the entire amortization schedule.',
+  'Annual rent increases follow the entered percentage compounded every 12 months.',
+  'Property taxes and maintenance scale annually in proportion to home valuation.',
+  'Home appreciation reflects the entered constant annualized rate.',
+  'Down payment and initial buyer closing costs are paid upfront as cash outflows.',
+  'All maintenance and repairs are funded as incurred without borrowing.',
+];
+
+const rentVsBuyExclusions = [
+  'Personal income tax deductions (e.g., mortgage interest deduction or state property tax limits).',
+  'Capital gains tax exemptions or exclusions upon ultimate home liquidation.',
+  'Unexpected major structural defects or capital replacements beyond routine maintenance reserves.',
+  'HOA dues, transfer taxes, or special municipal district assessments.',
+  'Opportunity cost or potential investment yields on capital allocated to down payment.',
+  'Seller transaction fees (such as broker commissions) when selling at year end.',
+];
+
+const faqList: FAQItem[] = [
+  {
+    question: 'Does this calculator predict whether buying a home will make me money?',
+    answer: 'No. This tool calculates an estimated financial comparison based purely on the assumptions and rates you enter. It does not predict future real estate appreciation, inflation, local neighborhood desirability, or mortgage interest fluctuations.',
+  },
+  {
+    question: 'What is the difference between total cash outflow and net housing cost?',
+    answer: 'Total cash outflow reflects every dollar that leaves your bank account over the time horizon (including down payment, mortgage principal, interest, taxes, and repairs). Net housing cost subtracts the estimated home equity you accumulate at the end of the period, recognizing that home equity represents retained asset value rather than consumed expense.',
+  },
+  {
+    question: 'How is the monthly mortgage payment calculated?',
+    answer: 'Monthly payments for Principal & Interest are calculated using the standard fixed-rate amortization equation: M = P[r(1+r)^n] / [(1+r)^n - 1], where P is loan principal, r is the monthly interest rate, and n is total monthly periods.',
+  },
+  {
+    question: 'Should I assume home appreciation in my model?',
+    answer: 'Appreciation is an assumption, not a guarantee. Real estate markets experience cyclical contractions as well as expansions. Setting expected appreciation to 0% allows you to observe how the numbers look if property values remain flat.',
+  },
+  {
+    question: 'What does home equity mean in this context?',
+    answer: 'Home equity is the estimated market value of the property at the end of the selected period minus the remaining unpaid loan balance. It does not deduct hypothetical selling costs or broker commissions.',
+  },
+];
+---
+
+<DecisionLayout
+  title="Rent vs Buy Calculator | Compare Housing Costs"
+  metaDescription="Compare the true financial trade-offs between renting and homeownership with an objective model that calculates cash outflows, mortgage amortization, and equity."
+  canonicalPath="/decisions/rent-vs-buy"
+  decisionSlug="rent-vs-buy"
+  category="Housing & Property"
+  h1="Rent vs. Buy Calculator"
+  intro="Evaluate the financial trade-offs between renting and purchasing a home. Enter your assumptions to compare cumulative cash outflows, equity accumulation, and net housing costs side by side."
+  faqItems={faqList}
+  relatedSlugs={['job-offer', 'lease-vs-buy', 'debt-vs-invest']}
+>
+  <!-- INPUTS SLOT -->
+  <div slot="inputs" class="inputs-container">
+    <div class="inputs-header">
+      <div class="time-horizon-panel">
+        <label for="input-horizon-years" class="label-inline">
+          <strong>Comparison Time Horizon:</strong>
+        </label>
+        <div class="input-with-unit horizon-input-group">
+          <input
+            type="number"
+            id="input-horizon-years"
+            name="horizonYears"
+            value={RENT_VS_BUY_DEFAULTS.horizonYears}
+            min="1"
+            max="50"
+            step="1"
+            class="input-field"
+            aria-describedby="horizon-help"
+          />
+          <span class="unit-addon">years</span>
+        </div>
+        <span id="horizon-help" class="field-help">Length of time you anticipate residing in the home.</span>
+      </div>
+    </div>
+
+    <!-- 2 Column Options Grid -->
+    <div class="options-grid">
+      <!-- OPTION A: RENT -->
+      <OptionPanel
+        optionLabel="Option A"
+        title="Renting"
+        description="Lease terms and projected annual escalation."
+        panelVariant="option-a"
+      >
+        <div class="form-group">
+          <label for="input-monthly-rent" class="field-label">Monthly rent</label>
+          <div class="input-with-unit">
+            <span class="unit-prefix">$</span>
+            <input
+              type="number"
+              id="input-monthly-rent"
+              name="monthlyRent"
+              value={RENT_VS_BUY_DEFAULTS.monthlyRent}
+              min="0"
+              step="50"
+              class="input-field"
+            />
+          </div>
+          <span class="field-help">Initial monthly lease cost.</span>
+          <span class="validation-error" id="err-monthlyRent" role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="input-rent-increase" class="field-label">Annual rent increase</label>
+          <div class="input-with-unit">
+            <input
+              type="number"
+              id="input-rent-increase"
+              name="annualRentIncreasePercent"
+              value={RENT_VS_BUY_DEFAULTS.annualRentIncreasePercent}
+              min="0"
+              max="20"
+              step="0.1"
+              class="input-field"
+            />
+            <span class="unit-addon">% / yr</span>
+          </div>
+          <span class="field-help">Projected yearly escalation on renewal.</span>
+          <span class="validation-error" id="err-annualRentIncreasePercent" role="alert"></span>
+        </div>
+      </OptionPanel>
+
+      <!-- OPTION B: BUY -->
+      <OptionPanel
+        optionLabel="Option B"
+        title="Buying"
+        description="Acquisition price, mortgage financing, and property overhead."
+        panelVariant="option-b"
+      >
+        <div class="form-group">
+          <label for="input-home-price" class="field-label">Home purchase price</label>
+          <div class="input-with-unit">
+            <span class="unit-prefix">$</span>
+            <input
+              type="number"
+              id="input-home-price"
+              name="homePrice"
+              value={RENT_VS_BUY_DEFAULTS.homePrice}
+              min="10000"
+              step="5000"
+              class="input-field"
+            />
+          </div>
+          <span class="field-help">Target purchase cost.</span>
+          <span class="validation-error" id="err-homePrice" role="alert"></span>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-down-payment" class="field-label">Down payment</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-down-payment"
+                name="downPayment"
+                value={RENT_VS_BUY_DEFAULTS.downPayment}
+                min="0"
+                step="5000"
+                class="input-field"
+              />
+            </div>
+            <span class="field-help">Upfront cash equity.</span>
+            <span class="validation-error" id="err-downPayment" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-mortgage-rate" class="field-label">Mortgage rate</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-mortgage-rate"
+                name="mortgageRatePercent"
+                value={RENT_VS_BUY_DEFAULTS.mortgageRatePercent}
+                min="0"
+                max="25"
+                step="0.1"
+                class="input-field"
+              />
+              <span class="unit-addon">%</span>
+            </div>
+            <span class="field-help">Fixed annual interest rate.</span>
+            <span class="validation-error" id="err-mortgageRatePercent" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-loan-term" class="field-label">Loan term</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-loan-term"
+                name="loanTermYears"
+                value={RENT_VS_BUY_DEFAULTS.loanTermYears}
+                min="1"
+                max="40"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">years</span>
+            </div>
+            <span class="field-help">Amortization term.</span>
+            <span class="validation-error" id="err-loanTermYears" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-closing-costs" class="field-label">Closing costs</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-closing-costs"
+                name="closingCostsPurchase"
+                value={RENT_VS_BUY_DEFAULTS.closingCostsPurchase}
+                min="0"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="field-help">Lender & title charges.</span>
+            <span class="validation-error" id="err-closingCostsPurchase" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-tax-rate" class="field-label">Property tax rate</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-tax-rate"
+                name="propertyTaxRatePercent"
+                value={RENT_VS_BUY_DEFAULTS.propertyTaxRatePercent}
+                min="0"
+                max="10"
+                step="0.1"
+                class="input-field"
+              />
+              <span class="unit-addon">% / yr</span>
+            </div>
+            <span class="field-help">Annual local tax rate.</span>
+            <span class="validation-error" id="err-propertyTaxRatePercent" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-insurance" class="field-label">Home insurance</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-insurance"
+                name="homeInsuranceAnnual"
+                value={RENT_VS_BUY_DEFAULTS.homeInsuranceAnnual}
+                min="0"
+                step="100"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="field-help">Hazard coverage premium.</span>
+            <span class="validation-error" id="err-homeInsuranceAnnual" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-maintenance" class="field-label">Annual maintenance</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-maintenance"
+                name="annualMaintenancePercent"
+                value={RENT_VS_BUY_DEFAULTS.annualMaintenancePercent}
+                min="0"
+                max="10"
+                step="0.1"
+                class="input-field"
+              />
+              <span class="unit-addon">% / yr</span>
+            </div>
+            <span class="field-help">% of current home value.</span>
+            <span class="validation-error" id="err-annualMaintenancePercent" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-appreciation" class="field-label">Expected appreciation</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-appreciation"
+                name="expectedAppreciationPercent"
+                value={RENT_VS_BUY_DEFAULTS.expectedAppreciationPercent}
+                min="-10"
+                max="20"
+                step="0.1"
+                class="input-field"
+              />
+              <span class="unit-addon">% / yr</span>
+            </div>
+            <span class="field-help">Estimated annual price change.</span>
+            <span class="validation-error" id="err-expectedAppreciationPercent" role="alert"></span>
+          </div>
+        </div>
+      </OptionPanel>
+    </div>
+
+    <!-- Actions: Recalculate & Reset -->
+    <div class="form-actions-bar">
+      <button type="button" class="btn btn-primary" id="btn-calculate">
+        Calculate Comparison
+      </button>
+      <button type="button" class="btn btn-secondary" id="btn-reset">
+        Reset to Defaults
+      </button>
+      <span class="form-status-note" id="calc-status-note">
+        Calculations update deterministically based on entered parameters.
+      </span>
+    </div>
+  </div>
+
+  <!-- RESULTS SLOT -->
+  <div slot="results" class="results-wrapper">
+    <!-- Result Summary Box -->
+    <div class="result-summary-box" id="result-summary-box">
+      <div class="summary-top">
+        <span class="badge badge-neutral">Comparative Outcome</span>
+        <span class="summary-period" id="summary-period-label">7-Year Horizon</span>
+      </div>
+      <p class="summary-lead-text" id="summary-lead-text">
+        {initialResult.summaryText}
+      </p>
+      <div class="summary-metrics-grid">
+        <div class="summary-metric-card opt-a-metric">
+          <span class="metric-tag">Option A (Rent)</span>
+          <span class="metric-val" id="metric-rent-cost">${initialResult.totalRentCost.toLocaleString()}</span>
+          <span class="metric-sub">Total Cumulative Rent</span>
+        </div>
+
+        <div class="summary-metric-card opt-b-metric">
+          <span class="metric-tag">Option B (Buy)</span>
+          <span class="metric-val" id="metric-buy-net">${initialResult.netOwnershipCost.toLocaleString()}</span>
+          <span class="metric-sub">Estimated Net Housing Cost</span>
+        </div>
+
+        <div class="summary-metric-card diff-metric">
+          <span class="metric-tag">Estimated Difference</span>
+          <span class="metric-val" id="metric-diff-val">${initialResult.netDifference.toLocaleString()}</span>
+          <span class="metric-sub" id="metric-diff-sub">Spread between options</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div id="container-comparison-table">
+      <ComparisonTable
+        caption="Rent vs Buy Comparative Analysis"
+        optionAName="Renting"
+        optionBName="Buying"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div id="container-cost-breakdown">
+      <CostBreakdown
+        title="Cumulative Cash Outflow Breakdown"
+        description="Detailed categorization of capital requirements and operating costs over the selected period."
+        optionAName="Renting"
+        optionBName="Buying"
+        items={initialCostItems}
+      />
+    </div>
+
+    <!-- Year by Year Table -->
+    <div class="year-breakdown-card">
+      <div class="year-breakdown-header">
+        <h3 class="year-breakdown-title">Year-by-Year Financial Progression</h3>
+        <p class="year-breakdown-desc">
+          Tracking cumulative expenditures, principal paydown, and equity evolution annually.
+        </p>
+      </div>
+
+      <div class="table-scroll-container" tabindex="0" role="region" aria-label="Year by Year Breakdown">
+        <table class="table-breakdown" id="table-yearly-breakdown">
+          <thead>
+            <tr>
+              <th scope="col">Year</th>
+              <th scope="col" class="text-right">Rent Cost (Yr)</th>
+              <th scope="col" class="text-right">Rent Cumulative</th>
+              <th scope="col" class="text-right">Buy Outflow (Yr)</th>
+              <th scope="col" class="text-right">Buy Cumulative</th>
+              <th scope="col" class="text-right">Remaining Loan</th>
+              <th scope="col" class="text-right">Est. Home Value</th>
+              <th scope="col" class="text-right">Est. Home Equity</th>
+              <th scope="col" class="text-right">Net Housing Cost</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-yearly-breakdown">
+            {initialResult.breakdown.map((row) => (
+              <tr>
+                <td>Year {row.year}</td>
+                <td class="text-right font-mono">${row.rentAnnualCost.toLocaleString()}</td>
+                <td class="text-right font-mono">${row.rentCumulativeCost.toLocaleString()}</td>
+                <td class="text-right font-mono">${row.ownershipAnnualCost.toLocaleString()}</td>
+                <td class="text-right font-mono">${row.ownershipCumulativeCost.toLocaleString()}</td>
+                <td class="text-right font-mono">${row.remainingMortgageBalance.toLocaleString()}</td>
+                <td class="text-right font-mono">${row.estimatedHomeValue.toLocaleString()}</td>
+                <td class="text-right font-mono">${row.estimatedHomeEquity.toLocaleString()}</td>
+                <td class="text-right font-mono">${row.netHousingCost.toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSUMPTIONS SLOT -->
+  <div slot="assumptions">
+    <AssumptionBox
+      assumptions={rentVsBuyAssumptions}
+      exclusions={rentVsBuyExclusions}
+      disclaimerNote="This calculator provides estimates based on the assumptions you enter. It is for educational and planning purposes and is not financial, tax, legal, or investment advice."
+    />
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The Rent vs. Buy comparison is modeled through three core mathematical components:
+    </p>
+    <ul>
+      <li>
+        <strong>Rent Escalation:</strong> Initial annual rent is calculated as <code>monthlyRent × 12</code>. For each subsequent year, the rent escalates by the entered annual percentage compounding annually: <code>rent<sub>t</sub> = rent<sub>t-1</sub> × (1 + rate)</code>.
+      </li>
+      <li>
+        <strong>Mortgage Amortization:</strong> The loan principal is <code>homePrice - downPayment</code>. The monthly principal and interest payment is determined using the standard fixed annuity formula: <code>M = P × [r(1+r)<sup>n</sup>] / [(1+r)<sup>n</sup> - 1]</code>. Monthly interest is calculated against the remaining balance, and principal paydown reduces subsequent balances month by month.
+      </li>
+      <li>
+        <strong>Ownership Outflows & Maintenance:</strong> Annual ownership cash requirements combine mortgage payments, municipal property taxes (calculated against escalating home value), hazard insurance, and annual maintenance reserves (defaulted to 1.0% of current property value).
+      </li>
+      <li>
+        <strong>Net Housing Cost & Equity:</strong> Estimated home value increases annually by the expected appreciation rate: <code>value<sub>t</sub> = value<sub>t-1</sub> × (1 + appreciation)</code>. Home equity equals <code>estimatedValue - remainingLoanBalance</code>. The net cost of ownership is calculated as <code>totalCumulativeCashOutflow - finalHomeEquity</code>.
+      </li>
+    </ul>
+    <p>
+      All calculations avoid hidden multipliers or promotional bias. Appreciation assumptions are purely hypothetical parameters provided by the user.
+    </p>
+  </div>
+
+  <!-- WORKED EXAMPLE SLOT -->
+  <div slot="worked-example" class="worked-example-content">
+    <div class="example-meta">
+      <span class="badge badge-neutral">Hypothetical Scenario</span>
+      <span class="example-note">Fictional illustrative parameters for demonstration</span>
+    </div>
+    <h3 class="example-title">Evaluating a 5-Year Suburban Horizon</h3>
+    <p>
+      Suppose a household evaluates renting a townhome for <strong>$2,200/month</strong> with a <strong>3.0% annual rent increase</strong> versus purchasing a single-family home for <strong>$400,000</strong> with <strong>20% down ($80,000)</strong>, a <strong>6.5% 30-year fixed mortgage</strong>, <strong>$8,000 in closing costs</strong>, and an expected <strong>3.0% annual appreciation rate</strong>.
+    </p>
+    <div class="example-breakdown-grid">
+      <div class="example-col">
+        <h4>Option A: 5 Years Renting</h4>
+        <ul>
+          <li>Year 1 Rent: $26,400</li>
+          <li>Cumulative 5-Year Rent: <strong>$139,890</strong></li>
+          <li>Net Financial Housing Cost: <strong>$139,890</strong></li>
+        </ul>
+      </div>
+      <div class="example-col">
+        <h4>Option B: 5 Years Buying</h4>
+        <ul>
+          <li>Initial Cash Outflow (Down + Closing): $88,000</li>
+          <li>5-Year Mortgage, Tax, Insurance & Upkeep: $184,320</li>
+          <li>Total Cumulative Outflow: $272,320</li>
+          <li>Estimated Home Value at Year 5: $463,710</li>
+          <li>Remaining Loan Balance: $299,640</li>
+          <li>Estimated Equity Accumulated: <strong>$164,070</strong></li>
+          <li>Net Housing Cost ($272,320 - $164,070): <strong>$108,250</strong></li>
+        </ul>
+      </div>
+    </div>
+    <p class="example-summary">
+      <strong>Observation:</strong> In this hypothetical scenario, while buying required $132,430 more in cumulative cash outflows ($272,320 vs. $139,890), the accumulation of $164,070 in estimated equity resulted in an estimated net housing cost that was $31,640 lower than renting. However, had the home experienced 0% appreciation, home equity would have been $120,360, narrowing the estimated net difference substantially.
+    </p>
+  </div>
+</DecisionLayout>
+
+<script>
+  import { calculateRentVsBuy, validateRentVsBuyInput, RENT_VS_BUY_DEFAULTS, type RentVsBuyInput } from '../../lib/decisions/rentVsBuy';
+
+  function getInputsFromDOM(): RentVsBuyInput {
+    const horizonYears = parseFloat((document.getElementById('input-horizon-years') as HTMLInputElement)?.value) || 1;
+    const monthlyRent = parseFloat((document.getElementById('input-monthly-rent') as HTMLInputElement)?.value) || 0;
+    const annualRentIncreasePercent = parseFloat((document.getElementById('input-rent-increase') as HTMLInputElement)?.value) || 0;
+    const homePrice = parseFloat((document.getElementById('input-home-price') as HTMLInputElement)?.value) || 0;
+    const downPayment = parseFloat((document.getElementById('input-down-payment') as HTMLInputElement)?.value) || 0;
+    const mortgageRatePercent = parseFloat((document.getElementById('input-mortgage-rate') as HTMLInputElement)?.value) || 0;
+    const loanTermYears = parseFloat((document.getElementById('input-loan-term') as HTMLInputElement)?.value) || 30;
+    const closingCostsPurchase = parseFloat((document.getElementById('input-closing-costs') as HTMLInputElement)?.value) || 0;
+    const propertyTaxRatePercent = parseFloat((document.getElementById('input-tax-rate') as HTMLInputElement)?.value) || 0;
+    const homeInsuranceAnnual = parseFloat((document.getElementById('input-insurance') as HTMLInputElement)?.value) || 0;
+    const annualMaintenancePercent = parseFloat((document.getElementById('input-maintenance') as HTMLInputElement)?.value) || 0;
+    const expectedAppreciationPercent = parseFloat((document.getElementById('input-appreciation') as HTMLInputElement)?.value) || 0;
+
+    return {
+      horizonYears,
+      monthlyRent,
+      annualRentIncreasePercent,
+      homePrice,
+      downPayment,
+      mortgageRatePercent,
+      loanTermYears,
+      closingCostsPurchase,
+      propertyTaxRatePercent,
+      homeInsuranceAnnual,
+      annualMaintenancePercent,
+      expectedAppreciationPercent,
+    };
+  }
+
+  function clearErrors() {
+    const errorSpans = document.querySelectorAll('.validation-error');
+    errorSpans.forEach((el) => {
+      el.textContent = '';
+    });
+  }
+
+  function updateResults() {
+    clearErrors();
+    const inputs = getInputsFromDOM();
+    const validation = validateRentVsBuyInput(inputs);
+
+    if (!validation.valid) {
+      for (const [field, msg] of Object.entries(validation.errors)) {
+        const errorEl = document.getElementById(`err-${field}`);
+        if (errorEl) {
+          errorEl.textContent = msg;
+        }
+      }
+      return;
+    }
+
+    const result = calculateRentVsBuy(inputs);
+
+    // Update Summary
+    const periodLabel = document.getElementById('summary-period-label');
+    if (periodLabel) periodLabel.textContent = `${result.horizonYears}-Year Horizon`;
+
+    const summaryLead = document.getElementById('summary-lead-text');
+    if (summaryLead) summaryLead.textContent = result.summaryText;
+
+    const rentMetric = document.getElementById('metric-rent-cost');
+    if (rentMetric) rentMetric.textContent = `$${result.totalRentCost.toLocaleString()}`;
+
+    const buyMetric = document.getElementById('metric-buy-net');
+    if (buyMetric) buyMetric.textContent = `$${result.netOwnershipCost.toLocaleString()}`;
+
+    const diffMetric = document.getElementById('metric-diff-val');
+    if (diffMetric) diffMetric.textContent = `$${result.netDifference.toLocaleString()}`;
+
+    // Update Comparison Table Rows dynamically
+    const tableContainer = document.getElementById('container-comparison-table');
+    if (tableContainer) {
+      const netRowA = tableContainer.querySelector('tbody tr:nth-child(1) .td-opt-a');
+      const netRowB = tableContainer.querySelector('tbody tr:nth-child(1) .td-opt-b');
+      const netRowDiff = tableContainer.querySelector('tbody tr:nth-child(1) .td-diff');
+      if (netRowA) netRowA.textContent = `$${result.totalRentCost.toLocaleString()}`;
+      if (netRowB) netRowB.textContent = `$${result.netOwnershipCost.toLocaleString()}`;
+      if (netRowDiff) netRowDiff.textContent = `$${result.netDifference.toLocaleString()}`;
+
+      const outflowA = tableContainer.querySelector('tbody tr:nth-child(2) .td-opt-a');
+      const outflowB = tableContainer.querySelector('tbody tr:nth-child(2) .td-opt-b');
+      const outflowDiff = tableContainer.querySelector('tbody tr:nth-child(2) .td-diff');
+      if (outflowA) outflowA.textContent = `$${result.totalRentCost.toLocaleString()}`;
+      if (outflowB) outflowB.textContent = `$${result.totalOwnershipOutflow.toLocaleString()}`;
+      if (outflowDiff) outflowDiff.textContent = `$${Math.abs(result.totalRentCost - result.totalOwnershipOutflow).toLocaleString()}`;
+
+      const eqA = tableContainer.querySelector('tbody tr:nth-child(3) .td-opt-a');
+      const eqB = tableContainer.querySelector('tbody tr:nth-child(3) .td-opt-b');
+      const eqDiff = tableContainer.querySelector('tbody tr:nth-child(3) .td-diff');
+      if (eqA) eqA.textContent = '$0';
+      if (eqB) eqB.textContent = `$${result.finalHomeEquity.toLocaleString()}`;
+      if (eqDiff) eqDiff.textContent = `$${result.finalHomeEquity.toLocaleString()}`;
+
+      const moA = tableContainer.querySelector('tbody tr:nth-child(4) .td-opt-a');
+      const moB = tableContainer.querySelector('tbody tr:nth-child(4) .td-opt-b');
+      if (moA) moA.textContent = `$${Math.round(inputs.monthlyRent).toLocaleString()} / mo`;
+      if (moB) moB.textContent = `$${result.monthlyMortgagePayment.toLocaleString()} / mo (P&I)`;
+    }
+
+    // Update Cost Breakdown
+    const costContainer = document.getElementById('container-cost-breakdown');
+    if (costContainer) {
+      const upfrontB = inputs.downPayment + inputs.closingCostsPurchase;
+      const mortgageTotal = result.breakdown.reduce((acc, y) => acc + (y.mortgagePrincipalPaidAnnual + y.mortgageInterestPaidAnnual), 0);
+      const nonMortgageOwnership = result.breakdown.reduce((acc, y) => acc + (y.ownershipAnnualCost - (y.mortgagePrincipalPaidAnnual + y.mortgageInterestPaidAnnual)), 0);
+      const taxInsurance = Math.round(nonMortgageOwnership * 0.65);
+      const maintenance = Math.round(nonMortgageOwnership * 0.35);
+
+      const rows = costContainer.querySelectorAll('tbody tr');
+      if (rows.length >= 5) {
+        // Row 1: Upfront
+        rows[0].querySelector('.td-val:nth-child(2)')!.textContent = '$0';
+        rows[0].querySelector('.td-val:nth-child(3)')!.textContent = `$${upfrontB.toLocaleString()}`;
+        rows[0].querySelector('.td-diff')!.textContent = `$${upfrontB.toLocaleString()}`;
+
+        // Row 2: Mortgage
+        rows[1].querySelector('.td-val:nth-child(2)')!.textContent = '$0';
+        rows[1].querySelector('.td-val:nth-child(3)')!.textContent = `$${mortgageTotal.toLocaleString()}`;
+        rows[1].querySelector('.td-diff')!.textContent = `$${mortgageTotal.toLocaleString()}`;
+
+        // Row 3: Tax & Insurance
+        rows[2].querySelector('.td-val:nth-child(2)')!.textContent = '$0';
+        rows[2].querySelector('.td-val:nth-child(3)')!.textContent = `$${taxInsurance.toLocaleString()}`;
+        rows[2].querySelector('.td-diff')!.textContent = `$${taxInsurance.toLocaleString()}`;
+
+        // Row 4: Maintenance
+        rows[3].querySelector('.td-val:nth-child(2)')!.textContent = '$0';
+        rows[3].querySelector('.td-val:nth-child(3)')!.textContent = `$${maintenance.toLocaleString()}`;
+        rows[3].querySelector('.td-diff')!.textContent = `$${maintenance.toLocaleString()}`;
+
+        // Row 5: Cumulative Rent
+        rows[4].querySelector('.td-val:nth-child(2)')!.textContent = `$${result.totalRentCost.toLocaleString()}`;
+        rows[4].querySelector('.td-val:nth-child(3)')!.textContent = '$0';
+        rows[4].querySelector('.td-diff')!.textContent = `$${result.totalRentCost.toLocaleString()}`;
+      }
+
+      // Foot
+      const foot = costContainer.querySelector('tfoot tr');
+      if (foot) {
+        foot.querySelector('.td-val:nth-child(2)')!.textContent = `$${result.totalRentCost.toLocaleString()}`;
+        foot.querySelector('.td-val:nth-child(3)')!.textContent = `$${result.totalOwnershipOutflow.toLocaleString()}`;
+        foot.querySelector('.td-diff')!.textContent = `$${Math.abs(result.totalRentCost - result.totalOwnershipOutflow).toLocaleString()}`;
+      }
+    }
+
+    // Update Year by Year Table
+    const tbody = document.getElementById('tbody-yearly-breakdown');
+    if (tbody) {
+      tbody.innerHTML = result.breakdown
+        .map(
+          (row) => `
+        <tr>
+          <td>Year ${row.year}</td>
+          <td class="text-right font-mono">$${row.rentAnnualCost.toLocaleString()}</td>
+          <td class="text-right font-mono">$${row.rentCumulativeCost.toLocaleString()}</td>
+          <td class="text-right font-mono">$${row.ownershipAnnualCost.toLocaleString()}</td>
+          <td class="text-right font-mono">$${row.ownershipCumulativeCost.toLocaleString()}</td>
+          <td class="text-right font-mono">$${row.remainingMortgageBalance.toLocaleString()}</td>
+          <td class="text-right font-mono">$${row.estimatedHomeValue.toLocaleString()}</td>
+          <td class="text-right font-mono">$${row.estimatedHomeEquity.toLocaleString()}</td>
+          <td class="text-right font-mono">$${row.netHousingCost.toLocaleString()}</td>
+        </tr>
+      `
+        )
+        .join('');
+    }
+  }
+
+  function resetDefaults() {
+    (document.getElementById('input-horizon-years') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.horizonYears);
+    (document.getElementById('input-monthly-rent') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.monthlyRent);
+    (document.getElementById('input-rent-increase') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.annualRentIncreasePercent);
+    (document.getElementById('input-home-price') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.homePrice);
+    (document.getElementById('input-down-payment') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.downPayment);
+    (document.getElementById('input-mortgage-rate') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.mortgageRatePercent);
+    (document.getElementById('input-loan-term') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.loanTermYears);
+    (document.getElementById('input-closing-costs') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.closingCostsPurchase);
+    (document.getElementById('input-tax-rate') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.propertyTaxRatePercent);
+    (document.getElementById('input-insurance') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.homeInsuranceAnnual);
+    (document.getElementById('input-maintenance') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.annualMaintenancePercent);
+    (document.getElementById('input-appreciation') as HTMLInputElement).value = String(RENT_VS_BUY_DEFAULTS.expectedAppreciationPercent);
+
+    updateResults();
+  }
+
+  document.getElementById('btn-calculate')?.addEventListener('click', updateResults);
+  document.getElementById('btn-reset')?.addEventListener('click', resetDefaults);
+
+  // Auto calculate on blur or enter key
+  const allInputs = document.querySelectorAll('.inputs-container input');
+  allInputs.forEach((input) => {
+    input.addEventListener('change', updateResults);
+    input.addEventListener('keyup', (e) => {
+      if ((e as KeyboardEvent).key === 'Enter') {
+        updateResults();
+      }
+    });
+  });
+</script>
+
+<style>
+  .inputs-container {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-8);
+  }
+
+  .inputs-header {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .time-horizon-panel {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .label-inline {
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+
+  .horizon-input-group {
+    width: 140px;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+
+  @media (max-width: 860px) {
+    .options-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--space-3);
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 480px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .field-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-1);
+  }
+
+  .field-help {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    margin-top: 3px;
+  }
+
+  .validation-error {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-status-danger);
+    margin-top: 2px;
+    min-height: 1rem;
+  }
+
+  .input-with-unit {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .input-with-unit:focus-within {
+    border-color: var(--color-brand-accent);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
+
+  .unit-prefix,
+  .unit-addon {
+    padding: 0 var(--space-3);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-subtle);
+    background-color: var(--color-surface-subtle);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    min-height: 2.25rem;
+  }
+
+  .input-field {
+    flex: 1;
+    border: none;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.95rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-main);
+    background: transparent;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .input-field:focus {
+    outline: none;
+  }
+
+  .form-actions-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .form-status-note {
+    font-size: 0.8rem;
+    color: var(--color-text-subtle);
+  }
+
+  /* Result Summary */
+  .result-summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+
+  .summary-period {
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-text-subtle);
+  }
+
+  .summary-lead-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+  }
+
+  .summary-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 768px) {
+    .summary-metrics-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .summary-metric-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .metric-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-subtle);
+    margin-bottom: var(--space-1);
+  }
+
+  .metric-val {
+    font-size: 1.6rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--color-text-main);
+    margin-bottom: var(--space-1);
+    letter-spacing: -0.02em;
+  }
+
+  .metric-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .opt-a-metric {
+    border-top: 3px solid var(--color-opt-a-text);
+  }
+
+  .opt-b-metric {
+    border-top: 3px solid var(--color-opt-b-text);
+  }
+
+  .diff-metric {
+    border-top: 3px solid var(--color-brand);
+  }
+
+  /* Year Breakdown Table */
+  .year-breakdown-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-6);
+  }
+
+  .year-breakdown-header {
+    margin-bottom: var(--space-4);
+  }
+
+  .year-breakdown-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 var(--space-1) 0;
+    color: var(--color-text-main);
+  }
+
+  .year-breakdown-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .table-scroll-container {
+    overflow-x: auto;
+  }
+
+  .table-scroll-container:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+
+  .table-breakdown {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    min-width: 780px;
+  }
+
+  .table-breakdown th {
+    padding: var(--space-3);
+    border-bottom: 2px solid var(--color-border-strong);
+    color: var(--color-text-main);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background-color: var(--color-surface-subtle);
+  }
+
+  .table-breakdown td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  /* Worked Example styles */
+  .example-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .example-note {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .example-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+
+  .example-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin: var(--space-4) 0;
+    padding: var(--space-4);
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  @media (max-width: 640px) {
+    .example-breakdown-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .example-col h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 var(--space-2) 0;
+    color: var(--color-text-main);
+  }
+
+  .example-col ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .example-summary {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+    line-height: 1.55;
+  }
+
+  .methodology-text ul {
+    margin: var(--space-3) 0;
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .methodology-text code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background-color: var(--color-surface-subtle);
+    padding: 0.15rem 0.35rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+  }
+</style>

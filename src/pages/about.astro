@@ -1,0 +1,297 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'About Decision Tools | Methodology & Editorial Principles',
+  description: 'Learn how Decision Tools creates transparent, non-prescriptive models to help people understand everyday financial and lifestyle trade-offs.',
+  url: 'https://decisiontools.org/about',
+};
+---
+
+<BaseLayout
+  title="About & Methodology | Decision Tools"
+  description="Our core product principle: we do not make decisions for you. We make the trade-offs easier to understand through transparent mathematics."
+  canonicalPath="/about"
+  structuredData={structuredData}
+>
+  <div class="about-page">
+    <div class="container">
+      <div class="about-breadcrumbs">
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'About & Methodology' }]} />
+      </div>
+
+      <header class="about-header">
+        <span class="about-kicker">Transparent Analysis</span>
+        <h1 class="about-title">About Decision Tools</h1>
+        <p class="about-lead">
+          Decision Tools exists to make everyday decisions clearer. We build objective, non-prescriptive calculators and frameworks designed to clarify costs, time, and practical trade-offs.
+        </p>
+      </header>
+
+      <!-- Core Principle Box -->
+      <section class="principle-spotlight" id="principles">
+        <div class="spotlight-inner">
+          <span class="spotlight-tag">Core Product Principle</span>
+          <h2 class="spotlight-heading">We do NOT tell you what you should choose.</h2>
+          <p class="spotlight-body">
+            Every major decision in life—from buying a house or accepting a new job offer to leasing a car or repairing an appliance—involves personal circumstances, risk tolerance, and unique priorities that no algorithm can know.
+          </p>
+          <p class="spotlight-body">
+            Our models calculate the mathematical outcomes and expose the underlying trade-offs so you can make your own informed choice with confidence.
+          </p>
+        </div>
+      </section>
+
+      <!-- The Four Analytical Pillars -->
+      <section class="pillars-section">
+        <h2 class="section-heading">Our Analytical Pillars</h2>
+        <div class="pillars-grid">
+          <div class="pillar-card">
+            <div class="pillar-num">01</div>
+            <h3>Zero Commercial Bias</h3>
+            <p>
+              We do not accept sponsored product placements, affiliate commissions for recommending specific lenders or vehicles, or payments to tilt calculation results. Our algorithms are independent and open.
+            </p>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-num">02</div>
+            <h3>Formula Transparency</h3>
+            <p>
+              Every amortization schedule, depreciation curve, and tax adjustment is documented in plain English. You can inspect the exact assumptions and override every parameter.
+            </p>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-num">03</div>
+            <h3>Opportunity Cost Accounting</h3>
+            <p>
+              Real-world decisions do not exist in a vacuum. We account for what capital or time could accomplish if deployed elsewhere, including investment compounding and unpaid commute hours.
+            </p>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-num">04</div>
+            <h3>Language Discipline</h3>
+            <p>
+              You will never see words like "Winner," "Best Choice," or "Recommended Option" in our tools. We report numerical differences and sensitivity ranges neutrally.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mathematical Methodology Section -->
+      <section class="methodology-section" id="methodology">
+        <h2 class="section-heading">Methodology & Modeling Standards</h2>
+        <div class="methodology-content">
+          <div class="method-block">
+            <h3>Deterministic Computation</h3>
+            <p>
+              All mathematical calculations run client-side in deterministic TypeScript. They do not rely on opaque generative AI predictions or probabilistic guesses. When you input an interest rate and term, the amortization formula matches standard banking actuarial tables.
+            </p>
+          </div>
+
+          <div class="method-block">
+            <h3>Standard Amortization Formulas</h3>
+            <p>
+              For mortgage, debt, and loan calculations, we apply standard compound interest equations:
+            </p>
+            <div class="code-box">
+              <code>M = P * [r(1+r)^n] / [(1+r)^n - 1]</code>
+            </div>
+            <p>
+              Where <em>M</em> is the monthly payment, <em>P</em> is principal, <em>r</em> is monthly interest rate, and <em>n</em> is total months.
+            </p>
+          </div>
+
+          <div class="method-block">
+            <h3>Empirical Benchmarks</h3>
+            <p>
+              Default values are grounded in reliable public sector and economic data:
+            </p>
+            <ul class="benchmarks-list">
+              <li><strong>IRS Standard Mileage Rate (Contextual Benchmark):</strong> The IRS standard business mileage rate is referenced solely as an illustrative public benchmark for comprehensive vehicle operating expenses (fuel, routine maintenance, tires, insurance, and asset depreciation wear). It does not represent tax advice or personal commuting deduction guidance, as ordinary commuting is non-deductible under federal tax rules.</li>
+              <li><strong>Federal Highway Administration (FHWA):</strong> Average annual household vehicle travel benchmark of approximately 13,500–14,000 miles per year (derived from FHWA Highway Statistics series data).</li>
+              <li><strong>U.S. Energy Information Administration (EIA):</strong> Baseline residential electricity tariffs ($/kWh) and retail motor gasoline prices ($/gallon) reference EIA monthly and annual state-level utility averages.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Privacy & Ethics Policy -->
+      <section class="privacy-section" id="privacy">
+        <h2 class="section-heading">Data Privacy & Security</h2>
+        <div class="privacy-card">
+          <h3>Your Numbers Stay in Your Browser</h3>
+          <p>
+            When you enter your salary, mortgage balances, debt figures, or personal vehicle numbers into Decision Tools, that data is processed entirely in your browser memory. We do not store your inputs on remote servers, we do not require account registration, and we do not sell financial profiling data.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-page {
+    padding: var(--space-8) 0 var(--space-16);
+  }
+  .about-breadcrumbs {
+    margin-bottom: var(--space-6);
+  }
+  .about-header {
+    max-width: 780px;
+    margin-bottom: var(--space-10);
+  }
+  .about-kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
+  .about-title {
+    font-size: 2.3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-4);
+  }
+  .about-lead {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+  .principle-spotlight {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+    margin-bottom: var(--space-12);
+    box-shadow: var(--shadow-sm);
+  }
+  .spotlight-tag {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    display: block;
+    margin-bottom: var(--space-2);
+  }
+  .spotlight-heading {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: var(--space-4);
+  }
+  .spotlight-body {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+  .spotlight-body:last-child {
+    margin-bottom: 0;
+  }
+  .section-heading {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: var(--space-6);
+  }
+  .pillars-section {
+    margin-bottom: var(--space-12);
+  }
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  @media (min-width: 768px) {
+    .pillars-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .pillar-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+  }
+  .pillar-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-subtle);
+    margin-bottom: var(--space-2);
+  }
+  .pillar-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: var(--space-2);
+  }
+  .pillar-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+  .methodology-section {
+    margin-bottom: var(--space-12);
+  }
+  .method-block {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin-bottom: var(--space-4);
+  }
+  .method-block h3 {
+    font-size: 1.2rem;
+    margin-bottom: var(--space-3);
+  }
+  .method-block p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+  .code-box {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) var(--space-4);
+    margin: var(--space-3) 0;
+    font-family: monospace;
+    font-size: 0.95rem;
+  }
+  .benchmarks-list {
+    margin: 0;
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .benchmarks-list li {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-main);
+  }
+  .privacy-card {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+  }
+  .privacy-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: var(--space-2);
+  }
+  .privacy-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+</style>

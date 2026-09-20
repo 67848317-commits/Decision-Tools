@@ -1,0 +1,779 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DecisionCard from '../components/DecisionCard.astro';
+import FeaturedGuides from '../components/FeaturedGuides.astro';
+import { DECISIONS, CATEGORIES } from '../data/decisions';
+
+// Selected 5 popular decisions as requested
+const popularSlugs = ['rent-vs-buy', 'job-offer', 'gas-vs-ev', 'buy-vs-repair', 'diy-vs-hire'];
+const popularDecisions = popularSlugs
+  .map((slug) => DECISIONS.find((d) => d.slug === slug))
+  .filter(Boolean) as typeof DECISIONS;
+
+// Categories for Browse by Life Area
+const categoryIcons: Record<string, string> = {
+  housing: 'Home, mortgage & rent',
+  career: 'Salary, equity & commute',
+  transportation: 'Vehicles, fuel & leases',
+  finance: 'Debt, investments & compounding',
+  lifestyle: 'Repairs, tools & subscriptions',
+};
+---
+
+<BaseLayout
+  title="Decision Tools | Compare Costs, Time & Trade-offs"
+  description="Simple decision tools that help you compare costs, time, and trade-offs for everyday choices."
+  canonicalPath="/"
+>
+  <!-- HERO SECTION -->
+  <section class="hero-section" id="hero-section">
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-badge">
+          <span class="hero-badge-dot" aria-hidden="true"></span>
+          Objective Decision Modeling
+        </span>
+        <h1 class="hero-title" id="hero-heading">Make everyday decisions clearer.</h1>
+        <p class="hero-lead">
+          Compare costs, time, and trade-offs with simple tools built for real-life decisions.
+        </p>
+        <div class="hero-actions">
+          <a href="/decisions" class="btn btn-primary" id="hero-primary-cta">
+            Explore Decision Tools
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+          <a href="/guides" class="btn btn-secondary" id="hero-secondary-cta">
+            Browse Guides
+          </a>
+        </div>
+
+        <!-- Analytical Snapshot Card -->
+        <div class="hero-snapshot" aria-label="Tool interface preview demonstrating trade-off calculation">
+          <div class="snapshot-header">
+            <div class="snapshot-meta">
+              <span class="snapshot-badge">Model Preview</span>
+              <span class="snapshot-label">Interactive Trade-off Calculation</span>
+            </div>
+            <span class="snapshot-status">Factual • Zero Recommendation</span>
+          </div>
+          <div class="snapshot-grid">
+            <div class="snapshot-col opt-a">
+              <div class="snapshot-col-header">
+                <span class="col-indicator opt-a-indicator"></span>
+                <span class="col-name">Option A</span>
+              </div>
+              <div class="snapshot-val">$24,120 <span class="snapshot-unit">/ 3-yr cost</span></div>
+              <div class="snapshot-detail">Lower upfront capital • Higher recurring overhead</div>
+            </div>
+            <div class="snapshot-divider" aria-hidden="true">
+              <span>vs</span>
+            </div>
+            <div class="snapshot-col opt-b">
+              <div class="snapshot-col-header">
+                <span class="col-indicator opt-b-indicator"></span>
+                <span class="col-name">Option B</span>
+              </div>
+              <div class="snapshot-val">$21,480 <span class="snapshot-unit">/ 3-yr cost</span></div>
+              <div class="snapshot-detail">Higher initial outlay • $2,640 estimated net advantage</div>
+            </div>
+          </div>
+          <div class="snapshot-footer">
+            <p><strong>Result statement:</strong> Under the entered parameters, Option B yields a lower estimated net cost over 3 years, assuming an annual usage rate of 12,000 units.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POPULAR DECISIONS -->
+  <section class="section section-popular" id="popular-decisions" aria-labelledby="popular-heading">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Start Here</span>
+          <h2 class="section-title" id="popular-heading">Popular Decisions</h2>
+        </div>
+        <p class="section-desc">Start with a common decision and see how the numbers compare.</p>
+      </div>
+
+      <div class="popular-grid">
+        {popularDecisions.map((decision) => (
+          <DecisionCard decision={decision} />
+        ))}
+      </div>
+
+      <div class="section-footer-cta">
+        <a href="/decisions" class="btn btn-secondary" id="view-all-decisions-link">
+          View All 10 Decision Tools
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BROWSE BY LIFE AREA -->
+  <section class="section section-categories" id="browse-by-life-area" aria-labelledby="categories-heading">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Taxonomy</span>
+          <h2 class="section-title" id="categories-heading">Browse by Life Area</h2>
+        </div>
+        <p class="section-desc">Explore practical decision models grouped by core domain.</p>
+      </div>
+
+      <div class="categories-grid">
+        {CATEGORIES.map((cat) => (
+          <a href="/decisions" class="category-card" id={`cat-card-${cat.id}`}>
+            <div class="category-card-header">
+              <span class="category-meta">{categoryIcons[cat.id] || 'Trade-off models'}</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="cat-arrow">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </div>
+            <h3 class="category-title">{cat.name}</h3>
+            <p class="category-desc">{cat.description}</p>
+            <span class="category-link-text">Browse {cat.name} tools →</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section section-how" id="how-it-works" aria-labelledby="how-heading">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-kicker">Methodology</span>
+        <h2 class="section-title" id="how-heading">How It Works</h2>
+        <p class="section-desc centered">Three transparent steps designed to clarify trade-offs without automated bias.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num" aria-hidden="true">01</div>
+          <h3 class="step-title">Enter your assumptions</h3>
+          <p class="step-desc">
+            Add the costs, time, and other inputs that matter to your situation. Every parameter has transparent default values that you can customize.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num" aria-hidden="true">02</div>
+          <h3 class="step-title">Compare the estimates</h3>
+          <p class="step-desc">
+            See the estimated costs, differences, and time requirements side by side. We break down initial cash outflows versus long-term asset impacts.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num" aria-hidden="true">03</div>
+          <h3 class="step-title">Understand the trade-offs</h3>
+          <p class="step-desc">
+            Review the assumptions and limitations before making your own decision. We never tell you what to choose or assign artificial “winners.”
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED GUIDES -->
+  <section class="section section-guides" id="featured-guides" aria-labelledby="guides-heading">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Deep-Dive Analysis</span>
+          <h2 class="section-title" id="guides-heading">Featured Guides</h2>
+        </div>
+        <p class="section-desc">Practical explanations for the decisions behind the numbers.</p>
+      </div>
+
+      <FeaturedGuides />
+
+      <div class="section-footer-cta">
+        <a href="/guides" class="btn btn-secondary" id="browse-all-guides-link">
+          Browse All Guides
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECISION PRINCIPLES -->
+  <section class="section section-principles" id="decision-principles" aria-labelledby="principles-heading">
+    <div class="container">
+      <div class="principles-panel">
+        <span class="principles-kicker">Core Product Principle</span>
+        <h2 class="principles-title" id="principles-heading">
+          We don't tell you what to choose.<br />
+          We help you understand the trade-offs.
+        </h2>
+        <p class="principles-copy">
+          Every estimate depends on the assumptions you enter. Our tools are designed to make those assumptions visible, show the differences clearly, and give you enough context to make your own decision.
+        </p>
+
+        <div class="principles-pillars">
+          <div class="pillar-item">
+            <div class="pillar-bullet" aria-hidden="true">01</div>
+            <div>
+              <h3 class="pillar-title">No Recommendations</h3>
+              <p class="pillar-desc">We never label options as “best” or declare “winners.” Choices involve personal priorities that math alone cannot dictate.</p>
+            </div>
+          </div>
+
+          <div class="pillar-item">
+            <div class="pillar-bullet" aria-hidden="true">02</div>
+            <div>
+              <h3 class="pillar-title">Visible Formulas</h3>
+              <p class="pillar-desc">Every financial model documents its methodology, calculation formulas, and omissions plainly on the page.</p>
+            </div>
+          </div>
+
+          <div class="pillar-item">
+            <div class="pillar-bullet" aria-hidden="true">03</div>
+            <div>
+              <h3 class="pillar-title">Zero Commercial Bias</h3>
+              <p class="pillar-desc">No affiliate paywalls, sponsored rankings, or hidden incentives. Independent tools crafted purely for analytical clarity.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hero Section */
+  .hero-section {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+  }
+
+  @media (min-width: 768px) {
+    .hero-section {
+      padding-top: var(--space-16);
+      padding-bottom: var(--space-16);
+    }
+  }
+
+  .hero-content {
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.3rem 0.8rem;
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-4);
+  }
+
+  .hero-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-brand-accent);
+  }
+
+  .hero-title {
+    font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-4);
+  }
+
+  .hero-lead {
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    max-width: 68ch;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: var(--space-8);
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-bottom: var(--space-12);
+  }
+
+  /* Analytical Snapshot Mock Card in Hero */
+  .hero-snapshot {
+    text-align: left;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .snapshot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-5);
+  }
+
+  .snapshot-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .snapshot-badge {
+    padding: 0.2rem 0.5rem;
+    background-color: var(--color-brand);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .snapshot-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+  }
+
+  .snapshot-status {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .snapshot-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+
+  @media (max-width: 640px) {
+    .snapshot-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .snapshot-col {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+  }
+
+  .snapshot-col.opt-a {
+    background-color: var(--color-surface);
+    border-color: var(--color-opt-a-border);
+  }
+
+  .snapshot-col.opt-b {
+    background-color: var(--color-surface);
+    border-color: var(--color-opt-b-border);
+  }
+
+  .snapshot-col-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .col-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .opt-a-indicator {
+    background-color: var(--color-opt-a-text);
+  }
+
+  .opt-b-indicator {
+    background-color: var(--color-opt-b-text);
+  }
+
+  .col-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+  }
+
+  .snapshot-val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--color-text-main);
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-1);
+  }
+
+  .snapshot-unit {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-text-subtle);
+    font-family: var(--font-sans);
+  }
+
+  .snapshot-detail {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .snapshot-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .snapshot-divider span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-subtle);
+    text-transform: uppercase;
+  }
+
+  .snapshot-footer {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .snapshot-footer strong {
+    color: var(--color-text-main);
+  }
+
+  /* General Section Layout */
+  .section {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 768px) {
+    .section {
+      padding-top: var(--space-16);
+      padding-bottom: var(--space-16);
+    }
+  }
+
+  .section-header {
+    margin-bottom: var(--space-8);
+  }
+
+  .section-header.text-center {
+    text-align: center;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .section-kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-brand-accent);
+    margin-bottom: var(--space-1);
+  }
+
+  .section-title {
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+  }
+
+  .section-desc {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+  }
+
+  .section-desc.centered {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .section-footer-cta {
+    margin-top: var(--space-8);
+    text-align: center;
+  }
+
+  /* Popular Decisions Grid */
+  .popular-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-6);
+  }
+
+  @media (max-width: 480px) {
+    .popular-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Categories Grid */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .category-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    text-decoration: none;
+    color: var(--color-text-main);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s ease;
+  }
+
+  .category-card:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+
+  .category-card:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+
+  .category-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+
+  .category-meta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .cat-arrow {
+    color: var(--color-text-subtle);
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+
+  .category-card:hover .cat-arrow {
+    transform: translate(2px, -2px);
+    color: var(--color-brand-accent);
+  }
+
+  .category-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+
+  .category-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-bottom: var(--space-4);
+    flex-grow: 1;
+  }
+
+  .category-link-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-brand-accent);
+  }
+
+  /* How It Works Steps */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+  }
+
+  @media (max-width: 768px) {
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+  }
+
+  .step-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--color-brand);
+    margin-bottom: var(--space-4);
+  }
+
+  .step-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+  }
+
+  .step-desc {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+
+  /* Decision Principles Distinct Panel */
+  .principles-panel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+
+  @media (min-width: 768px) {
+    .principles-panel {
+      padding: var(--space-10);
+    }
+  }
+
+  .principles-kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-subtle);
+    margin-bottom: var(--space-2);
+  }
+
+  .principles-title {
+    font-size: clamp(1.6rem, 3.2vw, 2.25rem);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-top: 0;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-main);
+  }
+
+  .principles-copy {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--color-text-muted);
+    max-width: 72ch;
+    margin-bottom: var(--space-8);
+  }
+
+  .principles-pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 768px) {
+    .principles-pillars {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+  }
+
+  .pillar-item {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .pillar-bullet {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-brand-accent);
+    padding-top: 2px;
+  }
+
+  .pillar-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: var(--space-1);
+    color: var(--color-text-main);
+  }
+
+  .pillar-desc {
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+  }
+</style>

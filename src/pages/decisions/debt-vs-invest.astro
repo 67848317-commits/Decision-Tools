@@ -1,0 +1,511 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import { DEBT_VS_INVEST_DEFAULTS, calculateDebtVsInvest, type DebtVsInvestResult } from '../../lib/decisions/debtVsInvest';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+const initialResult: DebtVsInvestResult = calculateDebtVsInvest(DEBT_VS_INVEST_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: `Estimated Net Financial Position (${DEBT_VS_INVEST_DEFAULTS.horizonYears} Years)`,
+    optionAValue: `$${initialResult.optionANetFinancialPosition.toLocaleString()}`,
+    optionBValue: `$${initialResult.optionBNetFinancialPosition.toLocaleString()}`,
+    difference: `$${initialResult.netPositionDifference.toLocaleString()}`,
+    helpNote: 'Ending investment portfolio balance minus remaining unpaid debt balance.',
+  },
+  {
+    metric: 'Debt-Free Timeline',
+    optionAValue: `Month ${initialResult.optionADebtFreeMonth} (~${(initialResult.optionADebtFreeMonth / 12).toFixed(1)} yrs)`,
+    optionBValue: `Ongoing (Debt balance: $${initialResult.optionBFinalDebtBalance.toLocaleString()})`,
+    difference: `${DEBT_VS_INVEST_DEFAULTS.horizonYears * 12 - initialResult.optionADebtFreeMonth} months faster`,
+    helpNote: 'Point in time when the debt balance reaches exactly $0.',
+  },
+  {
+    metric: 'Cumulative Interest Paid to Creditor',
+    optionAValue: `$${initialResult.optionATotalInterestPaid.toLocaleString()}`,
+    optionBValue: `$${initialResult.optionBTotalInterestPaid.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.optionATotalInterestPaid - initialResult.optionBTotalInterestPaid).toLocaleString()}`,
+    helpNote: 'Finance charges paid on the principal balance over the simulation.',
+  },
+  {
+    metric: 'Ending Investment Portfolio Value',
+    optionAValue: `$${initialResult.optionAFinalPortfolioValue.toLocaleString()}`,
+    optionBValue: `$${initialResult.optionBFinalPortfolioValue.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.optionAFinalPortfolioValue - initialResult.optionBFinalPortfolioValue).toLocaleString()}`,
+    helpNote: 'Accumulated market portfolio value at the end of Year 5.',
+  },
+  {
+    metric: 'Certainty & Volatility Profile',
+    optionAValue: `Fixed ${DEBT_VS_INVEST_DEFAULTS.debtInterestRatePercent}% interest cost avoided`,
+    optionBValue: `Variable (Assumes ${DEBT_VS_INVEST_DEFAULTS.expectedInvestmentReturnPercent}% market growth)`,
+    difference: 'Predictable savings vs. Market volatility',
+    helpNote: 'Debt payoff provides predictable interest cost avoided by preventing compounding interest accrual, while investments carry market volatility.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Total Interest Paid on Debt',
+    optionAAmount: initialResult.optionATotalInterestPaid,
+    optionBAmount: initialResult.optionBTotalInterestPaid,
+    note: 'Financing charges incurred over the duration of the debt.',
+  },
+  {
+    category: 'Capital Allocated to Principal Paydown',
+    optionAAmount: DEBT_VS_INVEST_DEFAULTS.debtBalance,
+    optionBAmount: DEBT_VS_INVEST_DEFAULTS.debtBalance - initialResult.optionBFinalDebtBalance,
+    note: 'Reduction of nominal debt principal.',
+  },
+  {
+    category: 'Gross Investment Portfolio Balance',
+    optionAAmount: -initialResult.optionAFinalPortfolioValue,
+    optionBAmount: -initialResult.optionBFinalPortfolioValue,
+    note: 'Accumulated assets in market investment accounts (asset credit).',
+  },
+];
+
+const assumptions = [
+  {
+    label: 'Known Interest Rate Savings',
+    value: `${DEBT_VS_INVEST_DEFAULTS.debtInterestRatePercent}% APR Avoided Interest`,
+    explanation: 'Paying off debt with a known APR eliminates that specific future interest charge under the entered amortization schedule.',
+  },
+  {
+    label: 'Market Investment Assumption',
+    value: `${DEBT_VS_INVEST_DEFAULTS.expectedInvestmentReturnPercent}% Nominal Annual Return`,
+    explanation: 'Based on long-term broad equity market historical benchmarks (e.g., S&P 500 average annualized performance).',
+  },
+  {
+    label: 'Taxes on Investment Gains',
+    value: `${DEBT_VS_INVEST_DEFAULTS.investmentTaxRatePercent}% Estimated Tax Drag`,
+    explanation: 'Reflects capital gains and dividend taxes in standard taxable accounts.',
+  },
+  {
+    label: 'Payment Redirection Mechanism',
+    value: 'Full monthly cash flow redirected upon debt elimination',
+    explanation: 'Once Option A clears all debt, the former minimum payment plus extra cash is immediately invested each month.',
+  },
+];
+
+const faqs: FAQItem[] = [
+  {
+    question: 'How do interest savings compare to market returns?',
+    answer: 'When you pay down a loan carrying an 18% APR, you immediately prevent future interest charges from accruing at that rate. Unlike equities or variable assets, the cost of that debt is a known contractual rate, while investment returns fluctuate with market volatility.',
+  },
+  {
+    question: 'When does investing instead of paying off debt make sense?',
+    answer: 'Mathematically, when the expected after-tax return of an investment portfolio consistently exceeds the net interest rate of the debt (such as a fixed 3% mortgage versus an 8% index fund), investing surplus capital builds more wealth over time.',
+  },
+  {
+    question: 'What psychological factors influence this decision?',
+    answer: 'While math provides clear boundary conditions, debt freedom reduces ongoing fixed overhead and stress during job transitions or emergencies. Many people prioritize debt payoff for security even when returns are close.',
+  },
+];
+
+const relatedGuides = [
+  {
+    slug: 'pay-off-debt-vs-invest',
+    title: 'Pay Off Debt vs. Invest: Mathematical and Risk Trade-Offs',
+    description: 'How to compare fixed APR savings with market compounding and risk tolerances.',
+    readTime: '1 min read',
+    topicTag: 'Finance',
+  },
+];
+---
+
+<DecisionLayout
+  title="Pay Off Debt vs. Invest Capital Calculator"
+  description="Compare predictable interest cost avoided from early debt reduction against prospective market investment compounding."
+  category="finance"
+  timeToEstimate="3 min"
+  slug="debt-vs-invest"
+  keyMetric="Net Financial Position Difference"
+  optionAName="Accelerate Debt Payoff"
+  optionBName="Invest Available Capital"
+  assumptions={assumptions}
+  faqs={faqs}
+  relatedDecisions={['rent-vs-buy', 'buy-vs-subscribe']}
+  relatedGuides={relatedGuides}
+>
+  <!-- 1. INPUTS -->
+  <div slot="inputs" class="inputs-container">
+    <!-- INPUT CONTROLS -->
+    <div class="calculator-inputs-grid" id="calculator-inputs">
+    <!-- Shared Monthly Surplus & Horizon -->
+    <div class="shared-params-card">
+      <h3 class="shared-title">Available Capital & Horizon</h3>
+      <div class="shared-inputs-row">
+        <div class="form-group">
+          <label for="input-extra-cash">Extra Monthly Cash Available</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-extra-cash" value={DEBT_VS_INVEST_DEFAULTS.extraMonthlyCash} min="50" max="10000" step="50" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-horizon-years">Simulation Horizon</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-horizon-years" value={DEBT_VS_INVEST_DEFAULTS.horizonYears} min="1" max="25" step="1" />
+            <span class="unit-label">years</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option A Panel: Debt Details -->
+    <OptionPanel title="Current Debt Profile" optionLabel="Option A (Debt Priority)" badgeClass="badge-neutral">
+      <div class="form-group">
+        <label for="input-debt-balance">Current Outstanding Balance</label>
+        <div class="input-with-prefix">
+          <span class="currency-prefix">$</span>
+          <input type="number" id="input-debt-balance" value={DEBT_VS_INVEST_DEFAULTS.debtBalance} min="500" max="250000" step="500" />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-debt-rate">Debt Interest Rate (APR)</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-debt-rate" value={DEBT_VS_INVEST_DEFAULTS.debtInterestRatePercent} min="0.5" max="36" step="0.25" />
+            <span class="unit-label">% APR</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-debt-min">Minimum Monthly Payment</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-debt-min" value={DEBT_VS_INVEST_DEFAULTS.debtMinimumMonthlyPayment} min="25" max="5000" step="25" />
+          </div>
+        </div>
+      </div>
+    </OptionPanel>
+
+    <!-- Option B Panel: Investment Assumptions -->
+    <OptionPanel title="Investment Market Assumptions" optionLabel="Option B (Investment Priority)" badgeClass="badge-primary">
+      <div class="form-group">
+        <label for="input-invest-return">Expected Annual Market Return</label>
+        <div class="input-with-unit">
+          <input type="number" id="input-invest-return" value={DEBT_VS_INVEST_DEFAULTS.expectedInvestmentReturnPercent} min="1.0" max="20.0" step="0.5" />
+          <span class="unit-label">% / yr</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-tax-rate">Estimated Tax Drag on Investment Gains</label>
+        <div class="input-with-unit">
+          <input type="number" id="input-tax-rate" value={DEBT_VS_INVEST_DEFAULTS.investmentTaxRatePercent} min="0" max="45" step="1" />
+          <span class="unit-label">% tax</span>
+        </div>
+      </div>
+    </OptionPanel>
+  </div>
+
+  <!-- Actions: Reset -->
+  <div class="form-actions-bar">
+    <button type="button" class="btn btn-secondary" id="btn-reset-debt-invest">
+      Reset to Defaults
+    </button>
+    <span class="form-status-note">
+      Calculations update deterministically based on entered parameters.
+    </span>
+  </div>
+  </div>
+
+  <!-- 2. RESULTS -->
+  <div slot="results" class="results-wrapper">
+    <!-- Summary Box -->
+    <div class="summary-box" id="result-summary-box">
+      <div class="summary-header">
+        <span class="summary-badge">Comparative Projection</span>
+        <span class="summary-horizon" id="summary-horizon-badge">{DEBT_VS_INVEST_DEFAULTS.horizonYears}-Year Model</span>
+      </div>
+      <div class="summary-metrics">
+        <div class="summary-metric">
+          <span class="metric-lbl">Option A (Debt First) Net Position</span>
+          <span class="metric-val" id="summary-debt-net">${initialResult.optionANetFinancialPosition.toLocaleString()}</span>
+        </div>
+        <div class="summary-metric">
+          <span class="metric-lbl">Option B (Invest First) Net Position</span>
+          <span class="metric-val" id="summary-invest-net">${initialResult.optionBNetFinancialPosition.toLocaleString()}</span>
+        </div>
+        <div class="summary-metric highlight">
+          <span class="metric-lbl">Net Financial Difference</span>
+          <span class="metric-val" id="summary-difference">${initialResult.netPositionDifference.toLocaleString()}</span>
+          <span class="metric-sub" id="summary-higher-option">Higher net position: {initialResult.higherNetOption === 'debt_first' ? 'Pay Off Debt First' : 'Invest First'}</span>
+        </div>
+      </div>
+      <p class="summary-text" id="summary-narrative">{initialResult.summaryText}</p>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div class="section-block" id="comparison-section">
+      <div class="section-header">
+        <h2>Metric by Metric Comparison</h2>
+        <p>Direct evaluation of interest avoidance, debt-free timelines, and accumulated portfolio equity.</p>
+      </div>
+      <ComparisonTable
+        optionAName="Accelerate Debt Payoff"
+        optionBName="Invest Available Capital"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- COST BREAKDOWN -->
+    <div class="section-block" id="cost-breakdown-section">
+      <div class="section-header">
+        <h2>Financial Capital Components</h2>
+        <p>Accounting of interest paid versus accumulated market asset wealth.</p>
+      </div>
+      <CostBreakdown
+        optionAName="Debt Paydown First"
+        optionBName="Concurrent Investing"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+</DecisionLayout>
+
+<script>
+  import { calculateDebtVsInvest, DEBT_VS_INVEST_DEFAULTS, type DebtVsInvestInput } from '../../lib/decisions/debtVsInvest';
+
+  function initCalculator() {
+    const inputs = {
+      extraMonthlyCash: document.getElementById('input-extra-cash') as HTMLInputElement,
+      horizonYears: document.getElementById('input-horizon-years') as HTMLInputElement,
+      debtBalance: document.getElementById('input-debt-balance') as HTMLInputElement,
+      debtInterestRatePercent: document.getElementById('input-debt-rate') as HTMLInputElement,
+      debtMinimumMonthlyPayment: document.getElementById('input-debt-min') as HTMLInputElement,
+      expectedInvestmentReturnPercent: document.getElementById('input-invest-return') as HTMLInputElement,
+      investmentTaxRatePercent: document.getElementById('input-tax-rate') as HTMLInputElement,
+    };
+
+    function recalculate() {
+      const currentInput: DebtVsInvestInput = {
+        extraMonthlyCash: Number(inputs.extraMonthlyCash.value) || DEBT_VS_INVEST_DEFAULTS.extraMonthlyCash,
+        horizonYears: Number(inputs.horizonYears.value) || DEBT_VS_INVEST_DEFAULTS.horizonYears,
+        debtBalance: Number(inputs.debtBalance.value) || DEBT_VS_INVEST_DEFAULTS.debtBalance,
+        debtInterestRatePercent: Number(inputs.debtInterestRatePercent.value) || DEBT_VS_INVEST_DEFAULTS.debtInterestRatePercent,
+        debtMinimumMonthlyPayment: Number(inputs.debtMinimumMonthlyPayment.value) || DEBT_VS_INVEST_DEFAULTS.debtMinimumMonthlyPayment,
+        expectedInvestmentReturnPercent: Number(inputs.expectedInvestmentReturnPercent.value) || DEBT_VS_INVEST_DEFAULTS.expectedInvestmentReturnPercent,
+        investmentTaxRatePercent: Number(inputs.investmentTaxRatePercent.value) || 0,
+      };
+
+      const result = calculateDebtVsInvest(currentInput);
+
+      const debtNetEl = document.getElementById('summary-debt-net');
+      const investNetEl = document.getElementById('summary-invest-net');
+      const diffEl = document.getElementById('summary-difference');
+      const higherEl = document.getElementById('summary-higher-option');
+      const narrativeEl = document.getElementById('summary-narrative');
+      const horizonBadge = document.getElementById('summary-horizon-badge');
+
+      if (debtNetEl) debtNetEl.textContent = `$${result.optionANetFinancialPosition.toLocaleString()}`;
+      if (investNetEl) investNetEl.textContent = `$${result.optionBNetFinancialPosition.toLocaleString()}`;
+      if (diffEl) diffEl.textContent = `$${result.netPositionDifference.toLocaleString()}`;
+      if (higherEl) {
+        higherEl.textContent = `Higher net position: ${result.higherNetOption === 'debt_first' ? 'Pay Off Debt First' : 'Invest First'}`;
+      }
+      if (narrativeEl) narrativeEl.textContent = result.summaryText;
+      if (horizonBadge) horizonBadge.textContent = `${result.horizonYears}-Year Model`;
+    }
+
+    Object.values(inputs).forEach((input) => {
+      if (input) {
+        input.addEventListener('input', recalculate);
+        input.addEventListener('change', recalculate);
+      }
+    });
+
+    document.getElementById('btn-reset-debt-invest')?.addEventListener('click', () => {
+      inputs.extraMonthlyCash.value = String(DEBT_VS_INVEST_DEFAULTS.extraMonthlyCash);
+      inputs.horizonYears.value = String(DEBT_VS_INVEST_DEFAULTS.horizonYears);
+      inputs.debtBalance.value = String(DEBT_VS_INVEST_DEFAULTS.debtBalance);
+      inputs.debtInterestRatePercent.value = String(DEBT_VS_INVEST_DEFAULTS.debtInterestRatePercent);
+      inputs.debtMinimumMonthlyPayment.value = String(DEBT_VS_INVEST_DEFAULTS.debtMinimumMonthlyPayment);
+      inputs.expectedInvestmentReturnPercent.value = String(DEBT_VS_INVEST_DEFAULTS.expectedInvestmentReturnPercent);
+      inputs.investmentTaxRatePercent.value = String(DEBT_VS_INVEST_DEFAULTS.investmentTaxRatePercent);
+      recalculate();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculator);
+  } else {
+    initCalculator();
+  }
+</script>
+
+<style>
+  .summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+  .summary-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-primary);
+  }
+  .summary-horizon {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .summary-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-4);
+  }
+  .summary-metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .metric-lbl {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .metric-val {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+  .summary-metric.highlight .metric-val {
+    color: var(--color-primary);
+  }
+  .metric-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+  .summary-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+  .calculator-inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+  }
+  @media (min-width: 900px) {
+    .calculator-inputs-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .shared-params-card {
+      grid-column: 1 / -1;
+    }
+  }
+  .shared-params-card {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .shared-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+  }
+  .shared-inputs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  @media (max-width: 580px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+  .input-with-prefix, .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .currency-prefix {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .unit-label {
+    position: absolute;
+    right: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .input-with-prefix input {
+    padding-left: var(--space-7);
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .input-with-unit input {
+    padding-right: var(--space-14);
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .section-block {
+    margin-top: var(--space-10);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+  .section-header {
+    margin-bottom: var(--space-6);
+  }
+  .section-header h2 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-2);
+  }
+  .section-header p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+</style>

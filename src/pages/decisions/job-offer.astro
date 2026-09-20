@@ -1,0 +1,1335 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import {
+  JOB_OFFER_DEFAULTS_A,
+  JOB_OFFER_DEFAULTS_B,
+  compareJobOffers,
+  type JobOfferComparisonResult,
+} from '../../lib/decisions/jobOffer';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+// Calculate initial defaults on server for instant SSR
+const initialResult: JobOfferComparisonResult = compareJobOffers(JOB_OFFER_DEFAULTS_A, JOB_OFFER_DEFAULTS_B);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: 'Gross Annual Cash Compensation',
+    optionAValue: `$${initialResult.optionA.cashCompensationTotal.toLocaleString()}`,
+    optionBValue: `$${initialResult.optionB.cashCompensationTotal.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.optionA.cashCompensationTotal - initialResult.optionB.cashCompensationTotal).toLocaleString()}`,
+    helpNote: 'Base salary + anticipated annual bonus + 401(k) match + other compensation.',
+  },
+  {
+    metric: 'Annual Health Insurance Premium (Employee)',
+    optionAValue: `$${initialResult.optionA.annualHealthCost.toLocaleString()}`,
+    optionBValue: `$${initialResult.optionB.annualHealthCost.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.optionA.annualHealthCost - initialResult.optionB.annualHealthCost).toLocaleString()}`,
+    helpNote: 'Out-of-pocket payroll deductions for health plan coverage.',
+  },
+  {
+    metric: 'Estimated Annual Commute Expense',
+    optionAValue: `$${initialResult.optionA.annualCommuteCost.toLocaleString()} / yr`,
+    optionBValue: `$${initialResult.optionB.annualCommuteCost.toLocaleString()} / yr`,
+    difference: `$${initialResult.commuteCostDifference.toLocaleString()}`,
+    helpNote: 'Illustrative vehicle-cost assumption of $0.725/mile for fuel, maintenance, depreciation, and operating expenses.',
+  },
+  {
+    metric: 'Estimated Annual Commute Time',
+    optionAValue: `${initialResult.optionA.annualCommuteHours} hrs / yr`,
+    optionBValue: `${initialResult.optionB.annualCommuteHours} hrs / yr`,
+    difference: `${initialResult.commuteHoursDifference} hrs / yr`,
+    helpNote: 'Estimated driving hours assuming an average speed of 35 mph.',
+  },
+  {
+    metric: 'Paid Vacation Days',
+    optionAValue: `${initialResult.optionA.vacationDays} days`,
+    optionBValue: `${initialResult.optionB.vacationDays} days`,
+    difference: `${initialResult.vacationDaysDifference} days`,
+    helpNote: 'Annual accrued paid time off.',
+  },
+  {
+    metric: 'Estimated Net Effective Compensation',
+    optionAValue: `$${initialResult.optionA.netEffectiveCompensation.toLocaleString()}`,
+    optionBValue: `$${initialResult.optionB.netEffectiveCompensation.toLocaleString()}`,
+    difference: `$${initialResult.compensationDifference.toLocaleString()}`,
+    helpNote: 'Cash compensation minus health insurance premiums and direct commute vehicle expenses.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Base Annual Salary',
+    optionAAmount: initialResult.optionA.baseSalary,
+    optionBAmount: initialResult.optionB.baseSalary,
+    note: 'Contracted base pay before deductions',
+  },
+  {
+    category: 'Target Annual Bonus',
+    optionAAmount: initialResult.optionA.annualBonus,
+    optionBAmount: initialResult.optionB.annualBonus,
+    note: 'Projected annual incentive target',
+  },
+  {
+    category: '401(k) Employer Match',
+    optionAAmount: initialResult.optionA.employerMatchDollars,
+    optionBAmount: initialResult.optionB.employerMatchDollars,
+    note: 'Company retirement contribution dollars',
+  },
+  {
+    category: 'Other Annual Compensation',
+    optionAAmount: initialResult.optionA.otherCompensation,
+    optionBAmount: initialResult.optionB.otherCompensation,
+    note: 'Equity vesting, wellness, or transit stipends',
+  },
+  {
+    category: 'Less: Employee Health Premium',
+    optionAAmount: initialResult.optionA.annualHealthCost,
+    optionBAmount: initialResult.optionB.annualHealthCost,
+    note: 'Mandatory annual payroll deduction',
+  },
+  {
+    category: 'Less: Estimated Commute Vehicle Cost',
+    optionAAmount: initialResult.optionA.annualCommuteCost,
+    optionBAmount: initialResult.optionB.annualCommuteCost,
+    note: 'Annual mileage multiplied by vehicle cost per mile ($0.725/mile default)',
+  },
+];
+
+const jobOfferAssumptions = [
+  'Annual schedule assumes 50 working weeks per year (accounting for 2 weeks standard holidays).',
+  'Commute cost estimate uses an editable illustrative assumption ($0.725 per mile default) for fuel, maintenance, and vehicle depreciation. This is not a tax deduction calculation.',
+  'Commute travel time calculation explicitly assumes an average speed of 35 mph.',
+  '401(k) employer match assumes the employee contributes sufficient salary to capture the full match.',
+  'Daily vacation valuation assumes a 260-workday annual baseline (Base Salary ÷ 260).',
+  'Bonus amounts reflect the entered expected target and are subject to employer performance terms.',
+];
+
+const jobOfferExclusions = [
+  'Federal, state, and local income tax brackets or payroll taxes.',
+  'Future career trajectory, promotional velocity, and title progression.',
+  'Subjective non-cash workplace culture, management quality, or psychological stress.',
+  'Equity volatility, liquidity horizons, or valuation strike prices.',
+  'Tolls, parking permits, and municipal public transit fare variations.',
+  'Differences in employer 401(k) vesting cliffs or graduated vesting schedules.',
+];
+
+const faqList: FAQItem[] = [
+  {
+    question: 'How is total cash compensation calculated?',
+    answer: 'Cash compensation is calculated by summing base salary, anticipated annual bonus, the employer 401(k) matching dollars, and any other regular annual cash stipends or compensation entered.',
+  },
+  {
+    question: 'How should I treat an annual bonus if it is performance-contingent?',
+    answer: 'If an annual bonus is discretionary or tied to company performance metrics, you may want to enter a conservative expectation (such as 50% or 75% of target) or model both best-case and base-case scenarios.',
+  },
+  {
+    question: 'How is the commute cost estimated?',
+    answer: 'Commute cost is estimated by multiplying your annual round-trip mileage (One-way miles × 2 × Commute days/week × 50 weeks) by the entered vehicle cost per mile ($0.725/mile default). This is an illustrative vehicle-cost assumption for fuel, maintenance, depreciation, and operating expenses—not an IRS tax deduction estimate.',
+  },
+  {
+    question: 'How are 401(k) employer matches handled?',
+    answer: 'The employer match percentage is multiplied by your base salary, assuming you contribute at least enough to capture the full matching tier. If your employer has a multi-year vesting schedule, you might not immediately retain 100% of these contributions if you leave early.',
+  },
+  {
+    question: 'Should vacation days be assigned a monetary dollar value?',
+    answer: 'Vacation days represent paid time off rather than extra cash in your bank account. While we show an estimated daily rate for context (Base Salary ÷ 260 workdays), we do not fold vacation dollars into net cash compensation so that cash liquidity and personal time remain distinct trade-off dimensions.',
+  },
+];
+---
+
+<DecisionLayout
+  title="Job Offer Comparison Calculator | Compare Compensation & Commute"
+  metaDescription="Compare two job offers across base salary, bonus, 401(k) match, health insurance, commute expenses, and travel time with an objective trade-off model."
+  canonicalPath="/decisions/job-offer"
+  decisionSlug="job-offer"
+  category="Career & Income"
+  h1="Job Offer Comparison Calculator"
+  intro="Evaluate two employment offers across both monetary and non-monetary trade-offs. Compare total compensation, out-of-pocket health costs, commute time, and travel expenses side by side."
+  faqItems={faqList}
+  relatedSlugs={['rent-vs-buy', 'gas-vs-ev', 'diy-vs-hire']}
+>
+  <!-- INPUTS SLOT -->
+  <div slot="inputs" class="inputs-container">
+    <div class="inputs-header">
+      <div class="header-notes">
+        <span class="badge badge-neutral">Side-by-Side Model</span>
+        <span class="note-text">
+          Commute cost estimate uses an illustrative assumption of <strong>$0.725 per mile</strong> (default, editable) and travel time assumes an average of <strong>35 mph</strong> across 50 annual work weeks.
+        </span>
+      </div>
+    </div>
+
+    <!-- 2 Column Options Grid -->
+    <div class="options-grid">
+      <!-- OPTION A -->
+      <OptionPanel
+        optionLabel="Option A"
+        title="Job Offer A"
+        description="Parameters for the first career opportunity."
+        panelVariant="option-a"
+      >
+        <div class="form-group">
+          <label for="input-a-title" class="field-label">Position / Employer Name</label>
+          <input
+            type="text"
+            id="input-a-title"
+            value={JOB_OFFER_DEFAULTS_A.title}
+            class="input-field text-input"
+          />
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-a-salary" class="field-label">Base salary</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-a-salary"
+                value={JOB_OFFER_DEFAULTS_A.baseSalary}
+                min="0"
+                step="1000"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-a-salary" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-a-bonus" class="field-label">Annual bonus</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-a-bonus"
+                value={JOB_OFFER_DEFAULTS_A.annualBonus}
+                min="0"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-a-bonus" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-a-match" class="field-label">401(k) match</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-a-match"
+                value={JOB_OFFER_DEFAULTS_A.employerMatchPercent}
+                min="0"
+                max="50"
+                step="0.5"
+                class="input-field"
+              />
+              <span class="unit-addon">%</span>
+            </div>
+            <span class="validation-error" id="err-a-match" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-a-health" class="field-label">Health premium (yr)</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-a-health"
+                value={JOB_OFFER_DEFAULTS_A.annualHealthInsuranceCost}
+                min="0"
+                step="100"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-a-health" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-a-vacation" class="field-label">Paid vacation days</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-a-vacation"
+                value={JOB_OFFER_DEFAULTS_A.paidVacationDays}
+                min="0"
+                max="60"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">days</span>
+            </div>
+            <span class="validation-error" id="err-a-vacation" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-a-other" class="field-label">Other annual comp</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-a-other"
+                value={JOB_OFFER_DEFAULTS_A.otherCompensationAnnual}
+                min="0"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-a-other" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-divider"><span>Commute Schedule</span></div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="input-a-distance" class="field-label">One-way miles</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-a-distance"
+                value={JOB_OFFER_DEFAULTS_A.commuteMilesOneWay}
+                min="0"
+                max="200"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">mi</span>
+            </div>
+            <span class="validation-error" id="err-a-distance" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-a-commute-days" class="field-label">Office days / wk</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-a-commute-days"
+                value={JOB_OFFER_DEFAULTS_A.commuteDaysPerWeek}
+                min="0"
+                max="7"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">days</span>
+            </div>
+            <span class="validation-error" id="err-a-commute-days" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-a-remote-days" class="field-label">Remote days / wk</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-a-remote-days"
+                value={JOB_OFFER_DEFAULTS_A.remoteDaysPerWeek}
+                min="0"
+                max="7"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">days</span>
+            </div>
+            <span class="validation-error" id="err-a-remote-days" role="alert"></span>
+          </div>
+        </div>
+      </OptionPanel>
+
+      <!-- OPTION B -->
+      <OptionPanel
+        optionLabel="Option B"
+        title="Job Offer B"
+        description="Parameters for the second career opportunity."
+        panelVariant="option-b"
+      >
+        <div class="form-group">
+          <label for="input-b-title" class="field-label">Position / Employer Name</label>
+          <input
+            type="text"
+            id="input-b-title"
+            value={JOB_OFFER_DEFAULTS_B.title}
+            class="input-field text-input"
+          />
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-b-salary" class="field-label">Base salary</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-b-salary"
+                value={JOB_OFFER_DEFAULTS_B.baseSalary}
+                min="0"
+                step="1000"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-b-salary" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-b-bonus" class="field-label">Annual bonus</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-b-bonus"
+                value={JOB_OFFER_DEFAULTS_B.annualBonus}
+                min="0"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-b-bonus" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-b-match" class="field-label">401(k) match</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-b-match"
+                value={JOB_OFFER_DEFAULTS_B.employerMatchPercent}
+                min="0"
+                max="50"
+                step="0.5"
+                class="input-field"
+              />
+              <span class="unit-addon">%</span>
+            </div>
+            <span class="validation-error" id="err-b-match" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-b-health" class="field-label">Health premium (yr)</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-b-health"
+                value={JOB_OFFER_DEFAULTS_B.annualHealthInsuranceCost}
+                min="0"
+                step="100"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-b-health" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-b-vacation" class="field-label">Paid vacation days</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-b-vacation"
+                value={JOB_OFFER_DEFAULTS_B.paidVacationDays}
+                min="0"
+                max="60"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">days</span>
+            </div>
+            <span class="validation-error" id="err-b-vacation" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-b-other" class="field-label">Other annual comp</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-b-other"
+                value={JOB_OFFER_DEFAULTS_B.otherCompensationAnnual}
+                min="0"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-b-other" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-divider"><span>Commute Schedule</span></div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="input-b-distance" class="field-label">One-way miles</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-b-distance"
+                value={JOB_OFFER_DEFAULTS_B.commuteMilesOneWay}
+                min="0"
+                max="200"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">mi</span>
+            </div>
+            <span class="validation-error" id="err-b-distance" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-b-commute-days" class="field-label">Office days / wk</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-b-commute-days"
+                value={JOB_OFFER_DEFAULTS_B.commuteDaysPerWeek}
+                min="0"
+                max="7"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">days</span>
+            </div>
+            <span class="validation-error" id="err-b-commute-days" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-b-remote-days" class="field-label">Remote days / wk</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-b-remote-days"
+                value={JOB_OFFER_DEFAULTS_B.remoteDaysPerWeek}
+                min="0"
+                max="7"
+                step="1"
+                class="input-field"
+              />
+              <span class="unit-addon">days</span>
+            </div>
+            <span class="validation-error" id="err-b-remote-days" role="alert"></span>
+          </div>
+        </div>
+      </OptionPanel>
+    </div>
+
+    <!-- Shared Assumptions Panel -->
+    <div class="shared-assumptions-panel">
+      <div class="shared-assumptions-header">
+        <span class="shared-panel-title">Shared Model Assumptions</span>
+        <span class="shared-panel-subtitle">Applies to both job offers for consistent vehicle cost modeling</span>
+      </div>
+      <div class="shared-assumptions-body">
+        <div class="form-group vehicle-cost-group">
+          <label for="input-vehicle-cost-per-mile" class="field-label">
+            Estimated vehicle cost per mile
+          </label>
+          <div class="input-with-unit">
+            <span class="unit-prefix">$</span>
+            <input
+              type="number"
+              id="input-vehicle-cost-per-mile"
+              value={JOB_OFFER_DEFAULTS_A.estimatedVehicleCostPerMile ?? 0.725}
+              min="0.10"
+              max="2.00"
+              step="0.005"
+              class="input-field"
+            />
+            <span class="unit-addon">/ mi</span>
+          </div>
+          <p class="field-help">
+            Illustrative estimate of vehicle operating cost (fuel, maintenance, tires, insurance, and depreciation wear). Default is $0.725/mile. Not a tax deduction calculation.
+          </p>
+          <span class="validation-error" id="err-vehicle-cost-per-mile" role="alert"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="form-actions-bar">
+      <button type="button" class="btn btn-primary" id="btn-calculate-job">
+        Calculate Comparison
+      </button>
+      <button type="button" class="btn btn-secondary" id="btn-reset-job">
+        Reset to Defaults
+      </button>
+      <span class="form-status-note">
+        Changes recalculate deterministically based on entered parameters.
+      </span>
+    </div>
+  </div>
+
+  <!-- RESULTS SLOT -->
+  <div slot="results" class="results-wrapper">
+    <!-- Result Summary Box -->
+    <div class="result-summary-box" id="job-summary-box">
+      <div class="summary-top">
+        <span class="badge badge-neutral">Comparative Outcome</span>
+        <span class="summary-period">Annual Assessment</span>
+      </div>
+      <p class="summary-lead-text" id="job-summary-lead">
+        {initialResult.summaryText}
+      </p>
+
+      <div class="summary-metrics-grid">
+        <div class="summary-metric-card opt-a-metric">
+          <span class="metric-tag">Offer A Net Effective</span>
+          <span class="metric-val" id="metric-a-net">${initialResult.optionA.netEffectiveCompensation.toLocaleString()}</span>
+          <span class="metric-sub" id="metric-a-hours">{initialResult.optionA.annualCommuteHours} commute hrs/yr</span>
+        </div>
+
+        <div class="summary-metric-card opt-b-metric">
+          <span class="metric-tag">Offer B Net Effective</span>
+          <span class="metric-val" id="metric-b-net">${initialResult.optionB.netEffectiveCompensation.toLocaleString()}</span>
+          <span class="metric-sub" id="metric-b-hours">{initialResult.optionB.annualCommuteHours} commute hrs/yr</span>
+        </div>
+
+        <div class="summary-metric-card diff-metric">
+          <span class="metric-tag">Compensation Spread</span>
+          <span class="metric-val" id="metric-job-diff">${initialResult.compensationDifference.toLocaleString()}</span>
+          <span class="metric-sub" id="metric-job-hours-diff">{initialResult.commuteHoursDifference} hrs commute diff</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div id="container-job-comparison-table">
+      <ComparisonTable
+        caption="Job Offer Comparison Table"
+        optionAName="Offer A"
+        optionBName="Offer B"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div id="container-job-cost-breakdown">
+      <CostBreakdown
+        title="Compensation & Deduction Breakdown"
+        description="Annualized itemized cash streams, employer contributions, and estimated out-of-pocket costs."
+        optionAName="Offer A"
+        optionBName="Offer B"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+
+  <!-- ASSUMPTIONS SLOT -->
+  <div slot="assumptions">
+    <AssumptionBox
+      assumptions={jobOfferAssumptions}
+      exclusions={jobOfferExclusions}
+      disclaimerNote="This calculator provides estimates based on the assumptions you enter. It is for educational and career planning purposes and does not constitute tax, legal, or financial advice."
+    />
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The job offer evaluation separates compensation cash flows from personal time expenditures:
+    </p>
+    <ul>
+      <li>
+        <strong>Cash Compensation:</strong> Evaluates base salary plus anticipated bonuses, employer 401(k) matching dollars (<code>Base Salary × match%</code>), and any other annual stipends.
+      </li>
+      <li>
+        <strong>Employee Health Premiums:</strong> Deducted from cash compensation as an unavoidable annual payroll expense.
+      </li>
+      <li>
+        <strong>Commute Cost Modeling:</strong> Annual round-trip commute mileage is calculated as: <code>Miles One-Way × 2 × Office Days/Week × 50 Weeks</code>. Annual vehicle cost is estimated by multiplying total miles by the illustrative operating benchmark (defaulting to <strong>$0.725/mile</strong>, editable, covering fuel, routine maintenance, tires, insurance, and vehicle depreciation).
+      </li>
+      <li>
+        <strong>Commute Travel Time:</strong> Annual commute hours are estimated as: <code>Total Annual Commute Miles ÷ 35 mph Average Speed</code>.
+      </li>
+      <li>
+        <strong>Paid Time Off:</strong> Paid vacation days are presented distinctly as time assets rather than converted to synthetic cash, preserving the true multi-dimensional nature of the trade-off.
+      </li>
+    </ul>
+    <p>
+      Crucially, the model does not declare a "winner." An offer with a higher salary may also involve substantially higher commute fatigue and less vacation time; our tool makes those parallel trade-offs visible so you can weigh what matters to you.
+    </p>
+  </div>
+
+  <!-- WORKED EXAMPLE SLOT -->
+  <div slot="worked-example" class="worked-example-content">
+    <div class="example-meta">
+      <span class="badge badge-neutral">Hypothetical Scenario</span>
+      <span class="example-note">Fictional illustrative parameters for demonstration</span>
+    </div>
+    <h3 class="example-title">Comparing a Higher Salary Long Commute vs. Hybrid Local Role</h3>
+    <p>
+      Consider an applicant evaluating two distinct options:
+    </p>
+    <div class="example-breakdown-grid">
+      <div class="example-col">
+        <h4>Offer A (Local / Hybrid)</h4>
+        <ul>
+          <li>Base Salary: $100,000</li>
+          <li>Bonus: $5,000 | 4% 401(k) Match: $4,000</li>
+          <li>Gross Cash Comp: <strong>$109,000</strong></li>
+          <li>Health Insurance Premium: $2,000</li>
+          <li>Commute: 15 miles one-way, 2 days/week in office</li>
+          <li>Annual Mileage: 3,000 miles (86 driving hours)</li>
+          <li>Commute Vehicle Cost (at $0.725/mi): <strong>$2,175</strong></li>
+          <li>Net Effective Comp: <strong>$104,825</strong></li>
+          <li>Vacation Days: 15 days</li>
+        </ul>
+      </div>
+      <div class="example-col">
+        <h4>Offer B (Higher Base / Long Daily Commute)</h4>
+        <ul>
+          <li>Base Salary: $118,000</li>
+          <li>Bonus: $6,000 | 3% 401(k) Match: $3,540</li>
+          <li>Gross Cash Comp: <strong>$127,540</strong></li>
+          <li>Health Insurance Premium: $3,600</li>
+          <li>Commute: 35 miles one-way, 5 days/week in office</li>
+          <li>Annual Mileage: 17,500 miles (500 driving hours)</li>
+          <li>Commute Vehicle Cost (at $0.725/mi): <strong>$12,688</strong></li>
+          <li>Net Effective Comp: <strong>$111,252</strong></li>
+          <li>Vacation Days: 12 days</li>
+        </ul>
+      </div>
+    </div>
+    <p class="example-summary">
+      <strong>Observation:</strong> Offer B has an apparent gross compensation advantage of $18,540 ($127,540 vs. $109,000). However, after accounting for higher employee health insurance premiums ($3,600 vs. $2,000) and $10,513 in additional direct vehicle operating wear, depreciation, and fuel ($12,688 vs. $2,175), the net effective compensation difference narrows to <strong>$6,427</strong>. In exchange for that $6,427 difference, Offer B requires <strong>414 additional hours</strong> sitting in traffic (over 10 standard full-time work weeks) and provides 3 fewer paid vacation days.
+    </p>
+  </div>
+</DecisionLayout>
+
+<script>
+  import {
+    compareJobOffers,
+    validateJobOfferInput,
+    JOB_OFFER_DEFAULTS_A,
+    JOB_OFFER_DEFAULTS_B,
+    type JobOfferDetails,
+  } from '../../lib/decisions/jobOffer';
+
+  function getJobOffersFromDOM(): { offerA: JobOfferDetails; offerB: JobOfferDetails } {
+    const vehicleCostInput = document.getElementById('input-vehicle-cost-per-mile') as HTMLInputElement;
+    const vehicleCostPerMile = vehicleCostInput && !isNaN(parseFloat(vehicleCostInput.value))
+      ? parseFloat(vehicleCostInput.value)
+      : (JOB_OFFER_DEFAULTS_A.estimatedVehicleCostPerMile ?? 0.725);
+
+    const offerA: JobOfferDetails = {
+      title: (document.getElementById('input-a-title') as HTMLInputElement)?.value || 'Offer A',
+      baseSalary: parseFloat((document.getElementById('input-a-salary') as HTMLInputElement)?.value) || 0,
+      annualBonus: parseFloat((document.getElementById('input-a-bonus') as HTMLInputElement)?.value) || 0,
+      employerMatchPercent: parseFloat((document.getElementById('input-a-match') as HTMLInputElement)?.value) || 0,
+      employeeContributionForMatchPercent: parseFloat((document.getElementById('input-a-match') as HTMLInputElement)?.value) || 0,
+      annualHealthInsuranceCost: parseFloat((document.getElementById('input-a-health') as HTMLInputElement)?.value) || 0,
+      paidVacationDays: parseFloat((document.getElementById('input-a-vacation') as HTMLInputElement)?.value) || 0,
+      commuteMilesOneWay: parseFloat((document.getElementById('input-a-distance') as HTMLInputElement)?.value) || 0,
+      commuteDaysPerWeek: parseFloat((document.getElementById('input-a-commute-days') as HTMLInputElement)?.value) || 0,
+      remoteDaysPerWeek: parseFloat((document.getElementById('input-a-remote-days') as HTMLInputElement)?.value) || 0,
+      otherCompensationAnnual: parseFloat((document.getElementById('input-a-other') as HTMLInputElement)?.value) || 0,
+      estimatedVehicleCostPerMile: vehicleCostPerMile,
+      averageCommuteSpeedMph: 35,
+      annualWorkWeeks: 50,
+    };
+
+    const offerB: JobOfferDetails = {
+      title: (document.getElementById('input-b-title') as HTMLInputElement)?.value || 'Offer B',
+      baseSalary: parseFloat((document.getElementById('input-b-salary') as HTMLInputElement)?.value) || 0,
+      annualBonus: parseFloat((document.getElementById('input-b-bonus') as HTMLInputElement)?.value) || 0,
+      employerMatchPercent: parseFloat((document.getElementById('input-b-match') as HTMLInputElement)?.value) || 0,
+      employeeContributionForMatchPercent: parseFloat((document.getElementById('input-b-match') as HTMLInputElement)?.value) || 0,
+      annualHealthInsuranceCost: parseFloat((document.getElementById('input-b-health') as HTMLInputElement)?.value) || 0,
+      paidVacationDays: parseFloat((document.getElementById('input-b-vacation') as HTMLInputElement)?.value) || 0,
+      commuteMilesOneWay: parseFloat((document.getElementById('input-b-distance') as HTMLInputElement)?.value) || 0,
+      commuteDaysPerWeek: parseFloat((document.getElementById('input-b-commute-days') as HTMLInputElement)?.value) || 0,
+      remoteDaysPerWeek: parseFloat((document.getElementById('input-b-remote-days') as HTMLInputElement)?.value) || 0,
+      otherCompensationAnnual: parseFloat((document.getElementById('input-b-other') as HTMLInputElement)?.value) || 0,
+      estimatedVehicleCostPerMile: vehicleCostPerMile,
+      averageCommuteSpeedMph: 35,
+      annualWorkWeeks: 50,
+    };
+
+    return { offerA, offerB };
+  }
+
+  function clearJobErrors() {
+    const errorSpans = document.querySelectorAll('.validation-error');
+    errorSpans.forEach((el) => {
+      el.textContent = '';
+    });
+  }
+
+  function updateJobResults() {
+    clearJobErrors();
+    const { offerA, offerB } = getJobOffersFromDOM();
+
+    const valA = validateJobOfferInput(offerA, 'Offer A');
+    const valB = validateJobOfferInput(offerB, 'Offer B');
+
+    let hasErrors = false;
+    if (!valA.valid) {
+      hasErrors = true;
+      if (valA.errors.baseSalary) document.getElementById('err-a-salary')!.textContent = valA.errors.baseSalary;
+      if (valA.errors.annualBonus) document.getElementById('err-a-bonus')!.textContent = valA.errors.annualBonus;
+      if (valA.errors.employerMatchPercent) document.getElementById('err-a-match')!.textContent = valA.errors.employerMatchPercent;
+      if (valA.errors.annualHealthInsuranceCost) document.getElementById('err-a-health')!.textContent = valA.errors.annualHealthInsuranceCost;
+      if (valA.errors.paidVacationDays) document.getElementById('err-a-vacation')!.textContent = valA.errors.paidVacationDays;
+      if (valA.errors.commuteMilesOneWay) document.getElementById('err-a-distance')!.textContent = valA.errors.commuteMilesOneWay;
+      if (valA.errors.commuteDaysPerWeek) document.getElementById('err-a-commute-days')!.textContent = valA.errors.commuteDaysPerWeek;
+      if (valA.errors.estimatedVehicleCostPerMile) document.getElementById('err-vehicle-cost-per-mile')!.textContent = valA.errors.estimatedVehicleCostPerMile;
+    }
+
+    if (!valB.valid) {
+      hasErrors = true;
+      if (valB.errors.baseSalary) document.getElementById('err-b-salary')!.textContent = valB.errors.baseSalary;
+      if (valB.errors.annualBonus) document.getElementById('err-b-bonus')!.textContent = valB.errors.annualBonus;
+      if (valB.errors.employerMatchPercent) document.getElementById('err-b-match')!.textContent = valB.errors.employerMatchPercent;
+      if (valB.errors.annualHealthInsuranceCost) document.getElementById('err-b-health')!.textContent = valB.errors.annualHealthInsuranceCost;
+      if (valB.errors.paidVacationDays) document.getElementById('err-b-vacation')!.textContent = valB.errors.paidVacationDays;
+      if (valB.errors.commuteMilesOneWay) document.getElementById('err-b-distance')!.textContent = valB.errors.commuteMilesOneWay;
+      if (valB.errors.commuteDaysPerWeek) document.getElementById('err-b-commute-days')!.textContent = valB.errors.commuteDaysPerWeek;
+      if (valB.errors.estimatedVehicleCostPerMile && !valA.errors.estimatedVehicleCostPerMile) {
+        document.getElementById('err-vehicle-cost-per-mile')!.textContent = valB.errors.estimatedVehicleCostPerMile;
+      }
+    }
+
+    if (hasErrors) return;
+
+    const result = compareJobOffers(offerA, offerB);
+
+    // Summary Box
+    const leadEl = document.getElementById('job-summary-lead');
+    if (leadEl) leadEl.textContent = result.summaryText;
+
+    const netAEl = document.getElementById('metric-a-net');
+    if (netAEl) netAEl.textContent = `$${result.optionA.netEffectiveCompensation.toLocaleString()}`;
+
+    const hrsAEl = document.getElementById('metric-a-hours');
+    if (hrsAEl) hrsAEl.textContent = `${result.optionA.annualCommuteHours} commute hrs/yr`;
+
+    const netBEl = document.getElementById('metric-b-net');
+    if (netBEl) netBEl.textContent = `$${result.optionB.netEffectiveCompensation.toLocaleString()}`;
+
+    const hrsBEl = document.getElementById('metric-b-hours');
+    if (hrsBEl) hrsBEl.textContent = `${result.optionB.annualCommuteHours} commute hrs/yr`;
+
+    const diffEl = document.getElementById('metric-job-diff');
+    if (diffEl) diffEl.textContent = `$${result.compensationDifference.toLocaleString()}`;
+
+    const diffHrsEl = document.getElementById('metric-job-hours-diff');
+    if (diffHrsEl) diffHrsEl.textContent = `${result.commuteHoursDifference} hrs commute diff`;
+
+    // Comparison Table
+    const tableContainer = document.getElementById('container-job-comparison-table');
+    if (tableContainer) {
+      const rows = tableContainer.querySelectorAll('tbody tr');
+      if (rows.length >= 6) {
+        // Row 1: Gross Cash
+        rows[0].querySelector('.td-opt-a')!.textContent = `$${result.optionA.cashCompensationTotal.toLocaleString()}`;
+        rows[0].querySelector('.td-opt-b')!.textContent = `$${result.optionB.cashCompensationTotal.toLocaleString()}`;
+        rows[0].querySelector('.td-diff')!.textContent = `$${Math.abs(result.optionA.cashCompensationTotal - result.optionB.cashCompensationTotal).toLocaleString()}`;
+
+        // Row 2: Health
+        rows[1].querySelector('.td-opt-a')!.textContent = `$${result.optionA.annualHealthCost.toLocaleString()}`;
+        rows[1].querySelector('.td-opt-b')!.textContent = `$${result.optionB.annualHealthCost.toLocaleString()}`;
+        rows[1].querySelector('.td-diff')!.textContent = `$${Math.abs(result.optionA.annualHealthCost - result.optionB.annualHealthCost).toLocaleString()}`;
+
+        // Row 3: Commute Expense
+        rows[2].querySelector('.td-opt-a')!.textContent = `$${result.optionA.annualCommuteCost.toLocaleString()} / yr`;
+        rows[2].querySelector('.td-opt-b')!.textContent = `$${result.optionB.annualCommuteCost.toLocaleString()} / yr`;
+        rows[2].querySelector('.td-diff')!.textContent = `$${result.commuteCostDifference.toLocaleString()}`;
+
+        // Row 4: Commute Time
+        rows[3].querySelector('.td-opt-a')!.textContent = `${result.optionA.annualCommuteHours} hrs / yr`;
+        rows[3].querySelector('.td-opt-b')!.textContent = `${result.optionB.annualCommuteHours} hrs / yr`;
+        rows[3].querySelector('.td-diff')!.textContent = `${result.commuteHoursDifference} hrs / yr`;
+
+        // Row 5: Vacation
+        rows[4].querySelector('.td-opt-a')!.textContent = `${result.optionA.vacationDays} days`;
+        rows[4].querySelector('.td-opt-b')!.textContent = `${result.optionB.vacationDays} days`;
+        rows[4].querySelector('.td-diff')!.textContent = `${result.vacationDaysDifference} days`;
+
+        // Row 6: Net Effective
+        rows[5].querySelector('.td-opt-a')!.textContent = `$${result.optionA.netEffectiveCompensation.toLocaleString()}`;
+        rows[5].querySelector('.td-opt-b')!.textContent = `$${result.optionB.netEffectiveCompensation.toLocaleString()}`;
+        rows[5].querySelector('.td-diff')!.textContent = `$${result.compensationDifference.toLocaleString()}`;
+      }
+    }
+
+    // Cost Breakdown Table
+    const breakdownContainer = document.getElementById('container-job-cost-breakdown');
+    if (breakdownContainer) {
+      const rows = breakdownContainer.querySelectorAll('tbody tr');
+      if (rows.length >= 6) {
+        // Base
+        rows[0].querySelector('.td-val:nth-child(2)')!.textContent = `$${result.optionA.baseSalary.toLocaleString()}`;
+        rows[0].querySelector('.td-val:nth-child(3)')!.textContent = `$${result.optionB.baseSalary.toLocaleString()}`;
+        rows[0].querySelector('.td-diff')!.textContent = `$${Math.abs(result.optionA.baseSalary - result.optionB.baseSalary).toLocaleString()}`;
+
+        // Bonus
+        rows[1].querySelector('.td-val:nth-child(2)')!.textContent = `$${result.optionA.annualBonus.toLocaleString()}`;
+        rows[1].querySelector('.td-val:nth-child(3)')!.textContent = `$${result.optionB.annualBonus.toLocaleString()}`;
+        rows[1].querySelector('.td-diff')!.textContent = `$${Math.abs(result.optionA.annualBonus - result.optionB.annualBonus).toLocaleString()}`;
+
+        // Match
+        rows[2].querySelector('.td-val:nth-child(2)')!.textContent = `$${result.optionA.employerMatchDollars.toLocaleString()}`;
+        rows[2].querySelector('.td-val:nth-child(3)')!.textContent = `$${result.optionB.employerMatchDollars.toLocaleString()}`;
+        rows[2].querySelector('.td-diff')!.textContent = `$${Math.abs(result.optionA.employerMatchDollars - result.optionB.employerMatchDollars).toLocaleString()}`;
+
+        // Other
+        rows[3].querySelector('.td-val:nth-child(2)')!.textContent = `$${result.optionA.otherCompensation.toLocaleString()}`;
+        rows[3].querySelector('.td-val:nth-child(3)')!.textContent = `$${result.optionB.otherCompensation.toLocaleString()}`;
+        rows[3].querySelector('.td-diff')!.textContent = `$${Math.abs(result.optionA.otherCompensation - result.optionB.otherCompensation).toLocaleString()}`;
+
+        // Health
+        rows[4].querySelector('.td-val:nth-child(2)')!.textContent = `$${result.optionA.annualHealthCost.toLocaleString()}`;
+        rows[4].querySelector('.td-val:nth-child(3)')!.textContent = `$${result.optionB.annualHealthCost.toLocaleString()}`;
+        rows[4].querySelector('.td-diff')!.textContent = `$${Math.abs(result.optionA.annualHealthCost - result.optionB.annualHealthCost).toLocaleString()}`;
+
+        // Commute
+        rows[5].querySelector('.td-val:nth-child(2)')!.textContent = `$${result.optionA.annualCommuteCost.toLocaleString()}`;
+        rows[5].querySelector('.td-val:nth-child(3)')!.textContent = `$${result.optionB.annualCommuteCost.toLocaleString()}`;
+        rows[5].querySelector('.td-diff')!.textContent = `$${Math.abs(result.optionA.annualCommuteCost - result.optionB.annualCommuteCost).toLocaleString()}`;
+      }
+
+      // Foot: total cash
+      const foot = breakdownContainer.querySelector('tfoot tr');
+      if (foot) {
+        const totalA = result.optionA.baseSalary + result.optionA.annualBonus + result.optionA.employerMatchDollars + result.optionA.otherCompensation + result.optionA.annualHealthCost + result.optionA.annualCommuteCost;
+        const totalB = result.optionB.baseSalary + result.optionB.annualBonus + result.optionB.employerMatchDollars + result.optionB.otherCompensation + result.optionB.annualHealthCost + result.optionB.annualCommuteCost;
+        foot.querySelector('.td-val:nth-child(2)')!.textContent = `$${totalA.toLocaleString()}`;
+        foot.querySelector('.td-val:nth-child(3)')!.textContent = `$${totalB.toLocaleString()}`;
+        foot.querySelector('.td-diff')!.textContent = `$${Math.abs(totalA - totalB).toLocaleString()}`;
+      }
+    }
+  }
+
+  function resetJobDefaults() {
+    (document.getElementById('input-a-title') as HTMLInputElement).value = JOB_OFFER_DEFAULTS_A.title;
+    (document.getElementById('input-a-salary') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.baseSalary);
+    (document.getElementById('input-a-bonus') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.annualBonus);
+    (document.getElementById('input-a-match') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.employerMatchPercent);
+    (document.getElementById('input-a-health') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.annualHealthInsuranceCost);
+    (document.getElementById('input-a-vacation') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.paidVacationDays);
+    (document.getElementById('input-a-other') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.otherCompensationAnnual);
+    (document.getElementById('input-a-distance') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.commuteMilesOneWay);
+    (document.getElementById('input-a-commute-days') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.commuteDaysPerWeek);
+    (document.getElementById('input-a-remote-days') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_A.remoteDaysPerWeek);
+
+    (document.getElementById('input-b-title') as HTMLInputElement).value = JOB_OFFER_DEFAULTS_B.title;
+    (document.getElementById('input-b-salary') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.baseSalary);
+    (document.getElementById('input-b-bonus') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.annualBonus);
+    (document.getElementById('input-b-match') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.employerMatchPercent);
+    (document.getElementById('input-b-health') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.annualHealthInsuranceCost);
+    (document.getElementById('input-b-vacation') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.paidVacationDays);
+    (document.getElementById('input-b-other') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.otherCompensationAnnual);
+    (document.getElementById('input-b-distance') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.commuteMilesOneWay);
+    (document.getElementById('input-b-commute-days') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.commuteDaysPerWeek);
+    (document.getElementById('input-b-remote-days') as HTMLInputElement).value = String(JOB_OFFER_DEFAULTS_B.remoteDaysPerWeek);
+
+    const vehicleCostEl = document.getElementById('input-vehicle-cost-per-mile') as HTMLInputElement;
+    if (vehicleCostEl) {
+      vehicleCostEl.value = String(JOB_OFFER_DEFAULTS_A.estimatedVehicleCostPerMile ?? 0.725);
+    }
+
+    updateJobResults();
+  }
+
+  document.getElementById('btn-calculate-job')?.addEventListener('click', updateJobResults);
+  document.getElementById('btn-reset-job')?.addEventListener('click', resetJobDefaults);
+
+  const inputs = document.querySelectorAll('.inputs-container input');
+  inputs.forEach((input) => {
+    input.addEventListener('change', updateJobResults);
+    input.addEventListener('keyup', (e) => {
+      if ((e as KeyboardEvent).key === 'Enter') {
+        updateJobResults();
+      }
+    });
+  });
+</script>
+
+<style>
+  .inputs-container {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-8);
+  }
+
+  .inputs-header {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .header-notes {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .note-text {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+
+  @media (max-width: 860px) {
+    .options-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .shared-assumptions-panel {
+    background-color: var(--color-surface-subtle, #f8fafc);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-5);
+    margin-bottom: var(--space-6);
+  }
+
+  .shared-assumptions-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-bottom: var(--space-3);
+  }
+
+  .shared-panel-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+  }
+
+  .shared-panel-subtitle {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .shared-assumptions-body {
+    max-width: 440px;
+  }
+
+  .vehicle-cost-group {
+    margin-bottom: 0;
+  }
+
+  .field-help {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-1);
+    line-height: 1.4;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--space-3);
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  .form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--space-2);
+  }
+
+  @media (max-width: 520px) {
+    .form-row-2,
+    .form-row-3 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-divider {
+    display: flex;
+    align-items: center;
+    margin: var(--space-3) 0 var(--space-2) 0;
+    border-top: 1px solid var(--color-border);
+    position: relative;
+  }
+
+  .form-divider span {
+    position: absolute;
+    top: -9px;
+    background-color: var(--color-surface);
+    padding: 0 var(--space-2);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+    letter-spacing: 0.05em;
+  }
+
+  .field-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-1);
+  }
+
+  .validation-error {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-status-danger);
+    margin-top: 2px;
+    min-height: 1rem;
+  }
+
+  .input-with-unit {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .input-with-unit:focus-within {
+    border-color: var(--color-brand-accent);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
+
+  .unit-prefix,
+  .unit-addon {
+    padding: 0 var(--space-3);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-subtle);
+    background-color: var(--color-surface-subtle);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    min-height: 2.25rem;
+  }
+
+  .input-field {
+    flex: 1;
+    border: none;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.95rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-main);
+    background: transparent;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .text-input {
+    font-family: var(--font-sans);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+  }
+
+  .input-field:focus {
+    outline: none;
+  }
+
+  .text-input:focus {
+    border-color: var(--color-brand-accent);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
+
+  .form-actions-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .form-status-note {
+    font-size: 0.8rem;
+    color: var(--color-text-subtle);
+  }
+
+  /* Results styling */
+  .result-summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+
+  .summary-period {
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-text-subtle);
+  }
+
+  .summary-lead-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+  }
+
+  .summary-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 768px) {
+    .summary-metrics-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .summary-metric-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .metric-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-subtle);
+    margin-bottom: var(--space-1);
+  }
+
+  .metric-val {
+    font-size: 1.6rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--color-text-main);
+    margin-bottom: var(--space-1);
+    letter-spacing: -0.02em;
+  }
+
+  .metric-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .opt-a-metric {
+    border-top: 3px solid var(--color-opt-a-text);
+  }
+
+  .opt-b-metric {
+    border-top: 3px solid var(--color-opt-b-text);
+  }
+
+  .diff-metric {
+    border-top: 3px solid var(--color-brand);
+  }
+
+  /* Worked example styling */
+  .example-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .example-note {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .example-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+
+  .example-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin: var(--space-4) 0;
+    padding: var(--space-4);
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  @media (max-width: 640px) {
+    .example-breakdown-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .example-col h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 var(--space-2) 0;
+    color: var(--color-text-main);
+  }
+
+  .example-col ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .example-summary {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+    line-height: 1.55;
+  }
+
+  .methodology-text ul {
+    margin: var(--space-3) 0;
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .methodology-text code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background-color: var(--color-surface-subtle);
+    padding: 0.15rem 0.35rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+  }
+</style>

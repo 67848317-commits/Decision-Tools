@@ -1,0 +1,6 @@
+{
+  "name": "Decision Tools",
+  "description": "Make everyday decisions clearer by comparing costs, time, and trade-offs with simple tools built for real-life decisions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

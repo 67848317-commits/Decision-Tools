@@ -1,0 +1,41 @@
+---
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+
+// Schema.org BreadcrumbList JSON-LD
+const schemaData = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.label,
+    ...(item.href ? { item: new URL(item.href, Astro.site || 'https://decisiontools.org').href } : {}),
+  })),
+};
+---
+
+<nav aria-label="Breadcrumbs" class="breadcrumbs" id="page-breadcrumbs">
+  <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+  {items.map((item, index) => {
+    const isLast = index === items.length - 1;
+    return (
+      <>
+        {index > 0 && <span class="breadcrumb-separator" aria-hidden="true">/</span>}
+        {isLast || !item.href ? (
+          <span class="breadcrumb-current" aria-current="page">{item.label}</span>
+        ) : (
+          <a href={item.href}>{item.label}</a>
+        )}
+      </>
+    );
+  })}
+</nav>

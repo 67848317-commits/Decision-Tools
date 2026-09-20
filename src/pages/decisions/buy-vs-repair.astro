@@ -1,0 +1,515 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import { BUY_VS_REPAIR_DEFAULTS, calculateBuyVsRepair, type BuyVsRepairResult } from '../../lib/decisions/buyVsRepair';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+const initialResult: BuyVsRepairResult = calculateBuyVsRepair(BUY_VS_REPAIR_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: 'Annualized Total Cost of Ownership',
+    optionAValue: `$${initialResult.repairAnnualizedTotalCost.toLocaleString()} / yr`,
+    optionBValue: `$${initialResult.buyAnnualizedTotalCost.toLocaleString()} / yr`,
+    difference: `$${initialResult.annualDifference.toLocaleString()} / yr`,
+    helpNote: 'Amortized capital cost over expected functional lifespan plus ongoing annual utility/operating expense.',
+  },
+  {
+    metric: 'Immediate Upfront Cash Outlay',
+    optionAValue: `$${initialResult.repairUpfrontCost.toLocaleString()}`,
+    optionBValue: `$${initialResult.buyUpfrontCost.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.buyUpfrontCost - initialResult.repairUpfrontCost).toLocaleString()}`,
+    helpNote: 'Repair: initial technician/parts quote. Buy: purchase price + delivery/installation fee.',
+  },
+  {
+    metric: '50% Rule Benchmark Ratio',
+    optionAValue: `${initialResult.repairRatioPercent}% of replacement cost`,
+    optionBValue: '100% (New asset reference)',
+    difference: `${(100 - initialResult.repairRatioPercent).toFixed(1)}% buffer`,
+    helpNote: 'Consumer benchmark evaluates replacement when repair exceeds 50% of the cost of buying new.',
+  },
+  {
+    metric: 'Expected Functional Service Horizon',
+    optionAValue: `${BUY_VS_REPAIR_DEFAULTS.expectedLifespanAfterRepairYears} years`,
+    optionBValue: `${BUY_VS_REPAIR_DEFAULTS.replacementExpectedLifespanYears} years`,
+    difference: `${BUY_VS_REPAIR_DEFAULTS.replacementExpectedLifespanYears - BUY_VS_REPAIR_DEFAULTS.expectedLifespanAfterRepairYears} years longer`,
+    helpNote: 'Estimated remaining years before complete catastrophic mechanical obsolescence.',
+  },
+  {
+    metric: 'Estimated Annual Operating / Energy Cost',
+    optionAValue: `$${BUY_VS_REPAIR_DEFAULTS.currentAnnualOperatingCost} / yr`,
+    optionBValue: `$${BUY_VS_REPAIR_DEFAULTS.replacementAnnualOperatingCost} / yr`,
+    difference: `$${initialResult.annualOperatingDifference} / yr savings with new`,
+    helpNote: 'Modern replacements typically offer higher energy or resource efficiency.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Upfront Capital Outlay',
+    optionAAmount: initialResult.repairUpfrontCost,
+    optionBAmount: initialResult.buyUpfrontCost,
+    note: 'Initial technician repair invoice vs. retail appliance acquisition + setup fee.',
+  },
+  {
+    category: '5-Year Cumulative Operating Energy/Supplies',
+    optionAAmount: BUY_VS_REPAIR_DEFAULTS.currentAnnualOperatingCost * 5,
+    optionBAmount: BUY_VS_REPAIR_DEFAULTS.replacementAnnualOperatingCost * 5,
+    note: 'Estimated electricity, gas, or consumables required over a 5-year period.',
+  },
+  {
+    category: 'Risk-Adjusted Secondary Maintenance Buffer',
+    optionAAmount: Math.round((BUY_VS_REPAIR_DEFAULTS.subsequentRepairRiskPercent / 100) * BUY_VS_REPAIR_DEFAULTS.subsequentRepairCost),
+    optionBAmount: 0,
+    note: 'Probability-weighted secondary component failure on aged existing machine.',
+  },
+];
+
+const assumptions = [
+  {
+    label: 'The 50% Lifespan and Cost Benchmark',
+    value: 'Repair quote ratio: 38.9% of new unit',
+    explanation: 'Industry rule suggests replacing if a repair estimate exceeds 50% of the replacement price or if the asset has passed 50% of its expected operating lifespan.',
+  },
+  {
+    label: 'Secondary Failure Probability',
+    value: `${BUY_VS_REPAIR_DEFAULTS.subsequentRepairRiskPercent}% chance of secondary $${BUY_VS_REPAIR_DEFAULTS.subsequentRepairCost} issue`,
+    explanation: 'Aged components adjacent to the repaired part may experience correlated failure within 24 months.',
+  },
+  {
+    label: 'Efficiency Gains',
+    value: `$${BUY_VS_REPAIR_DEFAULTS.currentAnnualOperatingCost - BUY_VS_REPAIR_DEFAULTS.replacementAnnualOperatingCost}/year energy delta`,
+    explanation: 'Modern Energy Star certified replacements frequently consume fewer kilowatt-hours or gallons.',
+  },
+];
+
+const faqs: FAQItem[] = [
+  {
+    question: 'What is the 50% rule of thumb?',
+    answer: 'A standard consumer finance rule of thumb advises against repairing an item if the repair quote exceeds 50% of the cost of a brand-new replacement, or if the product has already passed 50% of its expected manufactured lifespan.',
+  },
+  {
+    question: 'How does secondary failure risk alter the calculation?',
+    answer: 'Older appliances and electronics often experience cascading component fatigue. Factoring in a secondary failure buffer prevents underestimating the real multi-year maintenance burden of keeping aging equipment running.',
+  },
+  {
+    question: 'Are warranties factored into this comparison?',
+    answer: 'Yes. Brand new items include comprehensive 1 to 2-year manufacturer parts and labor warranties, whereas repair shop warranties typically only guarantee the specific replaced part for 30 to 90 days.',
+  },
+];
+
+const relatedGuides = [
+  {
+    slug: 'buy-vs-repair',
+    title: 'When Does Repairing an Appliance Make Mathematical Sense?',
+    description: 'Applying the 50% lifespan rule, reliability curves, and efficiency improvements to household goods.',
+    readTime: '4 min read',
+    topicTag: 'Lifestyle',
+  },
+  {
+    slug: 'how-to-estimate-the-cost-of-diy-projects',
+    title: 'How to Estimate the Cost of DIY Projects and Repairs',
+    description: 'Evaluating specialty tools, diagnostic fees, and parts sourcing.',
+    readTime: '5 min read',
+    topicTag: 'Lifestyle',
+  },
+];
+---
+
+<DecisionLayout
+  title="Buy New vs. Repair Existing Item Calculator"
+  description="Determine when repairing a malfunctioning appliance or device makes mathematical sense based on lifespan and operating costs."
+  category="lifestyle"
+  timeToEstimate="2 min"
+  slug="buy-vs-repair"
+  keyMetric="Annualized Operating Cost"
+  optionAName="Repair Existing"
+  optionBName="Buy Replacement"
+  assumptions={assumptions}
+  faqs={faqs}
+  relatedDecisions={['diy-vs-hire', 'new-vs-used']}
+  relatedGuides={relatedGuides}
+>
+  <!-- 1. INPUTS -->
+  <div slot="inputs" class="inputs-container">
+    <!-- INPUT CONTROLS -->
+    <div class="calculator-inputs-grid" id="calculator-inputs">
+    <!-- Option A Panel: Repair -->
+    <OptionPanel title="Repair Existing Item" optionLabel="Option A (Repair)" badgeClass="badge-neutral">
+      <div class="form-group">
+        <label for="input-repair-quote">Repair Estimate / Quote</label>
+        <div class="input-with-prefix">
+          <span class="currency-prefix">$</span>
+          <input type="number" id="input-repair-quote" value={BUY_VS_REPAIR_DEFAULTS.repairQuote} min="20" max="5000" step="10" />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-repair-life">Expected Life After Fix</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-repair-life" value={BUY_VS_REPAIR_DEFAULTS.expectedLifespanAfterRepairYears} min="0.5" max="10" step="0.5" />
+            <span class="unit-label">years</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-current-energy">Current Annual Energy/Op Cost</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-current-energy" value={BUY_VS_REPAIR_DEFAULTS.currentAnnualOperatingCost} min="0" max="1000" step="10" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-risk-percent">Secondary Repair Risk</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-risk-percent" value={BUY_VS_REPAIR_DEFAULTS.subsequentRepairRiskPercent} min="0" max="100" step="5" />
+            <span class="unit-label">% chance</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-risk-amount">Secondary Repair Cost</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-risk-amount" value={BUY_VS_REPAIR_DEFAULTS.subsequentRepairCost} min="0" max="2000" step="25" />
+          </div>
+        </div>
+      </div>
+    </OptionPanel>
+
+    <!-- Option B Panel: Buy Replacement -->
+    <OptionPanel title="Buy Replacement Model" optionLabel="Option B (Buy New)" badgeClass="badge-primary">
+      <div class="form-group">
+        <label for="input-buy-price">New Replacement Price</label>
+        <div class="input-with-prefix">
+          <span class="currency-prefix">$</span>
+          <input type="number" id="input-buy-price" value={BUY_VS_REPAIR_DEFAULTS.replacementPrice} min="50" max="10000" step="25" />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-buy-install">Delivery & Installation Fee</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-buy-install" value={BUY_VS_REPAIR_DEFAULTS.installationAndDisposalFee} min="0" max="1000" step="10" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-buy-life">Expected Useful Lifespan</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-buy-life" value={BUY_VS_REPAIR_DEFAULTS.replacementExpectedLifespanYears} min="1" max="25" step="1" />
+            <span class="unit-label">years</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-new-energy">New Model Annual Energy/Op Cost</label>
+        <div class="input-with-prefix">
+          <span class="currency-prefix">$</span>
+          <input type="number" id="input-new-energy" value={BUY_VS_REPAIR_DEFAULTS.replacementAnnualOperatingCost} min="0" max="1000" step="5" />
+        </div>
+      </div>
+    </OptionPanel>
+  </div>
+
+  <!-- Actions: Reset -->
+  <div class="form-actions-bar">
+    <button type="button" class="btn btn-secondary" id="btn-reset-buy-repair">
+      Reset to Defaults
+    </button>
+    <span class="form-status-note">
+      Calculations update deterministically based on entered parameters.
+    </span>
+  </div>
+  </div>
+
+  <!-- 2. RESULTS -->
+  <div slot="results" class="results-wrapper">
+    <!-- Summary Box -->
+    <div class="summary-box" id="result-summary-box">
+      <div class="summary-header">
+        <span class="summary-badge">Comparative Projection</span>
+        <span class="summary-horizon">Annualized Cost Model</span>
+      </div>
+      <div class="summary-metrics">
+        <div class="summary-metric">
+          <span class="metric-lbl">Repair Annualized Cost</span>
+          <span class="metric-val" id="summary-repair-cost">${initialResult.repairAnnualizedTotalCost.toLocaleString()} / yr</span>
+        </div>
+        <div class="summary-metric">
+          <span class="metric-lbl">Buy Replacement Annualized</span>
+          <span class="metric-val" id="summary-buy-cost">${initialResult.buyAnnualizedTotalCost.toLocaleString()} / yr</span>
+        </div>
+        <div class="summary-metric highlight">
+          <span class="metric-lbl">Annual Cost Difference</span>
+          <span class="metric-val" id="summary-difference">${initialResult.annualDifference.toLocaleString()} / yr</span>
+          <span class="metric-sub" id="summary-lower-option">Lower annualized cost: {initialResult.lowerAnnualizedOption === 'repair' ? 'Repair Existing' : 'Buy Replacement'}</span>
+        </div>
+      </div>
+      <p class="summary-text" id="summary-narrative">{initialResult.summaryText}</p>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div class="section-block" id="comparison-section">
+      <div class="section-header">
+        <h2>Metric by Metric Comparison</h2>
+        <p>Direct evaluation of annualized capital depreciation, immediate cash drain, and energy efficiency.</p>
+      </div>
+      <ComparisonTable
+        optionAName="Repair Existing"
+        optionBName="Buy Replacement"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- COST BREAKDOWN -->
+    <div class="section-block" id="cost-breakdown-section">
+      <div class="section-header">
+        <h2>Financial Capital Components</h2>
+        <p>Comparison of immediate invoice cost, multi-year operating consumption, and risk buffers.</p>
+      </div>
+      <CostBreakdown
+        optionAName="Repair Existing"
+        optionBName="Buy Replacement"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+</DecisionLayout>
+
+<script>
+  import { calculateBuyVsRepair, BUY_VS_REPAIR_DEFAULTS, type BuyVsRepairInput } from '../../lib/decisions/buyVsRepair';
+
+  function initCalculator() {
+    const inputs = {
+      repairQuote: document.getElementById('input-repair-quote') as HTMLInputElement,
+      expectedLifespanAfterRepairYears: document.getElementById('input-repair-life') as HTMLInputElement,
+      currentAnnualOperatingCost: document.getElementById('input-current-energy') as HTMLInputElement,
+      subsequentRepairRiskPercent: document.getElementById('input-risk-percent') as HTMLInputElement,
+      subsequentRepairCost: document.getElementById('input-risk-amount') as HTMLInputElement,
+      replacementPrice: document.getElementById('input-buy-price') as HTMLInputElement,
+      installationAndDisposalFee: document.getElementById('input-buy-install') as HTMLInputElement,
+      replacementExpectedLifespanYears: document.getElementById('input-buy-life') as HTMLInputElement,
+      replacementAnnualOperatingCost: document.getElementById('input-new-energy') as HTMLInputElement,
+    };
+
+    function recalculate() {
+      const currentInput: BuyVsRepairInput = {
+        itemName: 'Household Item',
+        repairQuote: Number(inputs.repairQuote.value) || 0,
+        expectedLifespanAfterRepairYears: Number(inputs.expectedLifespanAfterRepairYears.value) || 1,
+        currentAnnualOperatingCost: Number(inputs.currentAnnualOperatingCost.value) || 0,
+        subsequentRepairRiskPercent: Number(inputs.subsequentRepairRiskPercent.value) || 0,
+        subsequentRepairCost: Number(inputs.subsequentRepairCost.value) || 0,
+        replacementPrice: Number(inputs.replacementPrice.value) || 1,
+        installationAndDisposalFee: Number(inputs.installationAndDisposalFee.value) || 0,
+        replacementExpectedLifespanYears: Number(inputs.replacementExpectedLifespanYears.value) || 1,
+        replacementAnnualOperatingCost: Number(inputs.replacementAnnualOperatingCost.value) || 0,
+        warrantyYears: 2,
+      };
+
+      const result = calculateBuyVsRepair(currentInput);
+
+      const repairEl = document.getElementById('summary-repair-cost');
+      const buyEl = document.getElementById('summary-buy-cost');
+      const diffEl = document.getElementById('summary-difference');
+      const lowerEl = document.getElementById('summary-lower-option');
+      const narrativeEl = document.getElementById('summary-narrative');
+
+      if (repairEl) repairEl.textContent = `$${result.repairAnnualizedTotalCost.toLocaleString()} / yr`;
+      if (buyEl) buyEl.textContent = `$${result.buyAnnualizedTotalCost.toLocaleString()} / yr`;
+      if (diffEl) diffEl.textContent = `$${result.annualDifference.toLocaleString()} / yr`;
+      if (lowerEl) {
+        lowerEl.textContent = `Lower annualized cost: ${result.lowerAnnualizedOption === 'repair' ? 'Repair Existing' : 'Buy Replacement'}`;
+      }
+      if (narrativeEl) narrativeEl.textContent = result.summaryText;
+    }
+
+    Object.values(inputs).forEach((input) => {
+      if (input) {
+        input.addEventListener('input', recalculate);
+        input.addEventListener('change', recalculate);
+      }
+    });
+
+    document.getElementById('btn-reset-buy-repair')?.addEventListener('click', () => {
+      inputs.repairQuote.value = String(BUY_VS_REPAIR_DEFAULTS.repairQuote);
+      inputs.expectedLifespanAfterRepairYears.value = String(BUY_VS_REPAIR_DEFAULTS.expectedLifespanAfterRepairYears);
+      inputs.currentAnnualOperatingCost.value = String(BUY_VS_REPAIR_DEFAULTS.currentAnnualOperatingCost);
+      inputs.subsequentRepairRiskPercent.value = String(BUY_VS_REPAIR_DEFAULTS.subsequentRepairRiskPercent);
+      inputs.subsequentRepairCost.value = String(BUY_VS_REPAIR_DEFAULTS.subsequentRepairCost);
+      inputs.replacementPrice.value = String(BUY_VS_REPAIR_DEFAULTS.replacementPrice);
+      inputs.installationAndDisposalFee.value = String(BUY_VS_REPAIR_DEFAULTS.installationAndDisposalFee);
+      inputs.replacementExpectedLifespanYears.value = String(BUY_VS_REPAIR_DEFAULTS.replacementExpectedLifespanYears);
+      inputs.replacementAnnualOperatingCost.value = String(BUY_VS_REPAIR_DEFAULTS.replacementAnnualOperatingCost);
+      recalculate();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculator);
+  } else {
+    initCalculator();
+  }
+</script>
+
+<style>
+  .summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+  .summary-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-primary);
+  }
+  .summary-horizon {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .summary-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-4);
+  }
+  .summary-metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .metric-lbl {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .metric-val {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+  .summary-metric.highlight .metric-val {
+    color: var(--color-primary);
+  }
+  .metric-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+  .summary-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+  .calculator-inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+  }
+  @media (min-width: 900px) {
+    .calculator-inputs-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  @media (max-width: 580px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+  .input-with-prefix, .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .currency-prefix {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .unit-label {
+    position: absolute;
+    right: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .input-with-prefix input {
+    padding-left: var(--space-7);
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .input-with-unit input {
+    padding-right: var(--space-14);
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .section-block {
+    margin-top: var(--space-10);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+  .section-header {
+    margin-bottom: var(--space-6);
+  }
+  .section-header h2 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-2);
+  }
+  .section-header p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+</style>

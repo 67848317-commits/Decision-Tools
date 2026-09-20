@@ -1,0 +1,499 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import { DIY_VS_HIRE_DEFAULTS, calculateDiyVsHire, type DiyVsHireResult } from '../../lib/decisions/diyVsHire';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+const initialResult: DiyVsHireResult = calculateDiyVsHire(DIY_VS_HIRE_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: 'Total Economic Cost (Cash + Time)',
+    optionAValue: `$${initialResult.diyTotalEconomicCost.toLocaleString()}`,
+    optionBValue: `$${initialResult.contractorTotalEconomicCost.toLocaleString()}`,
+    difference: `$${initialResult.netEconomicDifference.toLocaleString()}`,
+    helpNote: 'DIY: direct cash + personal hours @ $35/hr + rework buffer. Contractor: quote + homeowner coordination hours.',
+  },
+  {
+    metric: 'Direct Out-of-Pocket Cash',
+    optionAValue: `$${initialResult.diyDirectCashOutlay.toLocaleString()}`,
+    optionBValue: `$${initialResult.contractorDirectQuote.toLocaleString()}`,
+    difference: `$${initialResult.directCashSavedByDiy.toLocaleString()} cash saved DIY`,
+    helpNote: 'Actual bank/card expenditure. DIY: supplies and tools. Hire: paid directly to contractor.',
+  },
+  {
+    metric: 'Personal Labor Investment',
+    optionAValue: `${DIY_VS_HIRE_DEFAULTS.diyEstimatedHours} personal hours`,
+    optionBValue: `${DIY_VS_HIRE_DEFAULTS.homeownerCoordinationHours} coordination hours`,
+    difference: `${DIY_VS_HIRE_DEFAULTS.diyEstimatedHours - DIY_VS_HIRE_DEFAULTS.homeownerCoordinationHours} hours saved by hiring`,
+    helpNote: 'Time committed to purchasing materials, execution, cleanup, versus managing the contractor.',
+  },
+  {
+    metric: 'Implied Breakeven Hourly Rate',
+    optionAValue: `$${initialResult.breakEvenHourlyRate.toFixed(2)} / hr`,
+    optionBValue: `$${initialResult.breakEvenHourlyRate.toFixed(2)} / hr`,
+    difference: 'Threshold Point',
+    helpNote: 'If your personal time is worth more than this hourly rate, hiring is mathematically less costly.',
+  },
+  {
+    metric: 'Workmanship Warranty & Risk',
+    optionAValue: 'Self-guaranteed (15% risk buffer included)',
+    optionBValue: 'Licensed & insured contractor warranty',
+    difference: 'Personal liability vs. professional coverage',
+    helpNote: 'Contractor assumes responsibility for execution flaws and materials failure.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Materials & Specialty Tool Purchases',
+    optionAAmount: initialResult.diyDirectCashOutlay,
+    optionBAmount: 0,
+    note: `DIY: Paint/supplies ($${DIY_VS_HIRE_DEFAULTS.diyMaterialsCost}) + specialized tools ($${DIY_VS_HIRE_DEFAULTS.diyToolsEquipmentCost}).`,
+  },
+  {
+    category: 'Contractor Professional Fee (Labor + Materials)',
+    optionAAmount: 0,
+    optionBAmount: initialResult.contractorDirectQuote,
+    note: 'All-inclusive contractor bid.',
+  },
+  {
+    category: 'Personal Time Opportunity Cost',
+    optionAAmount: initialResult.diyOpportunityCostOfTime,
+    optionBAmount: initialResult.contractorCoordinationTimeValue,
+    note: `Personal hours valued at $${DIY_VS_HIRE_DEFAULTS.personalHourlyRate}/hour.`,
+  },
+  {
+    category: 'Mistake & Do-Over Contingency Buffer',
+    optionAAmount: initialResult.diyRiskAdjustedBuffer,
+    optionBAmount: 0,
+    note: '15% buffer for replacement supplies, spills, or missed details.',
+  },
+];
+
+const assumptions = [
+  {
+    label: 'Valuation of Personal Free Time',
+    value: `$${DIY_VS_HIRE_DEFAULTS.personalHourlyRate}/hour baseline rate`,
+    explanation: 'Reflects personal economic opportunity cost or the subjective trade-off between manual labor and leisure/family/work time.',
+  },
+  {
+    label: 'Execution Time Multiplier',
+    value: `${DIY_VS_HIRE_DEFAULTS.diyEstimatedHours} DIY hours vs ${DIY_VS_HIRE_DEFAULTS.homeownerCoordinationHours} coordination hours`,
+    explanation: 'First-time DIYers typically require 2x to 3x longer than seasoned trade professionals to execute the same scope.',
+  },
+  {
+    label: 'Rework and Mistake Buffer',
+    value: `${DIY_VS_HIRE_DEFAULTS.diyReworkRiskPercent}% of materials ($${initialResult.diyRiskAdjustedBuffer})`,
+    explanation: 'Accounts for extra trips to the hardware store, spilled supplies, or discarded trial cuts.',
+  },
+];
+
+const faqs: FAQItem[] = [
+  {
+    question: 'Why assign a dollar value to personal DIY time?',
+    answer: 'Assigning a dollar rate makes the opportunity cost visible. Spending 20 hours on a home project means those hours cannot be used for overtime, professional freelance work, exercise, family time, or rest.',
+  },
+  {
+    question: 'What is the implied breakeven hourly rate?',
+    answer: 'The breakeven rate is the exact dollar value per hour at which the cash savings of doing the work yourself equal the hours you spend doing it. If you earn or value your time above this rate, hiring is the lower economic total cost.',
+  },
+  {
+    question: 'What about the intangible satisfaction of doing it yourself?',
+    answer: 'Many people enjoy craftsmanship and learning new skills. This tool quantifies the pure financial and time dimensions so you can decide whether the learning curve and effort are a fulfilling choice for your situation.',
+  },
+];
+
+const relatedGuides = [
+  {
+    slug: 'diy-vs-hire',
+    title: 'DIY vs. Hire: How to Value Your Time and Project Risks',
+    description: 'A quantitative framework for calculating tool amortization, opportunity cost, and contractor bids.',
+    readTime: '5 min read',
+    topicTag: 'Lifestyle',
+  },
+  {
+    slug: 'how-to-estimate-the-cost-of-diy-projects',
+    title: 'How to Estimate the Cost of DIY Projects and Repairs',
+    description: 'Accounting for unexpected hardware runs, disposal fees, and specialized equipment.',
+    readTime: '5 min read',
+    topicTag: 'Lifestyle',
+  },
+];
+---
+
+<DecisionLayout
+  title="DIY vs. Hire Professional Decision Calculator"
+  description="Balance materials and specialty tool purchases against contractor bids and the value of your personal hours."
+  category="lifestyle"
+  timeToEstimate="2 min"
+  slug="diy-vs-hire"
+  keyMetric="Total Resource Cost (Cash + Time)"
+  optionAName="Do It Yourself (DIY)"
+  optionBName="Hire Professional"
+  assumptions={assumptions}
+  faqs={faqs}
+  relatedDecisions={['buy-vs-repair', 'job-offer']}
+  relatedGuides={relatedGuides}
+>
+  <!-- 1. INPUTS -->
+  <div slot="inputs" class="inputs-container">
+    <!-- INPUT CONTROLS -->
+    <div class="calculator-inputs-grid" id="calculator-inputs">
+    <!-- Option A Panel: DIY -->
+    <OptionPanel title="Do It Yourself (DIY)" optionLabel="Option A (DIY)" badgeClass="badge-neutral">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-diy-materials">Materials & Supplies</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-diy-materials" value={DIY_VS_HIRE_DEFAULTS.diyMaterialsCost} min="0" max="25000" step="25" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-diy-tools">Tools & Equipment</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-diy-tools" value={DIY_VS_HIRE_DEFAULTS.diyToolsEquipmentCost} min="0" max="10000" step="25" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-diy-hours">Estimated DIY Hours</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-diy-hours" value={DIY_VS_HIRE_DEFAULTS.diyEstimatedHours} min="1" max="500" step="1" />
+            <span class="unit-label">hours</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-time-rate">Personal Time Value ($/hr)</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-time-rate" value={DIY_VS_HIRE_DEFAULTS.personalHourlyRate} min="0" max="500" step="5" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-rework-risk">Rework / Mistake Risk Buffer (%)</label>
+        <div class="input-with-unit">
+          <input type="number" id="input-rework-risk" value={DIY_VS_HIRE_DEFAULTS.diyReworkRiskPercent} min="0" max="50" step="5" />
+          <span class="unit-label">% of materials</span>
+        </div>
+      </div>
+    </OptionPanel>
+
+    <!-- Option B Panel: Hire Professional -->
+    <OptionPanel title="Hire Professional Contractor" optionLabel="Option B (Hire)" badgeClass="badge-primary">
+      <div class="form-group">
+        <label for="input-contractor-quote">Contractor All-In Quote</label>
+        <div class="input-with-prefix">
+          <span class="currency-prefix">$</span>
+          <input type="number" id="input-contractor-quote" value={DIY_VS_HIRE_DEFAULTS.contractorQuote} min="50" max="100000" step="50" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-coord-hours">Homeowner Coordination Hours</label>
+        <div class="input-with-unit">
+          <input type="number" id="input-coord-hours" value={DIY_VS_HIRE_DEFAULTS.homeownerCoordinationHours} min="0" max="40" step="0.5" />
+          <span class="unit-label">hours</span>
+        </div>
+      </div>
+    </OptionPanel>
+  </div>
+
+  <!-- Actions: Reset -->
+  <div class="form-actions-bar">
+    <button type="button" class="btn btn-secondary" id="btn-reset-diy-hire">
+      Reset to Defaults
+    </button>
+    <span class="form-status-note">
+      Calculations update deterministically based on entered parameters.
+    </span>
+  </div>
+  </div>
+
+  <!-- 2. RESULTS -->
+  <div slot="results" class="results-wrapper">
+    <!-- Summary Box -->
+    <div class="summary-box" id="result-summary-box">
+      <div class="summary-header">
+        <span class="summary-badge">Economic Resource Model</span>
+        <span class="summary-horizon">Cash + Time Trade-Off</span>
+      </div>
+      <div class="summary-metrics">
+        <div class="summary-metric">
+          <span class="metric-lbl">DIY Total Economic Cost</span>
+          <span class="metric-val" id="summary-diy-cost">${initialResult.diyTotalEconomicCost.toLocaleString()}</span>
+          <span class="metric-sub" id="summary-diy-cash">(${initialResult.diyDirectCashOutlay.toLocaleString()} cash + ${DIY_VS_HIRE_DEFAULTS.diyEstimatedHours}h)</span>
+        </div>
+        <div class="summary-metric">
+          <span class="metric-lbl">Hire Professional Cost</span>
+          <span class="metric-val" id="summary-hire-cost">${initialResult.contractorTotalEconomicCost.toLocaleString()}</span>
+          <span class="metric-sub">(${initialResult.contractorDirectQuote.toLocaleString()} quote + ${DIY_VS_HIRE_DEFAULTS.homeownerCoordinationHours}h)</span>
+        </div>
+        <div class="summary-metric highlight">
+          <span class="metric-lbl">Breakeven Time Value</span>
+          <span class="metric-val" id="summary-breakeven">${initialResult.breakEvenHourlyRate.toFixed(2)} / hr</span>
+          <span class="metric-sub" id="summary-lower-option">Lower total economic impact: {initialResult.lowerEconomicCostOption === 'diy' ? 'DIY' : 'Hire Professional'}</span>
+        </div>
+      </div>
+      <p class="summary-text" id="summary-narrative">{initialResult.summaryText}</p>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div class="section-block" id="comparison-section">
+      <div class="section-header">
+        <h2>Metric by Metric Comparison</h2>
+        <p>Direct side-by-side analysis of cash outlays, personal hours spent, and warranty safeguards.</p>
+      </div>
+      <ComparisonTable
+        optionAName="Do It Yourself (DIY)"
+        optionBName="Hire Professional"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- COST BREAKDOWN -->
+    <div class="section-block" id="cost-breakdown-section">
+      <div class="section-header">
+        <h2>Economic Resource Allocation</h2>
+        <p>Quantifying direct money expenditures alongside the opportunity cost of personal hours.</p>
+      </div>
+      <CostBreakdown
+        optionAName="Do It Yourself (DIY)"
+        optionBName="Hire Professional"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+</DecisionLayout>
+
+<script>
+  import { calculateDiyVsHire, DIY_VS_HIRE_DEFAULTS, type DiyVsHireInput } from '../../lib/decisions/diyVsHire';
+
+  function initCalculator() {
+    const inputs = {
+      diyMaterialsCost: document.getElementById('input-diy-materials') as HTMLInputElement,
+      diyToolsEquipmentCost: document.getElementById('input-diy-tools') as HTMLInputElement,
+      diyEstimatedHours: document.getElementById('input-diy-hours') as HTMLInputElement,
+      personalHourlyRate: document.getElementById('input-time-rate') as HTMLInputElement,
+      diyReworkRiskPercent: document.getElementById('input-rework-risk') as HTMLInputElement,
+      contractorQuote: document.getElementById('input-contractor-quote') as HTMLInputElement,
+      homeownerCoordinationHours: document.getElementById('input-coord-hours') as HTMLInputElement,
+    };
+
+    function recalculate() {
+      const currentInput: DiyVsHireInput = {
+        projectName: 'Home Improvement Project',
+        diyMaterialsCost: Number(inputs.diyMaterialsCost.value) || 0,
+        diyToolsEquipmentCost: Number(inputs.diyToolsEquipmentCost.value) || 0,
+        diyEstimatedHours: Number(inputs.diyEstimatedHours.value) || 1,
+        personalHourlyRate: Number(inputs.personalHourlyRate.value) || 0,
+        diyReworkRiskPercent: Number(inputs.diyReworkRiskPercent.value) || 0,
+        contractorQuote: Number(inputs.contractorQuote.value) || 1,
+        homeownerCoordinationHours: Number(inputs.homeownerCoordinationHours.value) || 0,
+      };
+
+      const result = calculateDiyVsHire(currentInput);
+
+      const diyCostEl = document.getElementById('summary-diy-cost');
+      const diyCashEl = document.getElementById('summary-diy-cash');
+      const hireCostEl = document.getElementById('summary-hire-cost');
+      const breakevenEl = document.getElementById('summary-breakeven');
+      const lowerEl = document.getElementById('summary-lower-option');
+      const narrativeEl = document.getElementById('summary-narrative');
+
+      if (diyCostEl) diyCostEl.textContent = `$${result.diyTotalEconomicCost.toLocaleString()}`;
+      if (diyCashEl) diyCashEl.textContent = `($${result.diyDirectCashOutlay.toLocaleString()} cash + ${currentInput.diyEstimatedHours}h)`;
+      if (hireCostEl) hireCostEl.textContent = `$${result.contractorTotalEconomicCost.toLocaleString()}`;
+      if (breakevenEl) breakevenEl.textContent = `$${result.breakEvenHourlyRate.toFixed(2)} / hr`;
+      if (lowerEl) {
+        lowerEl.textContent = `Lower total economic impact: ${result.lowerEconomicCostOption === 'diy' ? 'DIY' : 'Hire Professional'}`;
+      }
+      if (narrativeEl) narrativeEl.textContent = result.summaryText;
+    }
+
+    Object.values(inputs).forEach((input) => {
+      if (input) {
+        input.addEventListener('input', recalculate);
+        input.addEventListener('change', recalculate);
+      }
+    });
+
+    document.getElementById('btn-reset-diy-hire')?.addEventListener('click', () => {
+      inputs.diyMaterialsCost.value = String(DIY_VS_HIRE_DEFAULTS.diyMaterialsCost);
+      inputs.diyToolsEquipmentCost.value = String(DIY_VS_HIRE_DEFAULTS.diyToolsEquipmentCost);
+      inputs.diyEstimatedHours.value = String(DIY_VS_HIRE_DEFAULTS.diyEstimatedHours);
+      inputs.personalHourlyRate.value = String(DIY_VS_HIRE_DEFAULTS.personalHourlyRate);
+      inputs.diyReworkRiskPercent.value = String(DIY_VS_HIRE_DEFAULTS.diyReworkRiskPercent);
+      inputs.contractorQuote.value = String(DIY_VS_HIRE_DEFAULTS.contractorQuote);
+      inputs.homeownerCoordinationHours.value = String(DIY_VS_HIRE_DEFAULTS.homeownerCoordinationHours);
+      recalculate();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculator);
+  } else {
+    initCalculator();
+  }
+</script>
+
+<style>
+  .summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+  .summary-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-primary);
+  }
+  .summary-horizon {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .summary-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-4);
+  }
+  .summary-metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .metric-lbl {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .metric-val {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+  .summary-metric.highlight .metric-val {
+    color: var(--color-primary);
+  }
+  .metric-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+  .summary-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+  .calculator-inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+  }
+  @media (min-width: 900px) {
+    .calculator-inputs-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  @media (max-width: 580px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+  .input-with-prefix, .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .currency-prefix {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .unit-label {
+    position: absolute;
+    right: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .input-with-prefix input {
+    padding-left: var(--space-7);
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .input-with-unit input {
+    padding-right: var(--space-14);
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .section-block {
+    margin-top: var(--space-10);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+  .section-header {
+    margin-bottom: var(--space-6);
+  }
+  .section-header h2 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-2);
+  }
+  .section-header p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+</style>

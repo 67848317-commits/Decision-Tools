@@ -1,0 +1,48 @@
+---
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '' } = Astro.props;
+---
+
+<header class="site-header" id="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand-link" id="brand-home-link">
+      <span class="brand-badge" aria-hidden="true">DT</span>
+      <span>Decision Tools</span>
+    </a>
+
+    <nav aria-label="Main Navigation" id="main-nav">
+      <ul class="nav-menu">
+        <li>
+          <a
+            href="/decisions"
+            class={`nav-link ${currentPath.startsWith('/decisions') ? 'active' : ''}`}
+            id="nav-decisions"
+          >
+            Decisions
+          </a>
+        </li>
+        <li>
+          <a
+            href="/guides"
+            class={`nav-link ${currentPath.startsWith('/guides') ? 'active' : ''}`}
+            id="nav-guides"
+          >
+            Guides
+          </a>
+        </li>
+        <li>
+          <a
+            href="/about"
+            class={`nav-link ${currentPath === '/about' ? 'active' : ''}`}
+            id="nav-about"
+          >
+            About
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

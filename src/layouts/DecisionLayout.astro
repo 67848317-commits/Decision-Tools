@@ -1,0 +1,312 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs, { type CrumbItem } from '../components/Breadcrumbs.astro';
+import RelatedDecisions from '../components/RelatedDecisions.astro';
+import RelatedGuides from '../components/RelatedGuides.astro';
+import FAQ, { type FAQItem } from '../components/FAQ.astro';
+
+interface Props {
+  title: string;
+  metaDescription?: string;
+  description?: string;
+  canonicalPath?: string;
+  decisionSlug?: string;
+  slug?: string;
+  category?: string;
+  h1?: string;
+  intro?: string;
+  faqItems?: FAQItem[];
+  faqs?: FAQItem[];
+  relatedSlugs?: string[];
+  relatedDecisions?: string[];
+  relatedGuides?: any[];
+  timeToEstimate?: string;
+  keyMetric?: string;
+  optionAName?: string;
+  optionBName?: string;
+  assumptions?: any;
+}
+
+const {
+  title,
+  metaDescription = Astro.props.description || '',
+  canonicalPath = Astro.props.slug ? `/decisions/${Astro.props.slug}` : (Astro.props.canonicalPath || ''),
+  decisionSlug = Astro.props.slug || '',
+  category = 'Personal Finance',
+  h1 = Astro.props.title,
+  intro = Astro.props.description || '',
+  faqItems = Astro.props.faqs || [],
+  relatedSlugs = Astro.props.relatedDecisions || [],
+  assumptions = Astro.props.assumptions,
+} = Astro.props;
+
+const effectiveSlug = decisionSlug || Astro.props.slug || '';
+
+const crumbs: CrumbItem[] = [
+  { label: 'Home', href: '/' },
+  { label: 'Decisions', href: '/decisions' },
+  { label: h1 },
+];
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: title,
+  description: metaDescription,
+  url: `https://decisiontools.org${canonicalPath}`,
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'Decision Tools',
+    url: 'https://decisiontools.org',
+  },
+};
+---
+
+<BaseLayout
+  title={title}
+  description={metaDescription}
+  canonicalPath={canonicalPath}
+  structuredData={structuredData}
+>
+  <div class="decision-page-wrapper">
+    <div class="container">
+      <!-- 1. BREADCRUMBS -->
+      <div class="decision-breadcrumbs">
+        <Breadcrumbs items={crumbs} />
+      </div>
+
+      <!-- 2. HEADER: H1 & INTRO -->
+      <header class="decision-header">
+        <div class="decision-category-tag">
+          <span class="badge badge-neutral">{category}</span>
+          <span class="decision-meta-notice">Comparative Model • Unbiased</span>
+        </div>
+        <h1 class="decision-title" id="decision-heading">{h1}</h1>
+        <p class="decision-intro">{intro}</p>
+      </header>
+
+      <!-- OPTIONAL HEADER SUMMARY (Slot: header-summary) -->
+      {Astro.slots.has('header-summary') && (
+        <div class="decision-header-summary">
+          <slot name="header-summary" />
+        </div>
+      )}
+
+      <!-- 3. INPUT AREA & COMPARISON FORM (Slot: inputs) -->
+      <section class="decision-section inputs-section" aria-labelledby="inputs-heading">
+        <h2 class="sr-only" id="inputs-heading">Decision Parameters & Inputs</h2>
+        <slot name="inputs" />
+        {!Astro.slots.has('inputs') && <slot />}
+      </section>
+
+      <!-- 4. RESULTS SECTION: Summary, Comparison Table, Cost Breakdown, Year-by-Year (Slot: results) -->
+      {Astro.slots.has('results') && (
+        <section class="decision-section results-section" id="results-container" aria-labelledby="results-heading">
+          <h2 class="sr-only" id="results-heading">Estimated Comparison Results</h2>
+          <slot name="results" />
+        </section>
+      )}
+
+      <!-- 5. ASSUMPTIONS & EXCLUSIONS (Slot: assumptions or assumptions prop) -->
+      {(Astro.slots.has('assumptions') || (assumptions && assumptions.length > 0)) && (
+        <section class="decision-section" aria-labelledby="assumptions-heading">
+          <h2 class="section-subheading" id="assumptions-heading">Assumptions & Limitations</h2>
+          {Astro.slots.has('assumptions') ? (
+            <slot name="assumptions" />
+          ) : (
+            <div class="assumptions-grid">
+              {assumptions.map((item: any) => (
+                <div class="assumption-item-card">
+                  <div class="assumption-item-header">
+                    <strong class="assumption-item-label">{item.label}</strong>
+                    <span class="assumption-item-val">{item.value}</span>
+                  </div>
+                  <p class="assumption-item-exp">{item.explanation}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      <!-- 6. METHODOLOGY (Slot: methodology) -->
+      {Astro.slots.has('methodology') && (
+        <section class="decision-section methodology-section" aria-labelledby="methodology-heading">
+          <h2 class="section-subheading" id="methodology-heading">How This Model Calculates Trade-Offs</h2>
+          <div class="methodology-content">
+            <slot name="methodology" />
+          </div>
+        </section>
+      )}
+
+      <!-- 7. WORKED EXAMPLE (Slot: worked-example) -->
+      {Astro.slots.has('worked-example') && (
+        <section class="decision-section example-section" aria-labelledby="example-heading">
+          <h2 class="section-subheading" id="example-heading">Worked Example</h2>
+          <div class="worked-example-card">
+            <slot name="worked-example" />
+          </div>
+        </section>
+      )}
+
+      <!-- 8. FAQ -->
+      {faqItems.length > 0 && (
+        <section class="decision-section" aria-labelledby="faq-section-title">
+          <h2 class="sr-only" id="faq-section-title">Frequently Asked Questions</h2>
+          <FAQ items={faqItems} />
+        </section>
+      )}
+
+      <!-- 9. RELATED DECISIONS -->
+      <section class="decision-section" aria-labelledby="related-dec-title">
+        <h2 class="sr-only" id="related-dec-title">Related Decision Tools</h2>
+        <RelatedDecisions currentSlug={effectiveSlug} relatedSlugs={relatedSlugs} />
+      </section>
+
+      <!-- 10. RELATED GUIDES -->
+      <section class="decision-section" aria-labelledby="related-guide-title">
+        <h2 class="sr-only" id="related-guide-title">Educational Guides</h2>
+        <RelatedGuides decisionSlug={effectiveSlug} />
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .decision-page-wrapper {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-16);
+  }
+
+  .decision-breadcrumbs {
+    margin-bottom: var(--space-6);
+  }
+
+  .decision-header {
+    margin-bottom: var(--space-8);
+    max-width: 840px;
+  }
+
+  .decision-category-tag {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .decision-meta-notice {
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+
+  .decision-title {
+    font-size: clamp(2rem, 3.8vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    color: var(--color-text-main);
+    margin-top: 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .decision-intro {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+  }
+
+  .decision-section {
+    margin-bottom: var(--space-10);
+  }
+
+  .section-subheading {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text-main);
+    margin-top: 0;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .methodology-content {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--color-text-muted);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .worked-example-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .decision-header-summary {
+    margin-bottom: var(--space-8);
+  }
+
+  .assumptions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .assumption-item-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .assumption-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .assumption-item-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+
+  .assumption-item-val {
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+    color: var(--color-brand-accent);
+    font-weight: 600;
+  }
+
+  .assumption-item-exp {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

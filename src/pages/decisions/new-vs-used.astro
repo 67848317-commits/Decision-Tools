@@ -1,0 +1,1105 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import {
+  NEW_VS_USED_DEFAULTS,
+  calculateNewVsUsed,
+  type NewVsUsedResult,
+} from '../../lib/decisions/newVsUsed';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+const initialResult: NewVsUsedResult = calculateNewVsUsed(NEW_VS_USED_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: `Total Net Ownership Cost (${NEW_VS_USED_DEFAULTS.horizonYears}-Year Horizon)`,
+    optionAValue: `$${initialResult.newMetrics.totalOwnershipCost.toLocaleString()}`,
+    optionBValue: `$${initialResult.usedMetrics.totalOwnershipCost.toLocaleString()}`,
+    difference: `$${initialResult.costDifference.toLocaleString()}`,
+    helpNote: 'Depreciation + financing interest + insurance + maintenance + operating costs over the horizon.',
+  },
+  {
+    metric: 'Annualized Equivalent Ownership Cost',
+    optionAValue: `$${initialResult.newMetrics.annualizedOwnershipCost.toLocaleString()} / yr`,
+    optionBValue: `$${initialResult.usedMetrics.annualizedOwnershipCost.toLocaleString()} / yr`,
+    difference: `$${Math.abs(initialResult.newMetrics.annualizedOwnershipCost - initialResult.usedMetrics.annualizedOwnershipCost).toLocaleString()} / yr`,
+    helpNote: 'Net economic cost of ownership divided by comparison years.',
+  },
+  {
+    metric: 'Estimated Capital Depreciation',
+    optionAValue: `$${initialResult.newMetrics.estimatedDepreciation.toLocaleString()}`,
+    optionBValue: `$${initialResult.usedMetrics.estimatedDepreciation.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.depreciationDifference).toLocaleString()} higher on New`,
+    helpNote: 'Purchase price minus projected market resale value at the end of the horizon.',
+  },
+  {
+    metric: 'Monthly Financing Loan Payment',
+    optionAValue: `$${initialResult.newMetrics.monthlyLoanPayment.toLocaleString()} / mo`,
+    optionBValue: `$${initialResult.usedMetrics.monthlyLoanPayment.toLocaleString()} / mo`,
+    difference: `$${Math.abs(initialResult.newMetrics.monthlyLoanPayment - initialResult.usedMetrics.monthlyLoanPayment).toLocaleString()} / mo`,
+    helpNote: 'Principal and interest amortization based on financed balance, APR, and term.',
+  },
+  {
+    metric: 'Cumulative Financing Interest Paid',
+    optionAValue: `$${initialResult.newMetrics.totalInterestOverHorizon.toLocaleString()}`,
+    optionBValue: `$${initialResult.usedMetrics.totalInterestOverHorizon.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.interestDifference).toLocaleString()}`,
+    helpNote: 'Total finance charges incurred over the comparison horizon.',
+  },
+  {
+    metric: `${NEW_VS_USED_DEFAULTS.horizonYears}-Year Maintenance & Repairs`,
+    optionAValue: `$${initialResult.newMetrics.totalMaintenance.toLocaleString()}`,
+    optionBValue: `$${initialResult.usedMetrics.totalMaintenance.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.maintenanceDifference).toLocaleString()} higher on Used`,
+    helpNote: 'Scheduled servicing, wear-and-tear replacement, and out-of-warranty mechanical repairs.',
+  },
+  {
+    metric: 'Ending Equity at Horizon Close',
+    optionAValue: `$${initialResult.newMetrics.endingEquity.toLocaleString()}`,
+    optionBValue: `$${initialResult.usedMetrics.endingEquity.toLocaleString()}`,
+    difference: `$${Math.abs(initialResult.newMetrics.endingEquity - initialResult.usedMetrics.endingEquity).toLocaleString()}`,
+    helpNote: 'Projected resale asset value minus any remaining outstanding loan balance.',
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Depreciation (Loss in Asset Market Value)',
+    optionAAmount: initialResult.newMetrics.estimatedDepreciation,
+    optionBAmount: initialResult.usedMetrics.estimatedDepreciation,
+    note: 'Purchase price less projected resale value.',
+  },
+  {
+    category: 'Loan Financing Interest Paid',
+    optionAAmount: initialResult.newMetrics.totalInterestOverHorizon,
+    optionBAmount: initialResult.usedMetrics.totalInterestOverHorizon,
+    note: 'Interest charges paid during the comparison horizon.',
+  },
+  {
+    category: 'Insurance Premiums',
+    optionAAmount: initialResult.newMetrics.totalInsurance,
+    optionBAmount: initialResult.usedMetrics.totalInsurance,
+    note: 'Cumulative comprehensive and collision coverage over the horizon.',
+  },
+  {
+    category: 'Routine Maintenance & Unscheduled Repairs',
+    optionAAmount: initialResult.newMetrics.totalMaintenance,
+    optionBAmount: initialResult.usedMetrics.totalMaintenance,
+    note: 'Expected service upkeep over the horizon.',
+  },
+  {
+    category: 'Operating Fuel & Consumables',
+    optionAAmount: initialResult.newMetrics.totalOperatingCost,
+    optionBAmount: initialResult.usedMetrics.totalOperatingCost,
+    note: 'Gasoline, electricity, or consumable operating inputs.',
+  },
+];
+
+const assumptions = [
+  'Depreciation follows standard asset wear curves with steep early-year loss on new goods.',
+  'Maintenance on the new asset remains lower initially due to factory warranty coverage.',
+  'Used assets typically face higher financing interest rates (APR) from lenders compared to new inventory incentives.',
+  'Ending resale value represents a non-guaranteed projection under typical market conditions.',
+  'Both options are evaluated over the exact same multi-year comparison horizon.',
+];
+
+const exclusions = [
+  'Sales taxes, registration, and local excise fees (vary significantly by municipality).',
+  'Opportunity cost of down payment capital or cash difference invested in equities.',
+  'Subjective value of factory warranties, latest technology, or personal cosmetic preference.',
+  'Extended warranty contract premiums or gap insurance.',
+];
+
+const faqList: FAQItem[] = [
+  {
+    question: 'How does this model calculate total economic ownership cost?',
+    answer: 'Total ownership cost accounts for asset depreciation (purchase price minus ending resale value), cumulative financing interest, insurance, maintenance, and operating costs. Financed principal is not double-counted because it is already captured in the initial purchase price and depreciation calculation.',
+  },
+  {
+    question: 'What is ending equity?',
+    answer: 'Ending equity is the projected market resale value of the asset at the end of the comparison horizon minus any remaining unpaid loan principal. Positive equity represents an asset value that offsets cash outflows.',
+  },
+  {
+    question: 'Why do used assets often have higher financing interest rates?',
+    answer: 'Lenders typically price used vehicle or equipment loans with higher interest rates (APRs) because used collateral carries higher default risk and less predictable liquidation recovery for the lender.',
+  },
+  {
+    question: 'Does buying used always cost less overall?',
+    answer: 'In most scenarios, the steep initial depreciation avoided on a used purchase outweighs higher maintenance expenses. However, if a used vehicle requires extensive engine or transmission rebuilding, or if new manufacturer financing incentives offer 0% to 1.9% APR versus 8% to 10% on used, the net gap can narrow considerably.',
+  },
+];
+---
+
+<DecisionLayout
+  title="New vs. Used Calculator | Compare Total Cost of Ownership"
+  metaDescription="Compare the multi-year total cost of ownership between purchasing a new versus used vehicle or asset, factoring in depreciation, financing, maintenance, and insurance."
+  canonicalPath="/decisions/new-vs-used"
+  decisionSlug="new-vs-used"
+  category="Transportation"
+  h1="New vs. Used Purchase Calculator"
+  intro="Evaluate the complete financial difference between buying a new asset versus a pre-owned alternative. Compare upfront cash, loan interest, insurance, expected repairs, and steep early depreciation side by side."
+  faqItems={faqList}
+  relatedSlugs={['lease-vs-buy', 'gas-vs-ev', 'buy-vs-repair']}
+>
+  <!-- INPUTS SLOT -->
+  <div slot="inputs" class="inputs-container">
+    <div class="inputs-header">
+      <div class="time-horizon-panel">
+        <label for="input-horizon-years" class="label-inline">
+          <strong>Evaluation Horizon:</strong>
+        </label>
+        <div class="input-with-unit horizon-input-group">
+          <input
+            type="number"
+            id="input-horizon-years"
+            name="horizonYears"
+            value={NEW_VS_USED_DEFAULTS.horizonYears}
+            min="1"
+            max="15"
+            step="1"
+            class="input-field"
+            aria-describedby="horizon-help"
+          />
+          <span class="unit-addon">years</span>
+        </div>
+        <span id="horizon-help" class="field-help">Time period over which total ownership costs and ending equity are evaluated.</span>
+      </div>
+    </div>
+
+    <!-- 2 Column Options Grid -->
+    <div class="options-grid">
+      <!-- OPTION A: NEW -->
+      <OptionPanel
+        optionLabel="Option A"
+        title="Purchase New"
+        description="Brand new asset with factory warranty coverage."
+        panelVariant="option-a"
+      >
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-new-price" class="field-label">Purchase price</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-new-price"
+                value={NEW_VS_USED_DEFAULTS.newOption.purchasePrice}
+                min="1000"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-new-price" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-new-down" class="field-label">Down payment</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-new-down"
+                value={NEW_VS_USED_DEFAULTS.newOption.downPayment}
+                min="0"
+                step="250"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-new-down" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-new-apr" class="field-label">Financing APR</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-new-apr"
+                value={NEW_VS_USED_DEFAULTS.newOption.financingApr}
+                min="0"
+                max="25"
+                step="0.1"
+                class="input-field"
+              />
+              <span class="unit-addon">% APR</span>
+            </div>
+            <span class="validation-error" id="err-new-apr" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-new-term" class="field-label">Loan term</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-new-term"
+                value={NEW_VS_USED_DEFAULTS.newOption.loanTermMonths}
+                min="12"
+                max="84"
+                step="12"
+                class="input-field"
+              />
+              <span class="unit-addon">mos</span>
+            </div>
+            <span class="validation-error" id="err-new-term" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-new-ins" class="field-label">Annual insurance</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-new-ins"
+                value={NEW_VS_USED_DEFAULTS.newOption.annualInsurance}
+                min="0"
+                step="50"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-new-ins" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-new-maint" class="field-label">Annual maintenance</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-new-maint"
+                value={NEW_VS_USED_DEFAULTS.newOption.annualMaintenance}
+                min="0"
+                step="50"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-new-maint" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-new-op" class="field-label">Annual fuel / operating</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-new-op"
+                value={NEW_VS_USED_DEFAULTS.newOption.annualOperatingCost}
+                min="0"
+                step="50"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-new-op" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-new-resale" class="field-label">Resale value after horizon</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-new-resale"
+                value={NEW_VS_USED_DEFAULTS.newOption.expectedResaleValue}
+                min="0"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-new-resale" role="alert"></span>
+          </div>
+        </div>
+      </OptionPanel>
+
+      <!-- OPTION B: USED -->
+      <OptionPanel
+        optionLabel="Option B"
+        title="Purchase Used"
+        description="Pre-owned asset with lower upfront price and past initial depreciation."
+        panelVariant="option-b"
+      >
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-used-price" class="field-label">Purchase price</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-used-price"
+                value={NEW_VS_USED_DEFAULTS.usedOption.purchasePrice}
+                min="1000"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-used-price" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-used-down" class="field-label">Down payment</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-used-down"
+                value={NEW_VS_USED_DEFAULTS.usedOption.downPayment}
+                min="0"
+                step="250"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-used-down" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-used-apr" class="field-label">Financing APR</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-used-apr"
+                value={NEW_VS_USED_DEFAULTS.usedOption.financingApr}
+                min="0"
+                max="25"
+                step="0.1"
+                class="input-field"
+              />
+              <span class="unit-addon">% APR</span>
+            </div>
+            <span class="validation-error" id="err-used-apr" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-used-term" class="field-label">Loan term</label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                id="input-used-term"
+                value={NEW_VS_USED_DEFAULTS.usedOption.loanTermMonths}
+                min="12"
+                max="84"
+                step="12"
+                class="input-field"
+              />
+              <span class="unit-addon">mos</span>
+            </div>
+            <span class="validation-error" id="err-used-term" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-used-ins" class="field-label">Annual insurance</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-used-ins"
+                value={NEW_VS_USED_DEFAULTS.usedOption.annualInsurance}
+                min="0"
+                step="50"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-used-ins" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-used-maint" class="field-label">Annual maintenance</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-used-maint"
+                value={NEW_VS_USED_DEFAULTS.usedOption.annualMaintenance}
+                min="0"
+                step="50"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-used-maint" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="input-used-op" class="field-label">Annual fuel / operating</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-used-op"
+                value={NEW_VS_USED_DEFAULTS.usedOption.annualOperatingCost}
+                min="0"
+                step="50"
+                class="input-field"
+              />
+              <span class="unit-addon">/ yr</span>
+            </div>
+            <span class="validation-error" id="err-used-op" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-used-resale" class="field-label">Resale value after horizon</label>
+            <div class="input-with-unit">
+              <span class="unit-prefix">$</span>
+              <input
+                type="number"
+                id="input-used-resale"
+                value={NEW_VS_USED_DEFAULTS.usedOption.expectedResaleValue}
+                min="0"
+                step="500"
+                class="input-field"
+              />
+            </div>
+            <span class="validation-error" id="err-used-resale" role="alert"></span>
+          </div>
+        </div>
+      </OptionPanel>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="form-actions-bar">
+      <button type="button" class="btn btn-primary" id="btn-calc-newused">
+        Calculate Comparison
+      </button>
+      <button type="button" class="btn btn-secondary" id="btn-reset-newused">
+        Reset to Defaults
+      </button>
+      <span class="form-status-note">
+        Calculations update deterministically based on entered parameters.
+      </span>
+    </div>
+  </div>
+
+  <!-- RESULTS SLOT -->
+  <div slot="results" class="results-wrapper">
+    <!-- Result Summary Box -->
+    <div class="result-summary-box" id="newused-summary-box">
+      <div class="summary-top">
+        <span class="badge badge-neutral">Comparative Outcome</span>
+        <span class="summary-period" id="summary-horizon-badge">{NEW_VS_USED_DEFAULTS.horizonYears}-Year Ownership Horizon</span>
+      </div>
+      <p class="summary-lead-text" id="newused-summary-lead">
+        {initialResult.summaryText}
+      </p>
+
+      <div class="summary-key-metrics">
+        <div class="metric-card">
+          <span class="metric-label">New Net Ownership Cost</span>
+          <span class="metric-value" id="summary-new-cost">${initialResult.newMetrics.totalOwnershipCost.toLocaleString()}</span>
+          <span class="metric-detail" id="summary-new-annual">${initialResult.newMetrics.annualizedOwnershipCost.toLocaleString()} / yr</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Used Net Ownership Cost</span>
+          <span class="metric-value" id="summary-used-cost">${initialResult.usedMetrics.totalOwnershipCost.toLocaleString()}</span>
+          <span class="metric-detail" id="summary-used-annual">${initialResult.usedMetrics.annualizedOwnershipCost.toLocaleString()} / yr</span>
+        </div>
+        <div class="metric-card highlight-card">
+          <span class="metric-label">Cost Difference</span>
+          <span class="metric-value highlight" id="summary-diff-val">${initialResult.costDifference.toLocaleString()}</span>
+          <span class="metric-detail" id="summary-diff-lead">
+            {initialResult.lowerCostOption === 'used' ? 'Estimated used ownership cost is lower' : initialResult.lowerCostOption === 'new' ? 'Estimated new ownership cost is lower' : 'Identical estimated ownership cost'}
+          </span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Depreciation Delta</span>
+          <span class="metric-value" id="summary-deprec-diff">${Math.abs(initialResult.depreciationDifference).toLocaleString()}</span>
+          <span class="metric-detail" id="summary-deprec-detail">
+            {initialResult.depreciationDifference > 0 ? 'Higher depreciation on New' : 'Higher depreciation on Used'}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="results-table-section">
+      <h3 class="section-title">Metric-by-Metric Comparison</h3>
+      <ComparisonTable
+        optionAName="Purchase New"
+        optionBName="Purchase Used"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div class="results-breakdown-section">
+      <h3 class="section-title">Ownership Cost Component Breakdown</h3>
+      <CostBreakdown
+        optionAName="Purchase New"
+        optionBName="Purchase Used"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+
+  <!-- ASSUMPTIONS SLOT -->
+  <div slot="assumptions">
+    <AssumptionBox
+      assumptions={assumptions}
+      exclusions={exclusions}
+    />
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The New vs. Used evaluation model measures the true economic cost of asset ownership over the defined time horizon:
+    </p>
+    <ul>
+      <li>
+        <strong>Economic Cost Formula:</strong> Total cost of ownership is calculated as: <code>Asset Depreciation + Loan Financing Interest + Insurance + Maintenance + Operating Expenses</code>.
+      </li>
+      <li>
+        <strong>Preventing Financed Principal Double Counting:</strong> Loan principal payments represent the staged funding of the purchase price; counting loan payments alongside full purchase depreciation would count principal twice. We strictly include loan financing interest plus net capital loss (depreciation).
+      </li>
+      <li>
+        <strong>Ending Equity Calculation:</strong> Calculated as: <code>Ending Resale Value - Remaining Loan Balance</code>. If the financing term exceeds the comparison horizon, remaining debt is subtracted from the asset value.
+      </li>
+      <li>
+        <strong>Resale Value Projections:</strong> Resale values are non-guaranteed estimates based on typical market depreciation trajectories.
+      </li>
+    </ul>
+  </div>
+
+  <!-- WORKED EXAMPLE SLOT -->
+  <div slot="worked-example" class="worked-example-content">
+    <div class="example-meta">
+      <span class="badge badge-neutral">Hypothetical Scenario</span>
+      <span class="example-note">Fictional illustrative parameters for demonstration</span>
+    </div>
+    <h3 class="example-title">5-Year Sedan: New ($38,000) vs. 3-Year-Old Used ($22,500)</h3>
+    <p>
+      Consider a driver evaluating a brand new $38,000 sedan against a certified 3-year-old pre-owned model of the same class at $22,500 over a 5-year ownership window:
+    </p>
+    <div class="example-breakdown-grid">
+      <div class="example-col">
+        <h4>Option A: New Vehicle ($38,000)</h4>
+        <ul>
+          <li>Down Payment: $6,000 | Financed: $32,000 at 5.5% (60 mos)</li>
+          <li>Monthly Payment: $611 / mo</li>
+          <li>5-Year Financing Interest: $4,676</li>
+          <li>5-Year Depreciation ($38,000 - $16,500 resale): <strong>$21,500</strong></li>
+          <li>5-Year Insurance ($1,800/yr): $9,000</li>
+          <li>5-Year Maintenance ($600/yr): $3,000</li>
+          <li>5-Year Operating Fuel ($2,200/yr): $11,000</li>
+          <li>Total 5-Year Ownership Cost: <strong>$49,176</strong> ($9,835 / yr)</li>
+        </ul>
+      </div>
+      <div class="example-col">
+        <h4>Option B: Used Vehicle ($22,500)</h4>
+        <ul>
+          <li>Down Payment: $4,000 | Financed: $18,500 at 7.5% (48 mos)</li>
+          <li>Monthly Payment: $448 / mo</li>
+          <li>4-Year Financing Interest: $2,987</li>
+          <li>5-Year Depreciation ($22,500 - $9,500 resale): <strong>$13,000</strong></li>
+          <li>5-Year Insurance ($1,500/yr): $7,500</li>
+          <li>5-Year Maintenance ($1,350/yr): $6,750</li>
+          <li>5-Year Operating Fuel ($2,350/yr): $11,750</li>
+          <li>Total 5-Year Ownership Cost: <strong>$41,987</strong> ($8,397 / yr)</li>
+        </ul>
+      </div>
+    </div>
+    <p class="example-summary">
+      Under these assumptions, the estimated 5-year ownership cost of the used vehicle is $7,189 lower than the new vehicle ($41,987 vs. $49,176). The used option avoids $8,500 in depreciation, which offsets its $3,750 in higher expected maintenance costs.
+    </p>
+  </div>
+</DecisionLayout>
+
+<script>
+  import {
+    calculateNewVsUsed,
+    NEW_VS_USED_DEFAULTS,
+    type NewVsUsedInput,
+  } from '../../lib/decisions/newVsUsed';
+
+  function initNewVsUsed() {
+    const horizonInput = document.getElementById('input-horizon-years') as HTMLInputElement;
+
+    // New inputs
+    const newPriceInput = document.getElementById('input-new-price') as HTMLInputElement;
+    const newDownInput = document.getElementById('input-new-down') as HTMLInputElement;
+    const newAprInput = document.getElementById('input-new-apr') as HTMLInputElement;
+    const newTermInput = document.getElementById('input-new-term') as HTMLInputElement;
+    const newInsInput = document.getElementById('input-new-ins') as HTMLInputElement;
+    const newMaintInput = document.getElementById('input-new-maint') as HTMLInputElement;
+    const newOpInput = document.getElementById('input-new-op') as HTMLInputElement;
+    const newResaleInput = document.getElementById('input-new-resale') as HTMLInputElement;
+
+    // Used inputs
+    const usedPriceInput = document.getElementById('input-used-price') as HTMLInputElement;
+    const usedDownInput = document.getElementById('input-used-down') as HTMLInputElement;
+    const usedAprInput = document.getElementById('input-used-apr') as HTMLInputElement;
+    const usedTermInput = document.getElementById('input-used-term') as HTMLInputElement;
+    const usedInsInput = document.getElementById('input-used-ins') as HTMLInputElement;
+    const usedMaintInput = document.getElementById('input-used-maint') as HTMLInputElement;
+    const usedOpInput = document.getElementById('input-used-op') as HTMLInputElement;
+    const usedResaleInput = document.getElementById('input-used-resale') as HTMLInputElement;
+
+    function recalculate() {
+      const horizonYears = Math.max(0.5, Math.min(20, Number(horizonInput?.value) || 5));
+
+      const input: NewVsUsedInput = {
+        horizonYears,
+        newOption: {
+          label: 'New Vehicle / Asset',
+          purchasePrice: Math.max(0, Number(newPriceInput?.value) || 0),
+          downPayment: Math.max(0, Number(newDownInput?.value) || 0),
+          financingApr: Math.max(0, Number(newAprInput?.value) || 0),
+          loanTermMonths: Math.max(1, Number(newTermInput?.value) || 60),
+          annualInsurance: Math.max(0, Number(newInsInput?.value) || 0),
+          annualMaintenance: Math.max(0, Number(newMaintInput?.value) || 0),
+          annualOperatingCost: Math.max(0, Number(newOpInput?.value) || 0),
+          expectedResaleValue: Math.max(0, Number(newResaleInput?.value) || 0),
+        },
+        usedOption: {
+          label: 'Used Vehicle / Asset',
+          purchasePrice: Math.max(0, Number(usedPriceInput?.value) || 0),
+          downPayment: Math.max(0, Number(usedDownInput?.value) || 0),
+          financingApr: Math.max(0, Number(usedAprInput?.value) || 0),
+          loanTermMonths: Math.max(1, Number(usedTermInput?.value) || 48),
+          annualInsurance: Math.max(0, Number(usedInsInput?.value) || 0),
+          annualMaintenance: Math.max(0, Number(usedMaintInput?.value) || 0),
+          annualOperatingCost: Math.max(0, Number(usedOpInput?.value) || 0),
+          expectedResaleValue: Math.max(0, Number(usedResaleInput?.value) || 0),
+        },
+      };
+
+      const result = calculateNewVsUsed(input);
+
+      const horizonBadge = document.getElementById('summary-horizon-badge');
+      const summaryLead = document.getElementById('newused-summary-lead');
+      const newCostEl = document.getElementById('summary-new-cost');
+      const newAnnualEl = document.getElementById('summary-new-annual');
+      const usedCostEl = document.getElementById('summary-used-cost');
+      const usedAnnualEl = document.getElementById('summary-used-annual');
+      const diffValEl = document.getElementById('summary-diff-val');
+      const diffLeadEl = document.getElementById('summary-diff-lead');
+      const deprecDiffEl = document.getElementById('summary-deprec-diff');
+      const deprecDetailEl = document.getElementById('summary-deprec-detail');
+
+      if (horizonBadge) horizonBadge.textContent = `${result.horizonYears}-Year Ownership Horizon`;
+      if (summaryLead) summaryLead.textContent = result.summaryText;
+      if (newCostEl) newCostEl.textContent = `$${result.newMetrics.totalOwnershipCost.toLocaleString()}`;
+      if (newAnnualEl) newAnnualEl.textContent = `$${result.newMetrics.annualizedOwnershipCost.toLocaleString()} / yr`;
+      if (usedCostEl) usedCostEl.textContent = `$${result.usedMetrics.totalOwnershipCost.toLocaleString()}`;
+      if (usedAnnualEl) usedAnnualEl.textContent = `$${result.usedMetrics.annualizedOwnershipCost.toLocaleString()} / yr`;
+      if (diffValEl) diffValEl.textContent = `$${result.costDifference.toLocaleString()}`;
+
+      if (diffLeadEl) {
+        if (result.lowerCostOption === 'used') {
+          diffLeadEl.textContent = 'Estimated used ownership cost is lower';
+        } else if (result.lowerCostOption === 'new') {
+          diffLeadEl.textContent = 'Estimated new ownership cost is lower';
+        } else {
+          diffLeadEl.textContent = 'Identical estimated ownership cost';
+        }
+      }
+
+      if (deprecDiffEl) deprecDiffEl.textContent = `$${Math.abs(result.depreciationDifference).toLocaleString()}`;
+      if (deprecDetailEl) {
+        deprecDetailEl.textContent = result.depreciationDifference > 0 ? 'Higher depreciation on New' : 'Higher depreciation on Used';
+      }
+    }
+
+    const allInputs = [
+      horizonInput,
+      newPriceInput,
+      newDownInput,
+      newAprInput,
+      newTermInput,
+      newInsInput,
+      newMaintInput,
+      newOpInput,
+      newResaleInput,
+      usedPriceInput,
+      usedDownInput,
+      usedAprInput,
+      usedTermInput,
+      usedInsInput,
+      usedMaintInput,
+      usedOpInput,
+      usedResaleInput,
+    ];
+
+    allInputs.forEach((el) => {
+      if (el) {
+        el.addEventListener('input', recalculate);
+        el.addEventListener('change', recalculate);
+      }
+    });
+
+    document.getElementById('btn-calc-newused')?.addEventListener('click', recalculate);
+
+    document.getElementById('btn-reset-newused')?.addEventListener('click', () => {
+      if (horizonInput) horizonInput.value = String(NEW_VS_USED_DEFAULTS.horizonYears);
+
+      if (newPriceInput) newPriceInput.value = String(NEW_VS_USED_DEFAULTS.newOption.purchasePrice);
+      if (newDownInput) newDownInput.value = String(NEW_VS_USED_DEFAULTS.newOption.downPayment);
+      if (newAprInput) newAprInput.value = String(NEW_VS_USED_DEFAULTS.newOption.financingApr);
+      if (newTermInput) newTermInput.value = String(NEW_VS_USED_DEFAULTS.newOption.loanTermMonths);
+      if (newInsInput) newInsInput.value = String(NEW_VS_USED_DEFAULTS.newOption.annualInsurance);
+      if (newMaintInput) newMaintInput.value = String(NEW_VS_USED_DEFAULTS.newOption.annualMaintenance);
+      if (newOpInput) newOpInput.value = String(NEW_VS_USED_DEFAULTS.newOption.annualOperatingCost);
+      if (newResaleInput) newResaleInput.value = String(NEW_VS_USED_DEFAULTS.newOption.expectedResaleValue);
+
+      if (usedPriceInput) usedPriceInput.value = String(NEW_VS_USED_DEFAULTS.usedOption.purchasePrice);
+      if (usedDownInput) usedDownInput.value = String(NEW_VS_USED_DEFAULTS.usedOption.downPayment);
+      if (usedAprInput) usedAprInput.value = String(NEW_VS_USED_DEFAULTS.usedOption.financingApr);
+      if (usedTermInput) usedTermInput.value = String(NEW_VS_USED_DEFAULTS.usedOption.loanTermMonths);
+      if (usedInsInput) usedInsInput.value = String(NEW_VS_USED_DEFAULTS.usedOption.annualInsurance);
+      if (usedMaintInput) usedMaintInput.value = String(NEW_VS_USED_DEFAULTS.usedOption.annualMaintenance);
+      if (usedOpInput) usedOpInput.value = String(NEW_VS_USED_DEFAULTS.usedOption.annualOperatingCost);
+      if (usedResaleInput) usedResaleInput.value = String(NEW_VS_USED_DEFAULTS.usedOption.expectedResaleValue);
+
+      recalculate();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNewVsUsed);
+  } else {
+    initNewVsUsed();
+  }
+</script>
+
+<style>
+  .inputs-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .inputs-header {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .time-horizon-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .label-inline {
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+
+  .horizon-input-group {
+    width: 130px;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 900px) {
+    .options-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .field-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+
+  .field-help {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 580px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+
+  .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .unit-prefix {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .unit-addon {
+    position: absolute;
+    right: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    padding-left: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .input-with-unit .unit-addon ~ .input-field {
+    padding-right: 48px;
+  }
+
+  .validation-error {
+    font-size: 0.75rem;
+    color: var(--color-error);
+    display: none;
+  }
+
+  .form-actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+  }
+
+  .btn {
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-text-main);
+    border-color: var(--color-border);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-surface-hover, #f8f9fa);
+  }
+
+  .form-status-note {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .results-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .result-summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+
+  .summary-period {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .summary-lead-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+  }
+
+  .summary-key-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .metric-card {
+    background-color: var(--color-surface-subtle, #fbfcfd);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .highlight-card {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light, #f0f7ff);
+  }
+
+  .metric-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .metric-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+
+  .metric-value.highlight {
+    color: var(--color-primary);
+  }
+
+  .metric-detail {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-main);
+  }
+
+  .methodology-text p,
+  .methodology-text ul {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+
+  .methodology-text ul {
+    padding-left: var(--space-5);
+  }
+
+  .worked-example-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .example-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .example-note {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .example-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+
+  .example-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 700px) {
+    .example-breakdown-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .example-col {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+
+  .example-col h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .example-col ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+  }
+
+  .example-summary {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+</style>

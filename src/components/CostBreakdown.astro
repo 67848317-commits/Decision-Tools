@@ -1,0 +1,183 @@
+---
+export interface CostCategoryItem {
+  category: string;
+  optionAAmount: number;
+  optionBAmount: number;
+  note?: string;
+}
+
+interface Props {
+  title?: string;
+  description?: string;
+  optionAName: string;
+  optionBName: string;
+  items: CostCategoryItem[];
+  currencySymbol?: string;
+}
+
+const {
+  title = 'Cost Breakdown by Category',
+  description = 'Category-level expense and capital outflow comparison over the selected time horizon.',
+  optionAName,
+  optionBName,
+  items,
+  currencySymbol = '$',
+} = Astro.props;
+
+const totalA = items.reduce((acc, i) => acc + i.optionAAmount, 0);
+const totalB = items.reduce((acc, i) => acc + i.optionBAmount, 0);
+---
+
+<div class="cost-breakdown-card">
+  <div class="cost-breakdown-header">
+    <h3 class="cost-breakdown-title">{title}</h3>
+    {description && <p class="cost-breakdown-desc">{description}</p>}
+  </div>
+
+  <div class="breakdown-table-wrapper" tabindex="0" role="region" aria-label="Cost Breakdown Table">
+    <table class="breakdown-table">
+      <thead>
+        <tr>
+          <th scope="col" class="th-cat">Category</th>
+          <th scope="col" class="th-val">{optionAName}</th>
+          <th scope="col" class="th-val">{optionBName}</th>
+          <th scope="col" class="th-diff">Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        {items.map((item) => {
+          const diff = Math.abs(item.optionAAmount - item.optionBAmount);
+          return (
+            <tr>
+              <td class="td-cat">
+                <span class="cat-name">{item.category}</span>
+                {item.note && <span class="cat-note">{item.note}</span>}
+              </td>
+              <td class="td-val">{currencySymbol}{item.optionAAmount.toLocaleString()}</td>
+              <td class="td-val">{currencySymbol}{item.optionBAmount.toLocaleString()}</td>
+              <td class="td-diff">
+                {diff === 0 ? '—' : `${currencySymbol}${diff.toLocaleString()}`}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" class="td-cat"><strong>Total Outflow</strong></th>
+          <td class="td-val"><strong>{currencySymbol}{totalA.toLocaleString()}</strong></td>
+          <td class="td-val"><strong>{currencySymbol}{totalB.toLocaleString()}</strong></td>
+          <td class="td-diff"><strong>{currencySymbol}{Math.abs(totalA - totalB).toLocaleString()}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<style>
+  .cost-breakdown-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-6);
+  }
+
+  .cost-breakdown-header {
+    margin-bottom: var(--space-4);
+  }
+
+  .cost-breakdown-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: var(--space-1);
+    color: var(--color-text-main);
+  }
+
+  .cost-breakdown-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+  }
+
+  .breakdown-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .breakdown-table-wrapper:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+
+  .breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    min-width: 480px;
+  }
+
+  .breakdown-table thead th {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 2px solid var(--color-border-strong);
+    color: var(--color-text-main);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .th-cat {
+    text-align: left;
+    width: 40%;
+  }
+
+  .th-val {
+    text-align: right;
+    width: 25%;
+  }
+
+  .th-diff {
+    text-align: right;
+    width: 20%;
+    color: var(--color-text-subtle);
+  }
+
+  .breakdown-table tbody td {
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .cat-name {
+    display: block;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+
+  .cat-note {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-subtle);
+    margin-top: 2px;
+  }
+
+  .td-val {
+    text-align: right;
+    font-family: var(--font-mono);
+    color: var(--color-text-main);
+  }
+
+  .td-diff {
+    text-align: right;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+  }
+
+  .breakdown-table tfoot th,
+  .breakdown-table tfoot td {
+    padding: var(--space-3);
+    border-top: 2px solid var(--color-border-strong);
+    background-color: var(--color-surface-subtle);
+  }
+</style>

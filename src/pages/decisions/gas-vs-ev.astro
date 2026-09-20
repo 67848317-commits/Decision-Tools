@@ -1,0 +1,630 @@
+---
+import DecisionLayout from '../../layouts/DecisionLayout.astro';
+import OptionPanel from '../../components/OptionPanel.astro';
+import ComparisonTable, { type ComparisonRow } from '../../components/ComparisonTable.astro';
+import CostBreakdown, { type CostCategoryItem } from '../../components/CostBreakdown.astro';
+import AssumptionBox from '../../components/AssumptionBox.astro';
+import { GAS_VS_EV_DEFAULTS, calculateGasVsEv, type GasVsEvResult } from '../../lib/decisions/gasVsEv';
+import type { FAQItem } from '../../components/FAQ.astro';
+
+const initialResult: GasVsEvResult = calculateGasVsEv(GAS_VS_EV_DEFAULTS);
+
+const initialComparisonRows: ComparisonRow[] = [
+  {
+    metric: `Estimated ${GAS_VS_EV_DEFAULTS.horizonYears}-Year Total Cost of Ownership`,
+    optionAValue: `$${initialResult.gasTotalCostOfOwnership.toLocaleString()}`,
+    optionBValue: `$${initialResult.evTotalCostOfOwnership.toLocaleString()}`,
+    difference: `$${initialResult.totalTcoDifference.toLocaleString()}`,
+    helpNote: 'Net vehicle depreciation plus fuel/electricity, scheduled maintenance, and insurance.',
+  },
+  {
+    metric: 'Annual Fuel / Energy Expense',
+    optionAValue: `$${initialResult.gasAnnualFuelCost.toLocaleString()} / yr`,
+    optionBValue: `$${initialResult.evAnnualElectricityCost.toLocaleString()} / yr`,
+    difference: `$${Math.abs(initialResult.gasAnnualFuelCost - initialResult.evAnnualElectricityCost).toLocaleString()} / yr`,
+    helpNote: `Based on ${GAS_VS_EV_DEFAULTS.annualMiles.toLocaleString()} miles/yr. Gas: $${GAS_VS_EV_DEFAULTS.gasPricePerGallon}/gal @ ${GAS_VS_EV_DEFAULTS.gasMpg} mpg. EV: $${GAS_VS_EV_DEFAULTS.electricityCostPerKwh}/kWh @ ${GAS_VS_EV_DEFAULTS.evEfficiencyMilesPerKwh} mi/kWh.`,
+  },
+  {
+    metric: 'Energy Cost Per Mile Driven',
+    optionAValue: `$${initialResult.gasFuelCostPerMile.toFixed(3)} / mi`,
+    optionBValue: `$${initialResult.evElectricityCostPerMile.toFixed(3)} / mi`,
+    difference: `$${Math.abs(initialResult.gasFuelCostPerMile - initialResult.evElectricityCostPerMile).toFixed(3)} / mi`,
+    helpNote: 'Direct energy fuel expense per single mile driven.',
+  },
+  {
+    metric: 'Annual Routine Maintenance',
+    optionAValue: `$${initialResult.gasTotalMaintenanceCost / GAS_VS_EV_DEFAULTS.horizonYears} / yr`,
+    optionBValue: `$${initialResult.evTotalMaintenanceCost / GAS_VS_EV_DEFAULTS.horizonYears} / yr`,
+    difference: `$${Math.abs(initialResult.gasTotalMaintenanceCost - initialResult.evTotalMaintenanceCost) / GAS_VS_EV_DEFAULTS.horizonYears} / yr`,
+    helpNote: 'EV powertrain eliminates oil changes, spark plugs, and reduces brake wear via regenerative braking.',
+  },
+  {
+    metric: 'Estimated Resale Residual Value',
+    optionAValue: `$${Math.round(GAS_VS_EV_DEFAULTS.gasVehiclePrice * (GAS_VS_EV_DEFAULTS.gasResaleValuePercent / 100)).toLocaleString()}`,
+    optionBValue: `$${Math.round(GAS_VS_EV_DEFAULTS.evVehiclePrice * (GAS_VS_EV_DEFAULTS.evResaleValuePercent / 100)).toLocaleString()}`,
+    difference: `$${Math.abs(Math.round(GAS_VS_EV_DEFAULTS.gasVehiclePrice * (GAS_VS_EV_DEFAULTS.gasResaleValuePercent / 100)) - Math.round(GAS_VS_EV_DEFAULTS.evVehiclePrice * (GAS_VS_EV_DEFAULTS.evResaleValuePercent / 100))).toLocaleString()}`,
+    helpNote: `Estimated vehicle asset value remaining at end of Year ${GAS_VS_EV_DEFAULTS.horizonYears}.`,
+  },
+];
+
+const initialCostItems: CostCategoryItem[] = [
+  {
+    category: 'Vehicle Acquisition & Net Depreciation',
+    optionAAmount: initialResult.gasNetAcquisitionCost,
+    optionBAmount: initialResult.evNetAcquisitionCost,
+    note: 'Initial vehicle price (+ EV charger - tax credits) minus estimated residual resale value.',
+  },
+  {
+    category: `${GAS_VS_EV_DEFAULTS.horizonYears}-Year Fuel & Electricity Outlay`,
+    optionAAmount: initialResult.gasTotalFuelCost,
+    optionBAmount: initialResult.evTotalElectricityCost,
+    note: `Cumulative energy costs over ${initialResult.totalMiles.toLocaleString()} total miles.`,
+  },
+  {
+    category: 'Routine Powertrain Maintenance & Wear',
+    optionAAmount: initialResult.gasTotalMaintenanceCost,
+    optionBAmount: initialResult.evTotalMaintenanceCost,
+    note: 'Tires, brakes, fluid inspections, scheduled manufacturer checkups.',
+  },
+  {
+    category: 'Vehicle Comprehensive Insurance',
+    optionAAmount: initialResult.gasTotalInsuranceCost,
+    optionBAmount: initialResult.evTotalInsuranceCost,
+    note: 'Multi-year insurance policy premiums.',
+  },
+];
+
+const assumptions = [
+  {
+    label: 'Annual Mileage Horizon',
+    value: `${GAS_VS_EV_DEFAULTS.annualMiles.toLocaleString()} miles/yr over ${GAS_VS_EV_DEFAULTS.horizonYears} years`,
+    explanation: 'US Department of Transportation average driving distance is approximately 13,500 miles annually.',
+  },
+  {
+    label: 'Home Electric Utility Charging',
+    value: `$${GAS_VS_EV_DEFAULTS.electricityCostPerKwh}/kWh with 10% charging loss`,
+    explanation: 'Reflects off-peak or standard residential electric service rates, including Level 2 AC conversion thermal loss.',
+  },
+  {
+    label: 'Powertrain Maintenance Differences',
+    value: 'Gas: $1,150/yr vs EV: $550/yr',
+    explanation: 'Electric drivetrains have approximately 90% fewer moving parts, eliminating exhaust, transmission fluid, and engine oil upkeep.',
+  },
+  {
+    label: 'Depreciation Curves',
+    value: `Gas: ${GAS_VS_EV_DEFAULTS.gasResaleValuePercent}% retained | EV: ${GAS_VS_EV_DEFAULTS.evResaleValuePercent}% retained`,
+    explanation: 'Depreciation rates vary based on battery technology evolution, market incentives, and brand retention curves.',
+  },
+];
+
+const faqs: FAQItem[] = [
+  {
+    question: 'How is the electricity cost for charging calculated?',
+    answer: 'Electricity cost divides annual miles by vehicle efficiency (miles per kilowatt-hour) and multiplies by your residential electric tariff, adding a 10% factor for AC-to-DC onboard charging inefficiencies.',
+  },
+  {
+    question: 'Does this model factor in commercial public fast charging (DCFC)?',
+    answer: 'This default model assumes residential Level 2 overnight charging. If you rely primarily on public Level 3 fast chargers (which frequently bill at $0.35 to $0.50 per kWh), you can adjust the electricity cost per kWh input upward accordingly.',
+  },
+  {
+    question: 'Why does EV insurance typically cost slightly more?',
+    answer: 'Higher average purchase prices, specialized high-voltage collision repair requirements, and limited certified body shops can currently elevate comprehensive physical damage collision rates for electric vehicles.',
+  },
+];
+
+const relatedGuides = [
+  {
+    slug: 'gas-vs-ev-cost',
+    title: 'Gas vs. EV: The Real Cost of Ownership Over 5 Years',
+    description: 'Beyond pump savings: examining battery degradation, insurance premiums, and home charger installation expenses.',
+    readTime: '6 min read',
+    topicTag: 'Transportation',
+  },
+  {
+    slug: 'how-to-calculate-ev-charging-cost',
+    title: 'How to Calculate Electric Vehicle Charging Costs Accurately',
+    description: 'Understanding kilowatt-hours, charging efficiency loss, time-of-use tariffs, and public network markups.',
+    readTime: '5 min read',
+    topicTag: 'Transportation',
+  },
+];
+---
+
+<DecisionLayout
+  title="Gas vs. Electric Vehicle (EV) Cost Calculator"
+  description="Compare 5-year fuel versus electricity expenses, routine maintenance, and net vehicle depreciation objectively."
+  category="transportation"
+  timeToEstimate="3 min"
+  slug="gas-vs-ev"
+  keyMetric="5-Year Total Cost of Ownership"
+  optionAName="Internal Combustion (Gas)"
+  optionBName="Electric Vehicle (EV)"
+  assumptions={assumptions}
+  faqs={faqs}
+  relatedDecisions={['lease-vs-buy', 'new-vs-used']}
+  relatedGuides={relatedGuides}
+>
+  <!-- 1. INPUTS -->
+  <div slot="inputs" class="inputs-container">
+    <!-- INPUT CONTROLS -->
+    <div class="calculator-inputs-grid" id="calculator-inputs">
+    <!-- Shared Parameters -->
+    <div class="shared-params-card">
+      <h3 class="shared-title">Usage Assumptions</h3>
+      <div class="shared-inputs-row">
+        <div class="form-group">
+          <label for="input-annual-miles">Annual Miles Driven</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-annual-miles" value={GAS_VS_EV_DEFAULTS.annualMiles} min="1000" max="60000" step="500" />
+            <span class="unit-label">mi/yr</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-horizon-years">Operating Horizon</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-horizon-years" value={GAS_VS_EV_DEFAULTS.horizonYears} min="1" max="15" step="1" />
+            <span class="unit-label">years</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option A Panel: Gas -->
+    <OptionPanel title="Gasoline Vehicle" optionLabel="Option A" badgeClass="badge-neutral">
+      <div class="form-group">
+        <label for="input-gas-price">Vehicle Purchase Price</label>
+        <div class="input-with-prefix">
+          <span class="currency-prefix">$</span>
+          <input type="number" id="input-gas-price" value={GAS_VS_EV_DEFAULTS.gasVehiclePrice} min="5000" max="250000" step="500" />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-gas-mpg">Fuel Economy (MPG)</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-gas-mpg" value={GAS_VS_EV_DEFAULTS.gasMpg} min="10" max="70" step="1" />
+            <span class="unit-label">mpg</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-gas-per-gallon">Gas Price ($/gal)</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-gas-per-gallon" value={GAS_VS_EV_DEFAULTS.gasPricePerGallon} min="1.00" max="10.00" step="0.05" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-gas-maint">Annual Maintenance</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-gas-maint" value={GAS_VS_EV_DEFAULTS.gasAnnualMaintenance} min="0" max="10000" step="50" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-gas-insurance">Annual Insurance</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-gas-insurance" value={GAS_VS_EV_DEFAULTS.gasInsuranceAnnual} min="0" max="15000" step="50" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-gas-resale">Estimated Retained Resale Value (%)</label>
+        <div class="input-with-unit">
+          <input type="number" id="input-gas-resale" value={GAS_VS_EV_DEFAULTS.gasResaleValuePercent} min="10" max="90" step="1" />
+          <span class="unit-label">% of price</span>
+        </div>
+      </div>
+    </OptionPanel>
+
+    <!-- Option B Panel: EV -->
+    <OptionPanel title="Electric Vehicle (EV)" optionLabel="Option B" badgeClass="badge-primary">
+      <div class="form-group">
+        <label for="input-ev-price">Vehicle Purchase Price</label>
+        <div class="input-with-prefix">
+          <span class="currency-prefix">$</span>
+          <input type="number" id="input-ev-price" value={GAS_VS_EV_DEFAULTS.evVehiclePrice} min="5000" max="250000" step="500" />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-ev-efficiency">Efficiency (mi/kWh)</label>
+          <div class="input-with-unit">
+            <input type="number" id="input-ev-efficiency" value={GAS_VS_EV_DEFAULTS.evEfficiencyMilesPerKwh} min="1.0" max="6.0" step="0.1" />
+            <span class="unit-label">mi/kWh</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-ev-elec-rate">Electricity Rate ($/kWh)</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-ev-elec-rate" value={GAS_VS_EV_DEFAULTS.electricityCostPerKwh} min="0.04" max="1.00" step="0.01" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-ev-tax-credit">Tax Credit / Incentives</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-ev-tax-credit" value={GAS_VS_EV_DEFAULTS.evTaxCredit} min="0" max="15000" step="250" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-ev-charger">Home Charger & Install</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-ev-charger" value={GAS_VS_EV_DEFAULTS.evHomeChargerInstall} min="0" max="5000" step="50" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="input-ev-maint">Annual Maintenance</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-ev-maint" value={GAS_VS_EV_DEFAULTS.evAnnualMaintenance} min="0" max="10000" step="50" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-ev-insurance">Annual Insurance</label>
+          <div class="input-with-prefix">
+            <span class="currency-prefix">$</span>
+            <input type="number" id="input-ev-insurance" value={GAS_VS_EV_DEFAULTS.evInsuranceAnnual} min="0" max="15000" step="50" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="input-ev-resale">Estimated Retained Resale Value (%)</label>
+        <div class="input-with-unit">
+          <input type="number" id="input-ev-resale" value={GAS_VS_EV_DEFAULTS.evResaleValuePercent} min="10" max="90" step="1" />
+          <span class="unit-label">% of price</span>
+        </div>
+      </div>
+    </OptionPanel>
+  </div>
+
+  <!-- Actions: Reset -->
+  <div class="form-actions-bar">
+    <button type="button" class="btn btn-secondary" id="btn-reset-gas-ev">
+      Reset to Defaults
+    </button>
+    <span class="form-status-note">
+      Calculations update deterministically based on entered parameters.
+    </span>
+  </div>
+  </div>
+
+  <!-- 2. RESULTS -->
+  <div slot="results" class="results-wrapper">
+    <!-- Summary Box -->
+    <div class="summary-box" id="result-summary-box">
+      <div class="summary-header">
+        <span class="summary-badge">Comparative Projection</span>
+        <span class="summary-horizon" id="summary-horizon-badge">{GAS_VS_EV_DEFAULTS.horizonYears}-Year Analytical Model</span>
+      </div>
+      <div class="summary-metrics">
+        <div class="summary-metric">
+          <span class="metric-lbl">Gas Total Ownership Cost</span>
+          <span class="metric-val" id="summary-gas-tco">${initialResult.gasTotalCostOfOwnership.toLocaleString()}</span>
+        </div>
+        <div class="summary-metric">
+          <span class="metric-lbl">EV Total Ownership Cost</span>
+          <span class="metric-val" id="summary-ev-tco">${initialResult.evTotalCostOfOwnership.toLocaleString()}</span>
+        </div>
+        <div class="summary-metric highlight">
+          <span class="metric-lbl">Estimated TCO Difference</span>
+          <span class="metric-val" id="summary-difference">${initialResult.totalTcoDifference.toLocaleString()}</span>
+          <span class="metric-sub" id="summary-lower-option">Lower estimated cost: {initialResult.lowerTcoOption === 'ev' ? 'Electric Vehicle' : 'Gas Vehicle'}</span>
+        </div>
+      </div>
+      <p class="summary-text" id="summary-narrative">{initialResult.summaryText}</p>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div class="section-block" id="comparison-section">
+      <div class="section-header">
+        <h2>Metric by Metric Comparison</h2>
+        <p>Direct side-by-side evaluation of acquisition, energy expenditure, and ongoing operating parameters.</p>
+      </div>
+      <ComparisonTable
+        optionAName="Internal Combustion (Gas)"
+        optionBName="Electric Vehicle (EV)"
+        rows={initialComparisonRows}
+      />
+    </div>
+
+    <!-- COST BREAKDOWN -->
+    <div class="section-block" id="cost-breakdown-section">
+      <div class="section-header">
+        <h2>Cumulative Cost Components</h2>
+        <p>Categorized sum of all cash outflows and net residual asset value across the operating horizon.</p>
+      </div>
+      <CostBreakdown
+        optionAName="Gas Vehicle"
+        optionBName="Electric Vehicle"
+        items={initialCostItems}
+      />
+    </div>
+  </div>
+</DecisionLayout>
+
+<script>
+  import { calculateGasVsEv, GAS_VS_EV_DEFAULTS, type GasVsEvInput } from '../../lib/decisions/gasVsEv';
+
+  function initCalculator() {
+    const inputs = {
+      annualMiles: document.getElementById('input-annual-miles') as HTMLInputElement,
+      horizonYears: document.getElementById('input-horizon-years') as HTMLInputElement,
+      gasVehiclePrice: document.getElementById('input-gas-price') as HTMLInputElement,
+      gasMpg: document.getElementById('input-gas-mpg') as HTMLInputElement,
+      gasPricePerGallon: document.getElementById('input-gas-per-gallon') as HTMLInputElement,
+      gasAnnualMaintenance: document.getElementById('input-gas-maint') as HTMLInputElement,
+      gasInsuranceAnnual: document.getElementById('input-gas-insurance') as HTMLInputElement,
+      gasResaleValuePercent: document.getElementById('input-gas-resale') as HTMLInputElement,
+      evVehiclePrice: document.getElementById('input-ev-price') as HTMLInputElement,
+      evEfficiencyMilesPerKwh: document.getElementById('input-ev-efficiency') as HTMLInputElement,
+      electricityCostPerKwh: document.getElementById('input-ev-elec-rate') as HTMLInputElement,
+      evTaxCredit: document.getElementById('input-ev-tax-credit') as HTMLInputElement,
+      evHomeChargerInstall: document.getElementById('input-ev-charger') as HTMLInputElement,
+      evAnnualMaintenance: document.getElementById('input-ev-maint') as HTMLInputElement,
+      evInsuranceAnnual: document.getElementById('input-ev-insurance') as HTMLInputElement,
+      evResaleValuePercent: document.getElementById('input-ev-resale') as HTMLInputElement,
+    };
+
+    function recalculate() {
+      const currentInput: GasVsEvInput = {
+        annualMiles: Number(inputs.annualMiles.value) || GAS_VS_EV_DEFAULTS.annualMiles,
+        horizonYears: Number(inputs.horizonYears.value) || GAS_VS_EV_DEFAULTS.horizonYears,
+        gasVehiclePrice: Number(inputs.gasVehiclePrice.value) || GAS_VS_EV_DEFAULTS.gasVehiclePrice,
+        gasMpg: Number(inputs.gasMpg.value) || GAS_VS_EV_DEFAULTS.gasMpg,
+        gasPricePerGallon: Number(inputs.gasPricePerGallon.value) || GAS_VS_EV_DEFAULTS.gasPricePerGallon,
+        gasAnnualMaintenance: Number(inputs.gasAnnualMaintenance.value) || GAS_VS_EV_DEFAULTS.gasAnnualMaintenance,
+        gasInsuranceAnnual: Number(inputs.gasInsuranceAnnual.value) || GAS_VS_EV_DEFAULTS.gasInsuranceAnnual,
+        gasResaleValuePercent: Number(inputs.gasResaleValuePercent.value) || GAS_VS_EV_DEFAULTS.gasResaleValuePercent,
+        evVehiclePrice: Number(inputs.evVehiclePrice.value) || GAS_VS_EV_DEFAULTS.evVehiclePrice,
+        evEfficiencyMilesPerKwh: Number(inputs.evEfficiencyMilesPerKwh.value) || GAS_VS_EV_DEFAULTS.evEfficiencyMilesPerKwh,
+        electricityCostPerKwh: Number(inputs.electricityCostPerKwh.value) || GAS_VS_EV_DEFAULTS.electricityCostPerKwh,
+        evTaxCredit: Number(inputs.evTaxCredit.value) || 0,
+        evHomeChargerInstall: Number(inputs.evHomeChargerInstall.value) || 0,
+        evAnnualMaintenance: Number(inputs.evAnnualMaintenance.value) || GAS_VS_EV_DEFAULTS.evAnnualMaintenance,
+        evInsuranceAnnual: Number(inputs.evInsuranceAnnual.value) || GAS_VS_EV_DEFAULTS.evInsuranceAnnual,
+        evResaleValuePercent: Number(inputs.evResaleValuePercent.value) || GAS_VS_EV_DEFAULTS.evResaleValuePercent,
+      };
+
+      const result = calculateGasVsEv(currentInput);
+
+      // Update Summary
+      const gasTco = document.getElementById('summary-gas-tco');
+      const evTco = document.getElementById('summary-ev-tco');
+      const diffEl = document.getElementById('summary-difference');
+      const lowerEl = document.getElementById('summary-lower-option');
+      const narrativeEl = document.getElementById('summary-narrative');
+      const horizonBadge = document.getElementById('summary-horizon-badge');
+
+      if (gasTco) gasTco.textContent = `$${result.gasTotalCostOfOwnership.toLocaleString()}`;
+      if (evTco) evTco.textContent = `$${result.evTotalCostOfOwnership.toLocaleString()}`;
+      if (diffEl) diffEl.textContent = `$${result.totalTcoDifference.toLocaleString()}`;
+      if (lowerEl) {
+        lowerEl.textContent = `Lower estimated cost: ${result.lowerTcoOption === 'ev' ? 'Electric Vehicle' : 'Gas Vehicle'}`;
+      }
+      if (narrativeEl) narrativeEl.textContent = result.summaryText;
+      if (horizonBadge) horizonBadge.textContent = `${result.horizonYears}-Year Analytical Model`;
+    }
+
+    Object.values(inputs).forEach((input) => {
+      if (input) {
+        input.addEventListener('input', recalculate);
+        input.addEventListener('change', recalculate);
+      }
+    });
+
+    document.getElementById('btn-reset-gas-ev')?.addEventListener('click', () => {
+      inputs.annualMiles.value = String(GAS_VS_EV_DEFAULTS.annualMiles);
+      inputs.horizonYears.value = String(GAS_VS_EV_DEFAULTS.horizonYears);
+      inputs.gasVehiclePrice.value = String(GAS_VS_EV_DEFAULTS.gasVehiclePrice);
+      inputs.gasMpg.value = String(GAS_VS_EV_DEFAULTS.gasMpg);
+      inputs.gasPricePerGallon.value = String(GAS_VS_EV_DEFAULTS.gasPricePerGallon);
+      inputs.gasAnnualMaintenance.value = String(GAS_VS_EV_DEFAULTS.gasAnnualMaintenance);
+      inputs.gasInsuranceAnnual.value = String(GAS_VS_EV_DEFAULTS.gasInsuranceAnnual);
+      inputs.gasResaleValuePercent.value = String(GAS_VS_EV_DEFAULTS.gasResaleValuePercent);
+      inputs.evVehiclePrice.value = String(GAS_VS_EV_DEFAULTS.evVehiclePrice);
+      inputs.evEfficiencyMilesPerKwh.value = String(GAS_VS_EV_DEFAULTS.evEfficiencyMilesPerKwh);
+      inputs.electricityCostPerKwh.value = String(GAS_VS_EV_DEFAULTS.electricityCostPerKwh);
+      inputs.evTaxCredit.value = String(GAS_VS_EV_DEFAULTS.evTaxCredit);
+      inputs.evHomeChargerInstall.value = String(GAS_VS_EV_DEFAULTS.evHomeChargerInstall);
+      inputs.evAnnualMaintenance.value = String(GAS_VS_EV_DEFAULTS.evAnnualMaintenance);
+      inputs.evInsuranceAnnual.value = String(GAS_VS_EV_DEFAULTS.evInsuranceAnnual);
+      inputs.evResaleValuePercent.value = String(GAS_VS_EV_DEFAULTS.evResaleValuePercent);
+      recalculate();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculator);
+  } else {
+    initCalculator();
+  }
+</script>
+
+<style>
+  .summary-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+  .summary-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-primary);
+  }
+  .summary-horizon {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .summary-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-4);
+  }
+  .summary-metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .metric-lbl {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .metric-val {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+  .summary-metric.highlight .metric-val {
+    color: var(--color-primary);
+  }
+  .metric-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+  .summary-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+  .calculator-inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+  }
+  @media (min-width: 900px) {
+    .calculator-inputs-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .shared-params-card {
+      grid-column: 1 / -1;
+    }
+  }
+  .shared-params-card {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .shared-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+  }
+  .shared-inputs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+  }
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  @media (max-width: 580px) {
+    .form-row-2 {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+  .input-with-prefix, .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .currency-prefix {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .unit-label {
+    position: absolute;
+    right: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .input-with-prefix input {
+    padding-left: var(--space-7);
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .input-with-unit input {
+    padding-right: var(--space-16);
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+  .section-block {
+    margin-top: var(--space-10);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+  .section-header {
+    margin-bottom: var(--space-6);
+  }
+  .section-header h2 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-2);
+  }
+  .section-header p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+</style>

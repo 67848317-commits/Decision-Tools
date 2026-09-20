@@ -1,0 +1,354 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { GUIDES, PLANNED_GUIDES } from '../../data/guides';
+import { CATEGORIES } from '../../data/decisions';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Decision Guides | Methodological Trade-Off Frameworks',
+  description: 'In-depth analytical frameworks for everyday decisions across housing, career, transportation, and personal finance.',
+  url: 'https://decisiontools.org/guides',
+};
+---
+
+<BaseLayout
+  title="Decision Guides | Frameworks for Real-Life Choices"
+  description="In-depth analytical frameworks and methodology breakdowns to help you evaluate major financial, career, and household trade-offs."
+  canonicalPath="/guides"
+  structuredData={structuredData}
+>
+  <div class="guides-page">
+    <div class="container">
+      <div class="page-breadcrumbs">
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Decision Guides' }]} />
+      </div>
+
+      <header class="page-header">
+        <span class="page-kicker">Editorial Frameworks</span>
+        <h1 class="page-title">Decision Guides</h1>
+        <p class="page-lead">
+          Comprehensive, non-prescriptive frameworks explaining the mathematical principles, hidden costs, and opportunity trade-offs behind major life decisions.
+        </p>
+      </header>
+
+      <!-- Category Filter Pills -->
+      <div class="categories-bar">
+        <span class="categories-label">Filter by Area:</span>
+        <div class="categories-tags">
+          <a href="#all" class="cat-tag active">All Guides ({GUIDES.length})</a>
+          {CATEGORIES.map((cat) => (
+            <a href={`#cat-${cat.id}`} class="cat-tag">{cat.name}</a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Guides Grid -->
+      <div class="guides-grid">
+        {GUIDES.map((guide) => (
+          <article class="guide-card" id={`guide-${guide.slug}`}>
+            <div class="guide-meta">
+              <span class="badge badge-neutral">{guide.topicTag}</span>
+              <span class="read-time">{guide.readTime}</span>
+            </div>
+
+            <h2 class="guide-title">
+              <a href={`/guides/${guide.slug}`} class="guide-link">{guide.title}</a>
+            </h2>
+
+            <p class="guide-desc">{guide.description}</p>
+
+            <div class="guide-footer">
+              <span class="guide-date">{guide.publishDate}</span>
+              <a href={`/guides/${guide.slug}`} class="guide-cta">
+                Read Guide
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <!-- Upcoming Editorial Topics -->
+      <section class="upcoming-section" aria-labelledby="upcoming-heading">
+        <div class="upcoming-header">
+          <span class="page-kicker">Content Architecture</span>
+          <h2 id="upcoming-heading" class="upcoming-title">Topics In Editorial Preparation</h2>
+          <p class="upcoming-desc">
+            The following decision guides are scheduled in our content roadmap, expanding methodological coverage across all 10 decision calculators.
+          </p>
+        </div>
+        <div class="upcoming-grid">
+          {PLANNED_GUIDES.filter((p) => !p.isPublished).map((item) => (
+            <div class="upcoming-card">
+              <div class="upcoming-card-header">
+                <span class="badge badge-neutral">{item.category}</span>
+                <span class="badge-status">In Editorial Review</span>
+              </div>
+              <h3 class="upcoming-card-title">{item.title}</h3>
+              <p class="upcoming-card-link">Pairs with: <a href={`/decisions/${item.relatedDecisionSlug}`}>Interactive Calculator →</a></p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Bottom Principle Callout -->
+      <div class="principle-banner">
+        <h3>Our Analytical Stance</h3>
+        <p>
+          We do not publish sponsored brand rankings, affiliate product selections, or automated recommendations. Our guides explain mathematical formulas, unrecoverable outlays, and trade-off parameters so you can evaluate options on your own terms.
+        </p>
+        <a href="/about" class="btn btn-secondary">Read Our Methodology & Principles →</a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .guides-page {
+    padding: var(--space-8) 0 var(--space-16);
+  }
+  .page-breadcrumbs {
+    margin-bottom: var(--space-6);
+  }
+  .page-header {
+    max-width: 760px;
+    margin-bottom: var(--space-8);
+  }
+  .page-kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
+  .page-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-3);
+  }
+  .page-lead {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+  .categories-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
+    flex-wrap: wrap;
+  }
+  .categories-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+  .categories-tags {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .cat-tag {
+    font-size: 0.85rem;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .cat-tag:hover, .cat-tag.active {
+    background-color: var(--color-primary);
+    color: #ffffff;
+    border-color: var(--color-primary);
+  }
+  .guides-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-12);
+  }
+  @media (min-width: 768px) {
+    .guides-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .guides-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .guide-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .guide-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .guide-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+  .read-time {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+  .guide-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: var(--space-3);
+  }
+  .guide-link {
+    color: var(--color-text-main);
+    text-decoration: none;
+  }
+  .guide-link:hover {
+    color: var(--color-primary);
+  }
+  .guide-desc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-6);
+    flex-grow: 1;
+  }
+  .guide-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+  .guide-date {
+    font-size: 0.8rem;
+    color: var(--color-text-subtle);
+  }
+  .guide-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+  .principle-banner {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .principle-banner h3 {
+    font-size: 1.3rem;
+    margin-bottom: var(--space-3);
+  }
+  .principle-banner p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: var(--space-6);
+  }
+  .upcoming-section {
+    margin-bottom: var(--space-16);
+    padding-top: var(--space-10);
+    border-top: 1px solid var(--color-border);
+  }
+  .upcoming-header {
+    margin-bottom: var(--space-6);
+    max-width: 720px;
+  }
+  .upcoming-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: var(--space-1) 0 var(--space-2);
+    color: var(--color-text-main);
+  }
+  .upcoming-desc {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+  .upcoming-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 640px) {
+    .upcoming-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .upcoming-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .upcoming-card {
+    background-color: var(--color-surface-subtle);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .upcoming-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .badge-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .upcoming-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin: 0;
+    line-height: 1.4;
+    flex-grow: 1;
+  }
+  .upcoming-card-link {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin: 0;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border);
+  }
+  .upcoming-card-link a {
+    color: var(--color-brand-accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .upcoming-card-link a:hover {
+    text-decoration: underline;
+  }
+</style>
