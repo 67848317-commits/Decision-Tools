@@ -22,6 +22,7 @@ const {
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.org';
 const canonicalUrl = `${siteUrl}${canonicalPath || Astro.url.pathname}`;
 const fullTitle = title.includes('Decision Tools') ? title : `${title} | Decision Tools`;
+const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
 
 const orgSchema = {
   '@context': 'https://schema.org',
@@ -78,15 +79,18 @@ const webSiteSchema = {
     )}
 
     <!-- Google tag (gtag.js) -->
-    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-7MH3T18Q4T"></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      window.gtag = gtag;
-      gtag('js', new Date());
-
-      gtag('config', 'G-7MH3T18Q4T');
-    </script>
+    {gaMeasurementId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
+        <script is:inline define:vars={{ gaMeasurementId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', gaMeasurementId);
+        </script>
+      </>
+    )}
 
     <!-- Analytics Safety Shim: Safe non-blocking event dispatcher for gtag / dataLayer -->
     <script is:inline>
