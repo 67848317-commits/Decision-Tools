@@ -48,7 +48,7 @@ const crumbs: CrumbItem[] = [
   { label: h1 },
 ];
 
-const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.practicaltools.org';
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.org';
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -70,7 +70,7 @@ const structuredData = {
   canonicalPath={canonicalPath}
   structuredData={structuredData}
 >
-  <div class="decision-page-wrapper">
+  <div class="decision-page-wrapper" data-calculator-slug={effectiveSlug} data-calculator-name={title}>
     <div class="container">
       <!-- 1. BREADCRUMBS -->
       <div class="decision-breadcrumbs">
@@ -312,3 +312,139 @@ const structuredData = {
     border: 0;
   }
 </style>
+
+<script>
+  function initCalculatorAnalytics() {
+    const wrapper = document.querySelector('.decision-page-wrapper[data-calculator-slug]');
+    if (!wrapper) return;
+
+    const calcSlug = wrapper.getAttribute('data-calculator-slug') || '';
+    const calcName = wrapper.getAttribute('data-calculator-name') || calcSlug;
+    if (!calcSlug) return;
+
+    let hasStarted = false;
+    let completeDebounceTimer: number | undefined;
+    let isResetting = false;
+    let lastCompleteTime = 0;
+
+    function track(eventName: string, params: Record<string, any> = {}) {
+      if (typeof (window as any).trackDecisionEvent === 'function') {
+        (window as any).trackDecisionEvent(eventName, params);
+      } else if (Array.isArray((window as any).dataLayer)) {
+        (window as any).dataLayer.push({ event: eventName, ...params });
+      }
+    }
+
+    // 1. calculator_start: User meaningfully begins interacting with the calculator inputs
+    // Does NOT fire on page load; strictly fires on the first interactive event in the inputs section
+    const inputsSection = wrapper.querySelector('.inputs-section');
+    if (inputsSection) {
+      const handleStart = (e: Event) => {
+        if (!hasStarted && (e.isTrusted !== false)) {
+          hasStarted = true;
+          track('calculator_start', {
+            calculator_slug: calcSlug,
+            calculator_name: calcName,
+          });
+        }
+      };
+
+      inputsSection.addEventListener('focusin', handleStart, { passive: true });
+      inputsSection.addEventListener('input', handleStart, { passive: true });
+      inputsSection.addEventListener('change', handleStart, { passive: true });
+    }
+
+    // 2. calculator_complete: Calculator produces a meaningful result after valid input
+    // Does NOT fire on page load. Requires hasStarted === true and no active reset.
+    function triggerComplete() {
+      if (!hasStarted || isResetting) return;
+
+      const now = Date.now();
+      if (now - lastCompleteTime < 1000) return; // Prevent duplicate rapid events
+
+      // Check if there are visible validation errors
+      const errorElements = Array.from(document.querySelectorAll('.validation-error'));
+      const hasErrors = errorElements.some(
+        (el) => el.textContent && el.textContent.trim().length > 0
+      );
+      if (hasErrors) return;
+
+      lastCompleteTime = now;
+      track('calculator_complete', {
+        calculator_slug: calcSlug,
+        calculator_name: calcName,
+      });
+    }
+
+    // Explicit Calculate buttons if present
+    const calcBtns = wrapper.querySelectorAll('button[id^="btn-calc"], button[id="btn-calculate"], button.btn-calculate');
+    calcBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setTimeout(triggerComplete, 100);
+      });
+    });
+
+    // Inputs change / debounce
+    if (inputsSection) {
+      inputsSection.addEventListener('change', (e) => {
+        if ((e as Event).isTrusted !== false) {
+          setTimeout(triggerComplete, 100);
+        }
+      });
+
+      inputsSection.addEventListener('input', (e) => {
+        if ((e as Event).isTrusted !== false) {
+          if (completeDebounceTimer) clearTimeout(completeDebounceTimer);
+          completeDebounceTimer = window.setTimeout(triggerComplete, 800);
+        }
+      });
+    }
+
+    // 3. calculator_reset: User resets calculator inputs
+    const resetBtns = wrapper.querySelectorAll('button[id^="btn-reset"], button.btn-reset, button[id*="reset"]');
+    resetBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        if ((e as Event).isTrusted !== false) {
+          isResetting = true;
+          if (completeDebounceTimer) clearTimeout(completeDebounceTimer);
+          track('calculator_reset', {
+            calculator_slug: calcSlug,
+            calculator_name: calcName,
+          });
+          // Release resetting lock after reset inputs finish populating
+          setTimeout(() => {
+            isResetting = false;
+          }, 400);
+        }
+      });
+    });
+
+    // 5. calculator_to_guide_click: User clicks a guide link from a calculator
+    wrapper.addEventListener('click', (e) => {
+      const anchor = (e.target as HTMLElement)?.closest('a');
+      if (!anchor) return;
+      const href = anchor.getAttribute('href');
+      if (href && href.startsWith('/guides/')) {
+        const guideSlug = href.replace('/guides/', '').replace(/\/$/, '');
+        if (!guideSlug || guideSlug === 'index') return;
+
+        const guideTitle = anchor.querySelector('.guide-title')?.textContent?.trim() ||
+                           anchor.textContent?.trim() ||
+                           guideSlug;
+
+        track('calculator_to_guide_click', {
+          calculator_slug: calcSlug,
+          calculator_name: calcName,
+          guide_slug: guideSlug,
+          guide_name: guideTitle,
+        });
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculatorAnalytics);
+  } else {
+    initCalculatorAnalytics();
+  }
+</script>

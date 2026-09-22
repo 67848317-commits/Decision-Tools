@@ -41,6 +41,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Renting',
     optionBName: 'Buying',
     keyMetric: 'Net Housing Cost Difference',
+    primaryKeyword: 'rent vs buy calculator',
     relatedGuides: ['rent-vs-buy', 'rent-vs-buy-hidden-costs'],
     relatedDecisions: ['lease-vs-buy', 'debt-vs-invest'],
     faq: [
@@ -66,6 +67,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Offer A',
     optionBName: 'Offer B',
     keyMetric: 'Net Effective Compensation',
+    primaryKeyword: 'job offer comparison calculator',
     relatedGuides: ['how-to-compare-job-offers', 'how-to-value-job-benefits'],
     relatedDecisions: ['diy-vs-hire', 'debt-vs-invest'],
     faq: [
@@ -91,6 +93,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Lease Vehicle',
     optionBName: 'Purchase Vehicle',
     keyMetric: 'Net Cost Difference After Term',
+    primaryKeyword: 'lease vs buy calculator',
     relatedGuides: ['lease-vs-buy', 'true-cost-of-leasing-a-car'],
     relatedDecisions: ['gas-vs-ev', 'rent-vs-buy'],
     faq: [
@@ -116,6 +119,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Internal Combustion (Gas)',
     optionBName: 'Electric Vehicle (EV)',
     keyMetric: '5-Year Total Energy & Maintenance Cost',
+    primaryKeyword: 'gas vs electric car cost calculator',
     relatedGuides: ['gas-vs-ev-cost', 'how-to-calculate-ev-charging-cost'],
     relatedDecisions: ['lease-vs-buy', 'rent-vs-buy'],
     faq: [
@@ -141,6 +145,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Repair Existing',
     optionBName: 'Buy Replacement',
     keyMetric: 'Annualized Operating Cost',
+    primaryKeyword: 'repair or replace calculator',
     relatedGuides: ['buy-vs-repair', 'when-does-repairing-an-appliance-make-sense'],
     relatedDecisions: ['diy-vs-hire', 'lease-vs-buy'],
     faq: [
@@ -166,6 +171,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Do It Yourself (DIY)',
     optionBName: 'Hire Professional',
     keyMetric: 'Total Resource Cost (Cash + Time)',
+    primaryKeyword: 'DIY vs hire calculator',
     relatedGuides: ['diy-vs-hire', 'how-to-estimate-the-cost-of-diy-projects'],
     relatedDecisions: ['buy-vs-repair', 'job-offer'],
     faq: [
@@ -191,6 +197,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Accelerate Debt Payoff',
     optionBName: 'Invest Available Capital',
     keyMetric: 'Net Financial Position Difference',
+    primaryKeyword: 'pay off debt vs invest calculator',
     relatedGuides: ['pay-off-debt-vs-invest', 'how-to-compare-debt-interest-with-investment-returns'],
     relatedDecisions: ['rent-vs-buy', 'job-offer'],
     faq: [
@@ -216,6 +223,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'One-Time Purchase',
     optionBName: 'Recurring Subscription',
     keyMetric: 'Break-Even Duration',
+    primaryKeyword: 'buy vs subscription calculator',
     relatedGuides: ['buy-vs-subscribe', 'how-to-calculate-subscription-break-even'],
     relatedDecisions: ['lease-vs-buy', 'bulk-buy'],
     faq: [
@@ -241,6 +249,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Purchase New',
     optionBName: 'Purchase Used',
     keyMetric: 'Total 3-Year & 5-Year Ownership Cost',
+    primaryKeyword: 'new vs used car calculator',
     relatedGuides: ['new-vs-used', 'how-to-compare-the-cost-of-a-new-and-used-car'],
     relatedDecisions: ['lease-vs-buy', 'gas-vs-ev'],
     faq: [
@@ -266,6 +275,7 @@ export const DECISIONS: DecisionItem[] = [
     optionAName: 'Standard Unit Size',
     optionBName: 'Bulk Quantity Package',
     keyMetric: 'Net Savings After Spoilage & Waste',
+    primaryKeyword: 'bulk buying calculator',
     relatedGuides: ['bulk-buying', 'how-to-calculate-bulk-purchase-savings'],
     relatedDecisions: ['buy-vs-subscribe', 'buy-vs-repair'],
     faq: [

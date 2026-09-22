@@ -24,6 +24,7 @@ export interface DecisionItem {
   optionAName: string;
   optionBName: string;
   keyMetric: string;
+  primaryKeyword?: string;
   relatedGuides: string[];
   relatedDecisions: string[];
   faq: Array<{ question: string; answer: string }>;
@@ -35,6 +36,7 @@ export interface GuideItem {
   description: string;
   category: DecisionCategory;
   readTime: string;
+  primaryKeyword?: string;
   relatedDecisionSlug: string;
   relatedGuides: string[];
 }

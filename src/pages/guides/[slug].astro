@@ -21,7 +21,7 @@ interface Props {
 const { guide } = Astro.props;
 const relatedDecision = DECISIONS.find((d) => d.slug === guide.relatedDecisionSlug);
 
-const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.practicaltools.org';
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.org';
 const guideUrl = `${siteUrl}/guides/${guide.slug}`;
 
 const articleSchema: Record<string, any> = {
@@ -73,7 +73,7 @@ if (guide.faq && guide.faq.length > 0) {
   ogType="article"
   structuredData={structuredData}
 >
-  <article class="guide-article" id={`guide-article-${guide.slug}`}>
+  <article class="guide-article" id={`guide-article-${guide.slug}`} data-guide-slug={guide.slug} data-guide-name={guide.title}>
     <div class="container">
       <div class="guide-breadcrumbs">
         <Breadcrumbs
@@ -404,3 +404,49 @@ if (guide.faq && guide.faq.length > 0) {
     position: relative;
   }
 </style>
+
+<script>
+  function initGuideAnalytics() {
+    const article = document.querySelector('[data-guide-slug]');
+    if (!article) return;
+
+    const guideSlug = article.getAttribute('data-guide-slug') || '';
+    const guideName = article.getAttribute('data-guide-name') || guideSlug;
+
+    function track(eventName: string, params: Record<string, any> = {}) {
+      if (typeof (window as any).trackDecisionEvent === 'function') {
+        (window as any).trackDecisionEvent(eventName, params);
+      } else if (Array.isArray((window as any).dataLayer)) {
+        (window as any).dataLayer.push({ event: eventName, ...params });
+      }
+    }
+
+    article.addEventListener('click', (e) => {
+      const anchor = (e.target as HTMLElement)?.closest('a');
+      if (!anchor) return;
+      const href = anchor.getAttribute('href');
+      if (href && href.startsWith('/decisions/')) {
+        const calcSlug = href.replace('/decisions/', '').replace(/\/$/, '');
+        if (!calcSlug || calcSlug === 'index') return;
+
+        // Discover calculator name from nearest heading/badge or text content
+        const calcTitle = anchor.querySelector('.calculator-tool-title, .callout-title')?.textContent?.trim() ||
+                          anchor.textContent?.trim() ||
+                          calcSlug;
+
+        track('guide_to_calculator_click', {
+          guide_slug: guideSlug,
+          guide_name: guideName,
+          calculator_slug: calcSlug,
+          calculator_name: calcTitle,
+        });
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGuideAnalytics);
+  } else {
+    initGuideAnalytics();
+  }
+</script>

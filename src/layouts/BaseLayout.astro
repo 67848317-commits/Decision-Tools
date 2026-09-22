@@ -19,7 +19,7 @@ const {
   structuredData,
 } = Astro.props;
 
-const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.practicaltools.org';
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.org';
 const canonicalUrl = `${siteUrl}${canonicalPath || Astro.url.pathname}`;
 const fullTitle = title.includes('Decision Tools') ? title : `${title} | Decision Tools`;
 
@@ -76,6 +76,33 @@ const webSiteSchema = {
         <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
       )
     )}
+
+    <!-- Google tag (gtag.js) -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-7MH3T18Q4T"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
+      gtag('js', new Date());
+
+      gtag('config', 'G-7MH3T18Q4T');
+    </script>
+
+    <!-- Analytics Safety Shim: Safe non-blocking event dispatcher for gtag / dataLayer -->
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      window.trackDecisionEvent = function(eventName, params) {
+        try {
+          if (typeof window.gtag === 'function') {
+            window.gtag('event', eventName, params);
+          } else {
+            window.dataLayer.push({ event: eventName, ...(params || {}) });
+          }
+        } catch (e) {
+          // Fail safely without affecting UI or calculator execution
+        }
+      };
+    </script>
   </head>
   <body>
     <a href="#main-content" class="skip-to-content">Skip to main content</a>

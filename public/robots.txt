@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://decision-tools.practicaltools.org/sitemap.xml
+Sitemap: https://decision-tools.org/sitemap.xml

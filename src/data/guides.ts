@@ -28,6 +28,7 @@ export interface GuideItem {
   category: 'housing' | 'career' | 'transportation' | 'finance' | 'lifestyle';
   publishDate: string;
   modifiedDate?: string;
+  primaryKeyword?: string;
   relatedDecisionSlug: string;
   relatedGuideSlugs?: string[];
   summaryPoints: string[];
@@ -42,6 +43,12 @@ export interface PlannedGuideTopic {
   category: 'housing' | 'career' | 'transportation' | 'finance' | 'lifestyle';
   relatedDecisionSlug: string;
   isPublished: boolean;
+  primaryKeyword?: string;
+  targetTitle?: string;
+  targetMetaDescription?: string;
+  targetH1?: string;
+  searchIntent?: string;
+  relatedGuideSlugs?: string[];
 }
 
 /**
@@ -56,6 +63,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'housing',
     relatedDecisionSlug: 'rent-vs-buy',
     isPublished: true,
+    primaryKeyword: 'rent vs buy trade-offs',
   },
   {
     slug: 'rent-vs-buy-hidden-costs',
@@ -64,6 +72,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'housing',
     relatedDecisionSlug: 'rent-vs-buy',
     isPublished: true,
+    primaryKeyword: 'hidden costs of homeownership vs renting',
   },
   {
     slug: 'how-to-compare-job-offers',
@@ -72,6 +81,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'career',
     relatedDecisionSlug: 'job-offer',
     isPublished: true,
+    primaryKeyword: 'how to compare job offers',
   },
   {
     slug: 'how-to-value-job-benefits',
@@ -80,14 +90,21 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'career',
     relatedDecisionSlug: 'job-offer',
     isPublished: true,
+    primaryKeyword: 'how to value job benefits',
   },
   {
     slug: 'lease-vs-buy',
     title: 'Lease vs. Buy: Financing vs. Asset Acquisition',
-    shortTitle: 'Lease vs Buy Overview',
+    shortTitle: 'Lease vs Buy Framework',
     category: 'transportation',
     relatedDecisionSlug: 'lease-vs-buy',
     isPublished: false,
+    primaryKeyword: 'car leasing vs buying pros and cons',
+    targetTitle: 'Lease vs. Buy: Financing vs. Asset Acquisition Framework | Decision Tools',
+    targetMetaDescription: 'Evaluate vehicle leasing vs buying through cash flow velocity, money factors, equity retention, and ownership horizon trade-offs.',
+    targetH1: 'Lease vs. Buy: Financing vs. Asset Acquisition',
+    searchIntent: 'Informational / Methodological Framework',
+    relatedGuideSlugs: ['true-cost-of-leasing-a-car', 'how-to-compare-the-cost-of-a-new-and-used-car'],
   },
   {
     slug: 'true-cost-of-leasing-a-car',
@@ -96,6 +113,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'transportation',
     relatedDecisionSlug: 'lease-vs-buy',
     isPublished: true,
+    primaryKeyword: 'true cost of leasing a car',
   },
   {
     slug: 'gas-vs-ev-cost',
@@ -104,6 +122,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'transportation',
     relatedDecisionSlug: 'gas-vs-ev',
     isPublished: true,
+    primaryKeyword: 'gas vs electric car ownership cost',
   },
   {
     slug: 'how-to-calculate-ev-charging-cost',
@@ -112,6 +131,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'transportation',
     relatedDecisionSlug: 'gas-vs-ev',
     isPublished: true,
+    primaryKeyword: 'how to calculate ev charging cost',
   },
   {
     slug: 'buy-vs-repair',
@@ -120,6 +140,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'lifestyle',
     relatedDecisionSlug: 'buy-vs-repair',
     isPublished: true,
+    primaryKeyword: 'repair or replace appliance',
   },
   {
     slug: 'when-does-repairing-an-appliance-make-sense',
@@ -128,6 +149,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'lifestyle',
     relatedDecisionSlug: 'buy-vs-repair',
     isPublished: true,
+    primaryKeyword: 'is it worth repairing an old appliance',
   },
   {
     slug: 'diy-vs-hire',
@@ -136,6 +158,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'lifestyle',
     relatedDecisionSlug: 'diy-vs-hire',
     isPublished: true,
+    primaryKeyword: 'diy vs hiring a professional',
   },
   {
     slug: 'how-to-estimate-the-cost-of-diy-projects',
@@ -144,6 +167,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'lifestyle',
     relatedDecisionSlug: 'diy-vs-hire',
     isPublished: true,
+    primaryKeyword: 'how to estimate diy project costs',
   },
   {
     slug: 'pay-off-debt-vs-invest',
@@ -152,6 +176,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'finance',
     relatedDecisionSlug: 'debt-vs-invest',
     isPublished: true,
+    primaryKeyword: 'paying off debt vs investing trade-off',
   },
   {
     slug: 'how-to-compare-debt-interest-with-investment-returns',
@@ -160,14 +185,21 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'finance',
     relatedDecisionSlug: 'debt-vs-invest',
     isPublished: true,
+    primaryKeyword: 'compare debt interest rate to investment return',
   },
   {
     slug: 'buy-vs-subscribe',
     title: 'Buy Outright vs. Monthly Subscription Break-Even Analysis',
-    shortTitle: 'Buy vs Subscribe',
+    shortTitle: 'Buy vs Subscribe Analysis',
     category: 'lifestyle',
     relatedDecisionSlug: 'buy-vs-subscribe',
     isPublished: false,
+    primaryKeyword: 'subscription vs buying outright pros and cons',
+    targetTitle: 'Buy Outright vs. Monthly Subscription Break-Even Analysis | Decision Tools',
+    targetMetaDescription: 'Analyze software and equipment ownership versus recurring subscriptions across cash flow flexibility, update cycles, obsolescence, and long-term costs.',
+    targetH1: 'Buy Outright vs. Monthly Subscription Break-Even Analysis',
+    searchIntent: 'Informational / Methodological Framework',
+    relatedGuideSlugs: ['how-to-calculate-subscription-break-even', 'how-to-calculate-bulk-purchase-savings'],
   },
   {
     slug: 'how-to-calculate-subscription-break-even',
@@ -176,14 +208,21 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'lifestyle',
     relatedDecisionSlug: 'buy-vs-subscribe',
     isPublished: true,
+    primaryKeyword: 'how to calculate subscription break even',
   },
   {
     slug: 'new-vs-used',
     title: 'New vs. Used: Multi-Year Total Cost of Ownership',
-    shortTitle: 'New vs Used Principles',
+    shortTitle: 'New vs Used Ownership Model',
     category: 'transportation',
     relatedDecisionSlug: 'new-vs-used',
     isPublished: false,
+    primaryKeyword: 'buying a new vs used car trade-offs',
+    targetTitle: 'New vs. Used: Multi-Year Total Cost of Ownership Framework | Decision Tools',
+    targetMetaDescription: 'Examine steep early depreciation, warranty protections, financing interest spreads, and maintenance variance between new and pre-owned purchases.',
+    targetH1: 'New vs. Used: Multi-Year Total Cost of Ownership',
+    searchIntent: 'Informational / Methodological Framework',
+    relatedGuideSlugs: ['how-to-compare-the-cost-of-a-new-and-used-car', 'true-cost-of-leasing-a-car'],
   },
   {
     slug: 'how-to-compare-the-cost-of-a-new-and-used-car',
@@ -192,14 +231,21 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'transportation',
     relatedDecisionSlug: 'new-vs-used',
     isPublished: true,
+    primaryKeyword: 'how to compare new and used car costs',
   },
   {
     slug: 'bulk-buying',
     title: 'Bulk Buying Economics: Unit Prices, Spoilage, and Capital Lockup',
-    shortTitle: 'Bulk Buying Principles',
+    shortTitle: 'Bulk Buying Economics',
     category: 'lifestyle',
     relatedDecisionSlug: 'bulk-buy',
     isPublished: false,
+    primaryKeyword: 'is bulk buying worth it',
+    targetTitle: 'Bulk Buying Economics: Unit Prices, Spoilage, and Capital Lockup | Decision Tools',
+    targetMetaDescription: 'Evaluate volume warehouse discounts against household consumption velocity, inventory holding constraints, upfront capital lockup, and spoilage risk.',
+    targetH1: 'Bulk Buying Economics: Unit Prices, Spoilage, and Capital Lockup',
+    searchIntent: 'Informational / Methodological Framework',
+    relatedGuideSlugs: ['how-to-calculate-bulk-purchase-savings', 'how-to-calculate-subscription-break-even'],
   },
   {
     slug: 'how-to-calculate-bulk-purchase-savings',
@@ -208,6 +254,7 @@ export const PLANNED_GUIDES: PlannedGuideTopic[] = [
     category: 'lifestyle',
     relatedDecisionSlug: 'bulk-buy',
     isPublished: true,
+    primaryKeyword: 'how to calculate bulk purchase savings',
   },
 ];
 
