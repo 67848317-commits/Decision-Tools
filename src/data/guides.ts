@@ -28,6 +28,8 @@ export interface GuideItem {
   category: 'housing' | 'career' | 'transportation' | 'finance' | 'lifestyle';
   publishDate: string;
   modifiedDate?: string;
+  publishDateIso?: string;
+  modifiedDateIso?: string;
   primaryKeyword?: string;
   relatedDecisionSlug: string;
   relatedGuideSlugs?: string[];

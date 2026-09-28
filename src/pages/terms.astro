@@ -1,0 +1,288 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+const siteUrl = 'https://decision-tools.org';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Terms of Service | Decision Tools',
+  description: 'Terms of service and analytical disclaimer for Decision Tools. Transparent modeling for educational and informational purposes.',
+  url: `${siteUrl}/terms`,
+};
+---
+
+<BaseLayout
+  title="Terms of Service | Decision Tools"
+  description="Read the terms of service for Decision Tools: analytical modeling and informational trade-off frameworks. No financial, legal, or professional advice."
+  canonicalPath="/terms"
+  structuredData={structuredData}
+>
+  <div class="legal-page">
+    <div class="container">
+      <div class="page-breadcrumbs">
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Terms of Service' }]} />
+      </div>
+
+      <header class="legal-header">
+        <span class="legal-kicker">Usage Terms & Disclaimer</span>
+        <h1 class="legal-title">Terms of Service</h1>
+        <p class="legal-lead">
+          Decision Tools provides free analytical calculators and editorial decision frameworks to help you understand complex trade-offs. By accessing or using our website, you agree to these clear and straightforward terms.
+        </p>
+        <div class="legal-meta">
+          <span><strong>Effective Date:</strong> September 1, 2026</span>
+          <span class="meta-separator">•</span>
+          <span><strong>Last Updated:</strong> September 2026</span>
+        </div>
+      </header>
+
+      <!-- Prominent Advisory Notice -->
+      <section class="advisory-card">
+        <div class="advisory-badge">Important Analytical Notice</div>
+        <h2>Educational & Informational Modeling Only</h2>
+        <p>
+          Decision Tools does not tell you what to choose. Our tools model mathematical trade-offs based strictly on the parameters you enter. 
+          <strong>We do not provide certified financial, investment, legal, tax, career, automotive, or engineering advice.</strong> 
+          Always consult a licensed CPA, financial planner, attorney, or qualified professional before making major life or financial commitments.
+        </p>
+      </section>
+
+      <!-- Terms Sections -->
+      <div class="content-sections">
+        <section class="term-section">
+          <h2>1. Informational & Analytical Purpose</h2>
+          <p>
+            All content, interactive calculators, comparisons, and guides available on <strong>https://decision-tools.org</strong> are intended exclusively for general informational, educational, and analytical modeling purposes. 
+          </p>
+          <p>
+            Our core mission is to help individuals visualize trade-offs (e.g., upfront cash vs. ongoing payments, time vs. capital, depreciation vs. maintenance). No output from any tool constitutes a personal recommendation, endorsement, or financial plan.
+          </p>
+        </section>
+
+        <section class="term-section">
+          <h2>2. Calculator Estimates & Assumptions</h2>
+          <p>
+            The calculations produced by our tools are theoretical estimates derived from deterministic mathematical models:
+          </p>
+          <ul>
+            <li><strong>User Input Dependency:</strong> Calculation results depend directly on the numbers and assumptions you supply (such as interest rates, asset growth rates, inflation, holding periods, and personal time valuations).</li>
+            <li><strong>Default Benchmarks:</strong> Default figures provided in our tools (e.g., standard mileage rates, appliance lifespans, historical market returns) represent general statistical benchmarks, not guarantees of current or future conditions.</li>
+            <li><strong>No Guarantee of Future Outcomes:</strong> Real-world financial markets, tax laws, interest rates, property values, and vehicle repair costs fluctuate. Decision Tools cannot predict and does not guarantee actual future performance, cash flows, or financial results.</li>
+          </ul>
+        </section>
+
+        <section class="term-section">
+          <h2>3. User Responsibility</h2>
+          <p>
+            You are solely responsible for evaluating the accuracy, completeness, and usefulness of all calculation results, information, and opinions provided on this website. Any decision you make based on information or estimates obtained from Decision Tools is made entirely at your own risk.
+          </p>
+        </section>
+
+        <section class="term-section">
+          <h2>4. Permitted Use & Intellectual Property</h2>
+          <p>
+            All original content on Decision Tools—including our interactive calculator designs, text, analytical frameworks, and site branding—is protected by applicable copyright and intellectual property laws.
+          </p>
+          <ul>
+            <li><strong>Personal Use:</strong> You are granted a free, non-exclusive, non-transferable license to use our tools and read our guides for your personal, non-commercial decision-making.</li>
+            <li><strong>Restrictions:</strong> You may not scrape, reproduce, duplicate, copy, sell, or exploit any portion of the site’s codebase, formulas, or editorial text for commercial purposes without prior written authorization.</li>
+          </ul>
+        </section>
+
+        <section class="term-section">
+          <h2>5. Third-Party Services & Advertising</h2>
+          <p>
+            Our website uses third-party services, including Google Analytics for anonymous traffic measurement and Google AdSense for advertising. 
+          </p>
+          <ul>
+            <li>Third-party advertisers operate independently and may serve advertisements based on your browsing history. The presence of an advertisement on Decision Tools does not imply an endorsement or recommendation of the advertised product or service.</li>
+            <li>External links to government agencies, data repositories, or reference materials are provided solely for convenience. We do not control and are not liable for the content or practices of external websites.</li>
+          </ul>
+        </section>
+
+        <section class="term-section">
+          <h2>6. Disclaimer of Warranties</h2>
+          <p>
+            Decision Tools is provided on an "as is" and "as available" basis without warranties of any kind, either express or implied. To the maximum extent permitted by applicable law, Decision Tools disclaims all warranties, including but not limited to implied warranties of merchantability, fitness for a particular purpose, non-infringement, or freedom from computer errors or interruptions.
+          </p>
+        </section>
+
+        <section class="term-section">
+          <h2>7. Limitation of Liability</h2>
+          <p>
+            Under no circumstances shall Decision Tools, its creators, authors, contributors, or operators be liable for any direct, indirect, incidental, consequential, special, or exemplary damages—including but not limited to loss of capital, profits, business, or investment—arising out of or in connection with your use or inability to use this website, its calculators, or its editorial content.
+          </p>
+        </section>
+
+        <section class="term-section">
+          <h2>8. Modifications to the Service and Terms</h2>
+          <p>
+            We reserve the right to modify, refine, update, or temporarily discontinue any calculator, guide, or feature at any time without prior notice. We may update these Terms of Service periodically to reflect changes in our service. Continued use of the website following any changes constitutes acceptance of the updated terms.
+          </p>
+        </section>
+
+        <section class="term-section">
+          <h2>9. Questions and Feedback</h2>
+          <p>
+            If you have questions regarding these Terms of Service, wish to report an error or calculation discrepancy, or would like to propose a methodological improvement, please visit our <a href="/contact">Contact Page</a>.
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    padding: var(--space-8) 0 var(--space-16);
+  }
+
+  .page-breadcrumbs {
+    margin-bottom: var(--space-6);
+  }
+
+  .legal-header {
+    max-width: 820px;
+    margin-bottom: var(--space-10);
+  }
+
+  .legal-kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-brand-accent);
+    margin-bottom: var(--space-2);
+  }
+
+  .legal-title {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-4);
+  }
+
+  .legal-lead {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-4);
+  }
+
+  .legal-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: 0.9rem;
+    color: var(--color-text-subtle);
+  }
+
+  .meta-separator {
+    color: var(--color-border-strong);
+  }
+
+  .advisory-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid #d97706; /* Restrained amber notice */
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+    margin-bottom: var(--space-12);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .advisory-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #b45309;
+    margin-bottom: var(--space-2);
+  }
+
+  .advisory-card h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+
+  .advisory-card p {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .advisory-card strong {
+    color: var(--color-text-main);
+  }
+
+  .content-sections {
+    max-width: 820px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .term-section {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+  }
+
+  .term-section h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-4);
+  }
+
+  .term-section p {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-4);
+  }
+
+  .term-section p:last-child {
+    margin-bottom: 0;
+  }
+
+  .term-section ul {
+    margin: 0 0 var(--space-4) 0;
+    padding-left: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .term-section ul:last-child {
+    margin-bottom: 0;
+  }
+
+  .term-section li {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+
+  .term-section li strong {
+    color: var(--color-text-main);
+  }
+
+  .term-section a {
+    color: var(--color-brand-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .term-section a:hover {
+    color: var(--color-brand-accent-hover);
+  }
+</style>

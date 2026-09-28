@@ -35,7 +35,7 @@ const {
   category = 'Personal Finance',
   h1 = Astro.props.title,
   intro = Astro.props.description || '',
-  faqItems = Astro.props.faqs || [],
+  faqItems = Astro.props.faqItems || Astro.props.faqs || [],
   relatedSlugs = Astro.props.relatedDecisions || [],
   assumptions = Astro.props.assumptions,
 } = Astro.props;
@@ -50,7 +50,7 @@ const crumbs: CrumbItem[] = [
 
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.org';
 
-const structuredData = {
+const pageSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
   name: title,
@@ -62,6 +62,23 @@ const structuredData = {
     url: siteUrl,
   },
 };
+
+const structuredData: Record<string, any>[] = [pageSchema];
+
+if (faqItems && faqItems.length > 0) {
+  structuredData.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item: FAQItem) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  });
+}
 ---
 
 <BaseLayout

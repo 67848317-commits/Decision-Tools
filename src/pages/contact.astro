@@ -1,0 +1,299 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+const siteUrl = 'https://decision-tools.org';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Contact | Decision Tools',
+  description: 'How to contact Decision Tools for methodology questions, formula suggestions, calculation bug reports, and editorial feedback.',
+  url: `${siteUrl}/contact`,
+};
+---
+
+<BaseLayout
+  title="Contact & Feedback | Decision Tools"
+  description="Contact Decision Tools. Share formula feedback, report calculation discrepancies, or propose new decision modeling scenarios."
+  canonicalPath="/contact"
+  structuredData={structuredData}
+>
+  <div class="contact-page">
+    <div class="container">
+      <div class="page-breadcrumbs">
+        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
+      </div>
+
+      <header class="contact-header">
+        <span class="contact-kicker">Communication & Feedback</span>
+        <h1 class="contact-title">Contact Decision Tools</h1>
+        <p class="contact-lead">
+          Decision Tools is an independent, non-commercial analytical modeling project. We welcome peer review, formula feedback, mathematical bug reports, and suggestions for expanding our decision models.
+        </p>
+      </header>
+
+      <!-- Feedback Categories Grid -->
+      <section class="feedback-grid">
+        <div class="feedback-card">
+          <div class="card-icon" aria-hidden="true">📐</div>
+          <h2>Methodology & Formula Inquiries</h2>
+          <p>
+            Have a question about our compound amortization formulas, depreciation curve assumptions, or vehicle efficiency models? We believe mathematical models should be open to peer review and scrutiny.
+          </p>
+        </div>
+
+        <div class="feedback-card">
+          <div class="card-icon" aria-hidden="true">🐛</div>
+          <h2>Bug Reports & Calculation Discrepancies</h2>
+          <p>
+            If you encounter an unexpected calculation result, edge-case rounding error, or interface issue on any calculator or mobile device, please let us know with the exact inputs used.
+          </p>
+        </div>
+
+        <div class="feedback-card">
+          <div class="card-icon" aria-hidden="true">💡</div>
+          <h2>Model Suggestions & New Scenarios</h2>
+          <p>
+            We are continually evaluating new life trade-off scenarios across housing, career, transportation, and personal finance. We welcome suggestions for decision frameworks you would find valuable.
+          </p>
+        </div>
+      </section>
+
+      <!-- Contact Instructions Section -->
+      <section class="contact-info-section">
+        <h2>How to Reach the Project Team</h2>
+        <div class="info-card">
+          <p>
+            To maintain transparency and prevent unverified inquiries, communication for Decision Tools is handled through our open project repository and developer issue tracker.
+          </p>
+          <div class="channels-list">
+            <div class="channel-item">
+              <span class="channel-badge">Open Source & Issue Tracker</span>
+              <h3>GitHub Project Repository</h3>
+              <p>
+                Submit bug reports, propose mathematical formula refinements, or join discussions regarding economic benchmark updates on our project repository:
+              </p>
+              <a
+                href="https://github.com/decision-tools"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="channel-link"
+              >
+                github.com/decision-tools
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            </div>
+
+            <div class="channel-item">
+              <span class="channel-badge">Editorial Principles</span>
+              <h3>Methodology & Corrections</h3>
+              <p>
+                Before submitting a correction, you can review our full modeling standards, benchmark references (IRS, FHWA, EIA), and independent editorial philosophy on our <a href="/about">About & Methodology Page</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Honest Notice -->
+        <div class="note-box">
+          <h3>Individual Advisory Disclaimer</h3>
+          <p>
+            Please note: We do not provide individualized financial, legal, tax, or employment counseling. Because every person's financial situation is unique, our team cannot advise you on whether you should buy or rent a specific property, accept a specific job offer, or purchase a specific vehicle. Please consult a licensed professional for personal guidance.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .contact-page {
+    padding: var(--space-8) 0 var(--space-16);
+  }
+
+  .page-breadcrumbs {
+    margin-bottom: var(--space-6);
+  }
+
+  .contact-header {
+    max-width: 820px;
+    margin-bottom: var(--space-10);
+  }
+
+  .contact-kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-brand-accent);
+    margin-bottom: var(--space-2);
+  }
+
+  .contact-title {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-4);
+  }
+
+  .contact-lead {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+
+  .feedback-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-12);
+  }
+
+  @media (min-width: 768px) {
+    .feedback-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .feedback-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-icon {
+    font-size: 1.8rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .feedback-card h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+
+  .feedback-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .contact-info-section {
+    max-width: 820px;
+  }
+
+  .contact-info-section h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+  }
+
+  .info-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+    margin-bottom: var(--space-8);
+  }
+
+  .info-card > p {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-6);
+  }
+
+  .channels-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .channel-item {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-6);
+  }
+
+  .channel-item:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .channel-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-brand-accent);
+    margin-bottom: var(--space-2);
+  }
+
+  .channel-item h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+  }
+
+  .channel-item p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-3);
+  }
+
+  .channel-item a {
+    color: var(--color-brand-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .channel-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+    color: var(--color-brand-accent);
+    text-decoration: none;
+  }
+
+  .channel-link:hover {
+    color: var(--color-brand-accent-hover);
+    text-decoration: underline;
+  }
+
+  .note-box {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+  }
+
+  .note-box h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+  }
+
+  .note-box p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+</style>

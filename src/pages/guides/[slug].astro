@@ -24,6 +24,24 @@ const relatedDecision = DECISIONS.find((d) => d.slug === guide.relatedDecisionSl
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://decision-tools.org';
 const guideUrl = `${siteUrl}/guides/${guide.slug}`;
 
+/**
+ * Resolves an ISO 8601 date string ONLY when backed by reliable, documented project data.
+ * Does not fabricate days, timestamps, or convert month-level dates (e.g., 'September 2026')
+ * into artificial dates merely to satisfy Schema requirements.
+ */
+function getReliableIsoDate(displayDate?: string, explicitIsoDate?: string): string | undefined {
+  if (explicitIsoDate && /^\d{4}-\d{2}-\d{2}/.test(explicitIsoDate)) {
+    return explicitIsoDate;
+  }
+  if (displayDate && /^\d{4}-\d{2}-\d{2}/.test(displayDate)) {
+    return displayDate;
+  }
+  return undefined;
+}
+
+const isoPublishedDate = getReliableIsoDate(guide.publishDate, guide.publishDateIso);
+const isoModifiedDate = getReliableIsoDate(guide.modifiedDate, guide.modifiedDateIso) || isoPublishedDate;
+
 const articleSchema: Record<string, any> = {
   '@context': 'https://schema.org',
   '@type': 'Article',
@@ -34,8 +52,8 @@ const articleSchema: Record<string, any> = {
     '@type': 'WebPage',
     '@id': guideUrl,
   },
-  datePublished: '2026-09-01T08:00:00+00:00',
-  dateModified: '2026-09-20T08:00:00+00:00',
+  ...(isoPublishedDate ? { datePublished: isoPublishedDate } : {}),
+  ...(isoModifiedDate ? { dateModified: isoModifiedDate } : {}),
   author: {
     '@type': 'Organization',
     name: 'Decision Tools Analytical Team',
