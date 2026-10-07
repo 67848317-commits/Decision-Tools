@@ -133,6 +133,27 @@ const relatedGuides = [
   relatedDecisions={['diy-vs-hire', 'new-vs-used']}
   relatedGuides={relatedGuides}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> Comparing a repair quote ($350) directly to a replacement price ($900) is an incomplete comparison. A repair purchases only a temporary life extension on an aging machine; replacement purchases a brand-new depreciation cycle, comprehensive warranty coverage, and updated energy efficiency.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: Cost per Unit of Remaining Lifespan</h3>
+    <p>
+      The soundest economic method for evaluating an appliance or device failure is comparing <strong>annualized cost of utility</strong> rather than upfront invoice totals:
+    </p>
+    <ul>
+      <li><strong>Annualized Cost of Repair:</strong> Computed as: <code>(Repair Quote + Probability-Weighted Secondary Repair Risk) ÷ Expected Additional Lifespan Years + Annual Energy/Operating Outflow</code>. Spending $350 to keep a dishwasher running for 14 additional months costs roughly $300 per year of utility.</li>
+      <li><strong>Annualized Cost of Replacement:</strong> Computed as: <code>(New Purchase Price + Delivery, Installation, and Disposal Fees) ÷ Expected New Machine Lifespan Years + Modern Operating Outflow</code>. Purchasing a new dishwasher for $800 that lasts 10 years costs $80 per year in capital depreciation.</li>
+    </ul>
+
+    <h3>2. The "Bathtub Curve" and Cascading Component Failure</h3>
+    <p>
+      Mechanical appliances (refrigerators, washing machines, HVAC systems, automobiles) follow an engineering reliability model known as the bathtub failure curve. Once a core subsystem fails past the halfway point of an appliance's engineered lifespan (e.g., Year 8 on a 10-year design), other wear items—such as pumps, bearings, heating elements, and electronic control boards—face elevated failure probabilities. A single repair frequently triggers a cascade of secondary service calls within 12 to 18 months.
+    </p>
+  </div>
+
   <!-- 1. INPUTS -->
   <div slot="inputs" class="inputs-container">
     <!-- INPUT CONTROLS -->
@@ -281,6 +302,60 @@ const relatedGuides = [
         items={initialCostItems}
       />
     </div>
+  </div>
+
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> The economic outcome pivots on how many months of functioning service the repair realistically yields and whether a secondary failure occurs within that timeframe.
+    </div>
+
+    <h3>1. Expected Lifespan Extension Volatility</h3>
+    <p>
+      If a $300 repair successfully restores an appliance for <strong>3 full years</strong> (36 months), the capital cost of the fix drops to $100/year, making repair an outstanding financial decision. If the machine suffers another catastrophic failure <strong>6 months later</strong>, the annualized capital rate explodes to $600/year, rendering the initial repair a wasteful sunk cost.
+    </p>
+
+    <h3>2. Secondary Repair Probability</h3>
+    <p>
+      When dealing with an appliance older than 7 or 8 years, incorporating a 40%–60% secondary failure probability reflects real-world service records. If secondary failure costs are high ($250+), the risk-adjusted repair cost quickly surpasses the annualized depreciation rate of a brand-new model.
+    </p>
+
+    <h3>3. Operating Efficiency and Utility Differentials</h3>
+    <p>
+      For high-energy appliances (refrigerators, central air conditioning condensers, water heaters), replacing a 12-year-old inefficient unit with an ENERGY STAR certified heat pump or inverter unit can reduce utility bills by $100 to $250 annually. In high-efficiency categories, energy savings alone can pay down the replacement cost delta within 4 to 6 years.
+    </p>
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>Repair vs. Replacement Model Limitations & Realities</h3>
+    <p>
+      While mathematical models assume parts and labor can be acquired predictably, real-world repairs carry non-financial constraints:
+    </p>
+    <ul>
+      <li><strong>Replacement Part Availability and Obsolescence:</strong> Manufacturers typically discontinue specialized control boards and mechanical assemblies 7 to 10 years after production. Sourcing refurbished or salvage parts introduces reliability risks not captured in standard repair quotes.</li>
+      <li><strong>Disparate Warranty Horizons:</strong> Professional repair work typically carries a 30- to 90-day warranty limited strictly to the newly replaced component. In contrast, new appliances include a 1- to 5-year comprehensive manufacturer warranty covering all systems.</li>
+      <li><strong>Physical Degradation Beyond the Malfunction:</strong> Repairing a broken pump does not remedy rusted chassis panels, degraded door seals, mineral-scaled heating elements, or worn suspension springs.</li>
+      <li><strong>Delivery and Downtime Friction:</strong> Waiting 3 to 4 weeks for specialized backordered repair parts may impose severe lifestyle inconvenience (e.g., lack of refrigeration or laundry facilities) that justifies immediate replacement delivery.</li>
+    </ul>
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The model converts both decisions to an annualized operating cost baseline:
+    </p>
+    <ul>
+      <li>
+        <strong>Annualized Repair Expense:</strong> <code>[(Repair Quote + (Secondary Risk % × Secondary Repair Cost)) ÷ Expected Life Extension Years] + Annual Operating Outflow</code>.
+      </li>
+      <li>
+        <strong>Annualized Replacement Expense:</strong> <code>[(New Replacement Price + Delivery/Install/Disposal Fees) ÷ Expected New Machine Lifespan Years] + New Annual Operating Outflow</code>.
+      </li>
+      <li>
+        <strong>Net Trade-Off:</strong> Evaluates which option delivers a lower cost per year of utility while exposing you to less downtime volatility.
+      </li>
+    </ul>
   </div>
 </DecisionLayout>
 

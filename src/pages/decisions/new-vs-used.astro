@@ -144,6 +144,27 @@ const faqList: FAQItem[] = [
   faqItems={faqList}
   relatedSlugs={['lease-vs-buy', 'gas-vs-ev', 'buy-vs-repair']}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> A lower purchase price does not automatically equal a lower total economic cost. While buying a 3-year-old vehicle sidesteps steep initial depreciation, it introduces higher financing interest rates (APR spreads), elevated out-of-warranty repair volatility, and higher mechanical failure risks.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: The Tug-of-War Between Depreciation and Maintenance</h3>
+    <p>
+      An objective total cost of ownership (TCO) evaluation balances two opposing financial trajectories across identical operating horizons:
+    </p>
+    <ul>
+      <li><strong>The New Asset Profile:</strong> High, predictable initial depreciation (losing 40%–50% of value in the first 36 months) paired with minimal maintenance outlays, comprehensive 3- to 5-year factory warranty coverage, and subsidized promotional financing interest rates (often 2.9%–4.9% APR).</li>
+      <li><strong>The Used Asset Profile:</strong> A gentle, flattened depreciation curve paired with higher financing borrowing costs (commercial used-car loans often carry 7%–10% APR), higher comprehensive insurance deductibles, and increasing probability of out-of-pocket mechanical repairs (brakes, suspension, tires, electronic sensors).</li>
+    </ul>
+
+    <h3>2. Preventing the Financing Double-Counting Error</h3>
+    <p>
+      A common accounting mistake is counting both the vehicle purchase price and the full monthly loan payment as separate expenses. A proper financial model separates cash flow from asset valuation: monthly loan payments consist of principal reduction (which builds recoverable equity) and financing interest charges (which are unrecoverable fees paid to the lender). The true economic cost equals net depreciation plus financing interest, insurance, and maintenance.
+    </p>
+  </div>
+
   <!-- INPUTS SLOT -->
   <div slot="inputs" class="inputs-container">
     <div class="inputs-header">
@@ -545,12 +566,48 @@ const faqList: FAQItem[] = [
     </div>
   </div>
 
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> The net financial gap between new and used purchases is primarily dictated by the financing interest rate spread and your planned ownership horizon.
+    </div>
+
+    <h3>1. Financing APR Spreads</h3>
+    <p>
+      In competitive automotive markets, manufacturers frequently offer subvented new-car financing rates (e.g., <strong>1.9% to 3.9% APR</strong>) to move inventory, while used car loans through commercial banks often exceed <strong>7.5% to 9.5% APR</strong>. On a $25,000 financed balance over 60 months, a 6% interest spread adds over $4,200 in pure financing fees to the used vehicle, eroding a large fraction of the upfront sticker price discount.
+    </p>
+
+    <h3>2. Ownership Duration (Short-Cycle vs. Long-Term Hold)</h3>
+    <p>
+      If your horizon is <strong>3 years</strong>, purchasing new is heavily penalized because the vehicle absorbs 45%–55% depreciation in those initial 36 months. If you intend to own the vehicle for <strong>8 to 10 years</strong>, new-car depreciation amortizes across a decade of reliable, payment-free service, while the used vehicle enters an age bracket (years 10 through 13) characterized by frequent, high-cost mechanical component failures.
+    </p>
+
+    <h3>3. High-Mileage Driving Regimes</h3>
+    <p>
+      Accumulating 20,000+ miles per year accelerates component wear rapidly. A 3-year-old vehicle with 36,000 miles will cross the 100,000-mile major service threshold (timing belts, suspension dampers, catalytic converters) within three years, whereas a new car remains well within factory warranty coverage.
+    </p>
+  </div>
+
   <!-- ASSUMPTIONS SLOT -->
   <div slot="assumptions">
     <AssumptionBox
       assumptions={assumptions}
       exclusions={exclusions}
     />
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>New vs. Used Model Limitations & Vehicle Realities</h3>
+    <p>
+      While standard financial comparisons model deterministic depreciation and linear maintenance, pre-owned vehicle purchases carry distinct qualitative risks:
+    </p>
+    <ul>
+      <li><strong>Asymmetric Information and Lemon Risk:</strong> Even with third-party vehicle history reports, pre-owned vehicles carry hidden risks of previous collision structural fatigue, irregular oil change intervals by prior owners, or flood damage.</li>
+      <li><strong>Statutory Consumer Protections:</strong> Many state "Lemon Laws" that mandate manufacturer vehicle buybacks for unresolved recurring defects apply exclusively to brand-new vehicle purchases.</li>
+      <li><strong>Active Safety Technology Iteration:</strong> Newer generation vehicles frequently incorporate advanced active safety systems (automatic emergency braking, pedestrian detection, lane centering) that can reduce collision probability and insurance claim frequency.</li>
+      <li><strong>Downtime and Opportunity Cost:</strong> Out-of-warranty mechanical breakdowns incur not only repair invoices but also lost work time, towing arrangements, and rental car expenses during multi-day shop repairs.</li>
+    </ul>
   </div>
 
   <!-- METHODOLOGY SLOT -->

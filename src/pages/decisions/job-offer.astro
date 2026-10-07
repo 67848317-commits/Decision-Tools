@@ -152,6 +152,29 @@ const faqList: FAQItem[] = [
   faqItems={faqList}
   relatedSlugs={['rent-vs-buy', 'gas-vs-ev', 'diy-vs-hire']}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> Headline base salary is not synonymous with net economic compensation. A $15,000 higher nominal salary can easily be erased when an offer requires 5 days of in-office commuting, higher employee-paid health insurance premiums, and lower employer retirement matching.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: The Four Pillars of Employment Value</h3>
+    <p>
+      An objective career evaluation separates headline recruiter numbers into four distinct economic tiers:
+    </p>
+    <ul>
+      <li><strong>Contractual Guaranteed Cash:</strong> Base salary is predictable, contractually guaranteed liquidity that determines monthly cash flow and loan qualification limits.</li>
+      <li><strong>Deferred & Conditional Compensation:</strong> Employer 401(k) matching tiers (immediate pre-tax returns on contributed dollars), discretionary performance bonuses, and equity grants. Because bonuses and equity involve uncertainty and vesting friction, they carry a different risk profile than base salary.</li>
+      <li><strong>Out-of-Pocket Payroll Deductions:</strong> Employee contributions toward medical, dental, and vision insurance premiums vary dramatically across employers. A company covering 95% of family health premiums provides thousands of dollars in post-tax financial advantage over an employer deducting $700/month from your paycheck.</li>
+      <li><strong>Unreimbursed Work Overhead:</strong> Commute expenses (vehicle fuel, depreciation, insurance wear, parking, and transit fares) and irreversible commute time that subtracts directly from personal leisure, health, and family availability.</li>
+    </ul>
+
+    <h3>2. The Commute Iceberg: Operating Costs and Uncompensated Hours</h3>
+    <p>
+      Driving is rarely just the cost of gasoline. Comprehensive vehicle operating costs—encompassing wear, tires, maintenance, insurance risk, and depreciation—typically run between $0.65 and $0.75 per mile. A 25-mile one-way daily commute (50 miles round-trip) across 250 workdays accumulates 12,500 miles annually, incurring roughly $8,000 to $9,000 in vehicle expenses. Furthermore, a 45-minute one-way commute consumes approximately 375 hours per year—the equivalent of more than nine full 40-hour workweeks spent in transit.
+    </p>
+  </div>
+
   <!-- INPUTS SLOT -->
   <div slot="inputs" class="inputs-container">
     <div class="inputs-header">
@@ -621,6 +644,28 @@ const faqList: FAQItem[] = [
     </div>
   </div>
 
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> The net financial ranking between two career offers is extraordinarily sensitive to commute frequency and variable bonus realization rates.
+    </div>
+
+    <h3>1. Hybrid Attendance Mandates (In-Office Days/Week)</h3>
+    <p>
+      Shifting an offer from <strong>2 days/week in-office to 4 days/week</strong> doubles both annual vehicle operating expense and lost personal transit time. An initial salary advantage of $8,000 can invert completely if additional commute mileage and parking consume $5,000 in post-tax cash while extracting 180 additional unpaid commute hours.
+    </p>
+
+    <h3>2. Discretionary Bonus Realization vs. Target Metrics</h3>
+    <p>
+      If Offer A includes a "target 15% bonus" ($18,000) while Offer B offers a pure base salary, stress-test the model by setting Offer A's bonus to 0% or 50%. In corporate downturns or restructuring periods, discretionary incentive pools are often reduced or eliminated, exposing candidates who relied on target bonus numbers to cover fixed living obligations.
+    </p>
+
+    <h3>3. Healthcare Deductibles and Family Plan Tiers</h3>
+    <p>
+      Differences in health plans are amplified for individuals with family coverage or chronic health needs. A plan with a $6,000 family deductible and 20% co-insurance can impose thousands in unexpected healthcare expenses relative to a comprehensive low-deductible copay plan, eroding nominal salary premiums.
+    </p>
+  </div>
+
   <!-- ASSUMPTIONS SLOT -->
   <div slot="assumptions">
     <AssumptionBox
@@ -628,6 +673,20 @@ const faqList: FAQItem[] = [
       exclusions={jobOfferExclusions}
       disclaimerNote="This calculator provides estimates based on the assumptions you enter. It is for educational and career planning purposes and does not constitute tax, legal, or financial advice."
     />
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>Career Model Limitations & Qualitative Exclusions</h3>
+    <p>
+      While this tool quantifies tangible economic compensation, significant qualitative career dimensions cannot be captured in a mathematical formula:
+    </p>
+    <ul>
+      <li><strong>Equity Liquidity and Dilution:</strong> Stock options in pre-IPO or private companies carry substantial liquidation uncertainty and dilution risk. Treating illiquid paper equity as cash compensation is a dangerous evaluation error.</li>
+      <li><strong>Career Velocity and Skill Accumulation:</strong> A lower-paying position that exposes you to high-growth technologies, elite mentorship, or senior executive visibility may yield substantially greater lifetime earnings than a stagnant, higher-paying role.</li>
+      <li><strong>Workplace Culture and Psychological Burnout:</strong> An organization expecting 60-hour workweeks, uncompensated weekend on-call shifts, and toxic management imposes severe physical and mental tolls that exceed any monetary compensation delta.</li>
+      <li><strong>Vesting Cliff Risk:</strong> 401(k) matches subject to 3- or 4-year cliff or graded vesting schedules yield zero value if you depart before reaching vesting milestones.</li>
+    </ul>
   </div>
 
   <!-- METHODOLOGY SLOT -->

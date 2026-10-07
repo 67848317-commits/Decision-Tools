@@ -131,6 +131,37 @@ const faqList: FAQItem[] = [
   faqItems={faqList}
   relatedSlugs={['job-offer', 'lease-vs-buy', 'debt-vs-invest']}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> A headline comparison between monthly rent ($2,200) and a mortgage payment ($2,100) is mathematically incomplete. Rent represents the absolute ceiling on your housing expenses for the lease term; a mortgage payment is merely the baseline floor before taxes, insurance, routine maintenance, and transaction overhead.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: Unrecoverable Cost Parity</h3>
+    <p>
+      The popular narrative that "renting is throwing money away" misdiagnoses housing economics. Both renting and homeownership incur substantial, unrecoverable outlays that never build equity:
+    </p>
+    <ul>
+      <li><strong>Unrecoverable Rent Outflows:</strong> 100% of tenant rent and tenant insurance goes toward the immediate utility of shelter, landlord debt service, and building maintenance. None returns to your balance sheet, but your financial liability is contractually capped for the lease duration.</li>
+      <li><strong>Unrecoverable Ownership Outflows:</strong> Mortgage interest (which constitutes 65%–75% of monthly loan payments during early amortization years), municipal property taxes, hazard insurance, private mortgage insurance (PMI), HOA assessments, and physical maintenance reserves (typically 1.0%–2.0% of property value per year). These dollars are consumed permanently without accumulating equity.</li>
+    </ul>
+
+    <h3>2. The Variables With the Largest Mathematical Influence</h3>
+    <p>
+      Three variables overwhelmingly dictate whether buying or renting delivers a superior net financial position over your modeling horizon:
+    </p>
+    <ul>
+      <li><strong>Expected Duration of Stay (Holding Horizon):</strong> Acquiring real estate typically triggers 2%–4% in buyer closing costs and financing origination fees. Disposing of the property later incurs 6%–8% in seller broker commissions, transfer taxes, and title recording charges. Over a short holding period (e.g., 2–4 years), transaction friction dwarfs principal amortization.</li>
+      <li><strong>Opportunity Cost of Initial Down Payment Capital:</strong> Committing $60,000 to $120,000 in liquid capital to an illiquid down payment prevents that cash from compounding in a diversified, liquid portfolio (e.g., broad index funds or fixed-income reserves). The net housing cost difference is heavily driven by the return spread between real estate appreciation and alternative capital growth.</li>
+      <li><strong>Compounding Rent Inflation vs. Fixed Debt Service:</strong> A fixed-rate mortgage locks in the nominal Principal & Interest payment for 30 years, creating an inflationary hedge. In contrast, annual rent escalations (typically 2.5%–4.5% annually) compound over time, making renting progressively more expensive in nominal dollars over decade-long horizons.</li>
+    </ul>
+
+    <h3>3. Easily Overlooked Friction Points</h3>
+    <p>
+      Prospective buyers often underestimate the cash flow volatility of home maintenance. While a renter calls a property manager when a furnace fails, a homeowner must absorb capital repair replacements (roofs, HVAC units, plumbing) directly from liquid reserves. Conversely, renters often overlook the long-term vulnerability to forced landlord non-renewals and relocation costs.
+    </p>
+  </div>
+
   <!-- INPUTS SLOT -->
   <div slot="inputs" class="inputs-container">
     <div class="inputs-header">
@@ -499,6 +530,28 @@ const faqList: FAQItem[] = [
     </div>
   </div>
 
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> Housing models are highly path-dependent. Small adjustments to your expected duration of stay, property appreciation, or rent escalation rate can entirely reverse which option produces a lower net financial cost.
+    </div>
+
+    <h3>1. Horizon Inflection: The Amortization Threshold</h3>
+    <p>
+      In typical markets, moving within <strong>3 to 5 years</strong> almost invariably causes buying to result in a higher net economic cost than renting. Upfront purchasing closing costs (typically 2%–4%) combined with deferred selling broker commissions (5%–6%) consume significant capital. During early mortgage years, debt amortization is negligible—most monthly debt service goes directly toward lender interest rather than principal equity. Only after year 5 to 7 does compounding equity amortization reliably overcome transaction friction.
+    </p>
+
+    <h3>2. Property Appreciation vs. Stagnant Asset Valuation</h3>
+    <p>
+      If local real estate values appreciate at 3%–4% annually, home equity expands on the gross asset value, leveraging initial down payment capital. However, if appreciation averages 0% (or lags general inflation), ownership net costs surge. Without asset appreciation, the buyer relies exclusively on principal paydown to offset cumulative property taxes, hazard insurance, and ongoing physical maintenance.
+    </p>
+
+    <h3>3. Compounding Rent Inflation Spreads</h3>
+    <p>
+      A baseline scenario where market rents rise by 4% annually widens the cost difference in favor of buying over 10+ years. Conversely, in cities with rent stabilization or sluggish tenant demand (where rents escalate at 0%–1.5%), renting preserves long-term cash flow flexibility without exposing the occupant to rising municipal property tax assessments.
+    </p>
+  </div>
+
   <!-- ASSUMPTIONS SLOT -->
   <div slot="assumptions">
     <AssumptionBox
@@ -506,6 +559,20 @@ const faqList: FAQItem[] = [
       exclusions={rentVsBuyExclusions}
       disclaimerNote="This calculator provides estimates based on the assumptions you enter. It is for educational and planning purposes and is not financial, tax, legal, or investment advice."
     />
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>Critical Model Boundaries & Excluded Variables</h3>
+    <p>
+      To maintain transparent, deterministic arithmetic, this calculator isolates direct housing cash flows and amortized equity. Users evaluating complex personal scenarios should recognize variables intentionally excluded from the mathematical model:
+    </p>
+    <ul>
+      <li><strong>Income Tax Code Idiosyncrasies:</strong> Under prevailing tax laws (such as the standard deduction thresholds and federal SALT caps), many middle-market homeowners do not itemize deductions. Consequently, mortgage interest and property taxes may yield zero marginal tax savings. This model intentionally excludes speculative individual tax deductions.</li>
+      <li><strong>Capital Gains Exemptions:</strong> Realized capital gains on primary residences frequently qualify for federal tax exclusions (up to statutory ceilings), which may alter net proceeds upon eventual liquidation.</li>
+      <li><strong>Liquidity and Career Flexibility:</strong> Liquid down payment capital offers optionality—allowing rapid career relocation to higher-income labor markets, entrepreneurial ventures, or financial resilience during unforeseen medical emergencies. Home equity is illiquid and difficult to tap during personal credit contractions.</li>
+      <li><strong>Major Unscheduled Capital Assessments:</strong> Older single-family homes or condominium associations with deferred reserve funds can experience special assessments ($10,000 to $40,000 for elevators, roof replacements, or foundation stabilization) that far exceed standard 1% annual maintenance budgets.</li>
+    </ul>
   </div>
 
   <!-- METHODOLOGY SLOT -->

@@ -125,6 +125,27 @@ const faqList: FAQItem[] = [
   faqItems={faqList}
   relatedSlugs={['bulk-buy', 'buy-vs-repair', 'lease-vs-buy']}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> Low monthly subscription rates ($30 to $50/month) mask the reality of endless cumulative cash drains. Outright purchasing incurs a painful upfront capital outlay but caps your total financial liability, whereas subscriptions trade long-term wealth accumulation for short-term cancellation flexibility and zero maintenance friction.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: Fixed Ownership vs. Operational Access</h3>
+    <p>
+      The economic divide between buying outright and subscribing centers on how capital, maintenance, and technological obsolescence are allocated:
+    </p>
+    <ul>
+      <li><strong>Outright Purchase (Capital Asset Model):</strong> You absorb 100% of the acquisition cost upfront. You own the physical or digital asset indefinitely, retain access without ongoing payment obligations, and assume responsibility for maintenance, self-troubleshooting, and obsolescence. Upon retirement, you can often liquidate the asset on secondary markets to recoup residual equity.</li>
+      <li><strong>Subscription (Software/Service-as-a-Service Model):</strong> You pay an ongoing operational fee that bundles continuous software updates, server hosting, customer support, and immediate feature deployments. You avoid upfront capital friction and can terminate the contract at any time, but you accumulate zero asset equity. The moment payments stop, your access terminates completely.</li>
+    </ul>
+
+    <h3>2. When Subscriptions Are Economically Rational</h3>
+    <p>
+      Subscriptions are not inherently predatory; they represent rational economic choices under specific operating conditions: short-term project demands (needing specialized design software for a 3-month contract), rapid product innovation cycles where purchased hardware becomes obsolete within 18 months, or unpredictable business workflows where paying upfront would lock up vital working capital.
+    </p>
+  </div>
+
   <!-- INPUTS SLOT -->
   <div slot="inputs" class="inputs-container">
     <div class="inputs-header">
@@ -394,12 +415,48 @@ const faqList: FAQItem[] = [
     </div>
   </div>
 
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> The economic breakeven inflection shifts dramatically based on project duration, subscription price inflation, and unused capacity.
+    </div>
+
+    <h3>1. Usage Horizon and the Break-Even Horizon</h3>
+    <p>
+      For tools used continuously, the outright purchase break-even threshold is typically reached within <strong>14 to 24 months</strong>. Once you pass that break-even date, every subsequent month of outright ownership is effectively payment-free. Conversely, if your project or need lasts only 6 months, paying $35/month ($210 total) avoids a $600 purchase, saving nearly $400 in liquid capital.
+    </p>
+
+    <h3>2. "Zombie Subscriptions" and Utilization Creep</h3>
+    <p>
+      Mathematical models assume that when you subscribe, you actively extract utility every single month. In reality, consumer and enterprise subscription audits show that users frequently experience months of zero utilization due to project pauses, vacations, or shifting priorities. Paying $45/month across a 4-month inactive period is pure economic wastage that shifts the trade-off toward owning a static asset.
+    </p>
+
+    <h3>3. Subscription Fee Inflation and Tier Gating</h3>
+    <p>
+      Software and equipment subscriptions rarely keep prices flat over 5-year periods. Price increases of 10%–20% every few years or gating previously standard features behind "Enterprise" or "Pro" pricing tiers artificially compress the break-even window in favor of outright ownership.
+    </p>
+  </div>
+
   <!-- ASSUMPTIONS SLOT -->
   <div slot="assumptions">
     <AssumptionBox
       assumptions={assumptions}
       exclusions={exclusions}
     />
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>Buy vs. Subscribe Model Limitations & Operational Realities</h3>
+    <p>
+      The financial calculator balances purchase prices against subscription cash flows, but excludes software-specific structural constraints:
+    </p>
+    <ul>
+      <li><strong>Data Lock-In and Format Portability:</strong> Many modern cloud platforms store work in proprietary database formats. If you cancel a subscription, you may lose access to your archived files, project history, or client deliverables unless you maintain an active license.</li>
+      <li><strong>Forced Obsolescence & Operating System Incompatibilities:</strong> Outright purchased standalone software may stop functioning when your computer's operating system updates, forcing an unplanned upgrade purchase that shortens its modeled lifespan.</li>
+      <li><strong>Cloud Collaboration and Server Features:</strong> Subscriptions often bundle multi-user real-time collaboration, cloud storage, and AI computing credits that standalone purchased software cannot replicate locally without expensive private server infrastructure.</li>
+      <li><strong>Hardware Secondary Liquidity Variance:</strong> Recapturing residual equity on purchased physical equipment depends on local secondary market demand and product cosmetic condition.</li>
+    </ul>
   </div>
 
   <!-- METHODOLOGY SLOT -->

@@ -111,6 +111,16 @@ if (faqItems && faqItems.length > 0) {
         </div>
       )}
 
+      <!-- 2B. HOW TO THINK ABOUT THIS DECISION / FRAMEWORK (Slot: framework) -->
+      {Astro.slots.has('framework') && (
+        <section class="decision-section framework-section" aria-labelledby="framework-heading">
+          <h2 class="section-subheading" id="framework-heading">How to Think About This Decision</h2>
+          <div class="framework-content">
+            <slot name="framework" />
+          </div>
+        </section>
+      )}
+
       <!-- 3. INPUT AREA & COMPARISON FORM (Slot: inputs) -->
       <section class="decision-section inputs-section" aria-labelledby="inputs-heading">
         <h2 class="sr-only" id="inputs-heading">Decision Parameters & Inputs</h2>
@@ -126,10 +136,20 @@ if (faqItems && faqItems.length > 0) {
         </section>
       )}
 
+      <!-- 4B. SENSITIVITY: WHEN THE RESULT CAN CHANGE (Slot: sensitivity) -->
+      {Astro.slots.has('sensitivity') && (
+        <section class="decision-section sensitivity-section" aria-labelledby="sensitivity-heading">
+          <h2 class="section-subheading" id="sensitivity-heading">When the Result Can Change</h2>
+          <div class="sensitivity-content">
+            <slot name="sensitivity" />
+          </div>
+        </section>
+      )}
+
       <!-- 5. ASSUMPTIONS & EXCLUSIONS (Slot: assumptions or assumptions prop) -->
       {(Astro.slots.has('assumptions') || (assumptions && assumptions.length > 0)) && (
         <section class="decision-section" aria-labelledby="assumptions-heading">
-          <h2 class="section-subheading" id="assumptions-heading">Assumptions & Limitations</h2>
+          <h2 class="section-subheading" id="assumptions-heading">Assumptions & Parameters</h2>
           {Astro.slots.has('assumptions') ? (
             <slot name="assumptions" />
           ) : (
@@ -148,12 +168,27 @@ if (faqItems && faqItems.length > 0) {
         </section>
       )}
 
+      <!-- 5B. MODEL LIMITATIONS & EXCLUSIONS (Slot: limitations) -->
+      {Astro.slots.has('limitations') && (
+        <section class="decision-section limitations-section" aria-labelledby="limitations-heading">
+          <h2 class="section-subheading" id="limitations-heading">Model Limitations & Excluded Variables</h2>
+          <div class="limitations-content">
+            <slot name="limitations" />
+          </div>
+        </section>
+      )}
+
       <!-- 6. METHODOLOGY (Slot: methodology) -->
       {Astro.slots.has('methodology') && (
         <section class="decision-section methodology-section" aria-labelledby="methodology-heading">
           <h2 class="section-subheading" id="methodology-heading">How This Model Calculates Trade-Offs</h2>
           <div class="methodology-content">
             <slot name="methodology" />
+            <div class="methodology-reference-box">
+              <p>
+                To learn how Decision Tools defines economic cost, opportunity cost of capital, and break-even crossover points, read our comprehensive <a href="/about#analytical-foundations">Quantitative Methodology & Editorial Standards</a>.
+              </p>
+            </div>
           </div>
         </section>
       )}
@@ -251,15 +286,90 @@ if (faqItems && faqItems.length > 0) {
     border-bottom: 1px solid var(--color-border);
   }
 
-  .methodology-content {
+  .methodology-content,
+  .framework-content,
+  .sensitivity-content,
+  .limitations-content {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: var(--space-6);
     font-size: 0.95rem;
     line-height: 1.65;
-    color: var(--color-text-muted);
+    color: var(--color-text-main);
     box-shadow: var(--shadow-sm);
+  }
+
+  .framework-content h3,
+  .sensitivity-content h3,
+  .limitations-content h3,
+  .methodology-content h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+
+  .framework-content h3:first-child,
+  .sensitivity-content h3:first-child,
+  .limitations-content h3:first-child,
+  .methodology-content h3:first-child {
+    margin-top: 0;
+  }
+
+  .framework-content p,
+  .sensitivity-content p,
+  .limitations-content p,
+  .methodology-content p {
+    margin-top: 0;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-muted);
+  }
+
+  .framework-content ul,
+  .sensitivity-content ul,
+  .limitations-content ul,
+  .methodology-content ul {
+    margin-top: 0;
+    margin-bottom: var(--space-4);
+    padding-left: var(--space-5);
+    color: var(--color-text-muted);
+  }
+
+  .framework-content li,
+  .sensitivity-content li,
+  .limitations-content li,
+  .methodology-content li {
+    margin-bottom: var(--space-2);
+  }
+
+  .framework-callout,
+  .sensitivity-callout {
+    background-color: var(--color-surface-subtle);
+    border-left: 3px solid var(--color-brand-accent);
+    padding: var(--space-4) var(--space-5);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-bottom: var(--space-5);
+    font-size: 0.9rem;
+    color: var(--color-text-main);
+  }
+
+  .methodology-reference-box {
+    margin-top: var(--space-5);
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-brand-accent);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    color: var(--color-text-main);
+  }
+
+  .methodology-reference-box a {
+    color: var(--color-brand-accent);
+    font-weight: 500;
+    text-decoration: underline;
   }
 
   .worked-example-card {

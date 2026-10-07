@@ -43,6 +43,7 @@ export interface DebtVsInvestResult {
   netPositionDifference: number;
   higherNetOption: 'debt_first' | 'invest_first' | 'equal';
   fixedInterestRate: number;
+  contractualInterestRate: number;
   guaranteedInterestRate: number;
   breakdown: YearDebtInvestBreakdown[];
   summaryText: string;
@@ -165,11 +166,11 @@ export function calculateDebtVsInvest(input: DebtVsInvestInput): DebtVsInvestRes
 
   let summaryText = '';
   if (higherNetOption === 'debt_first') {
-    summaryText = `Over ${horizonYears} years, allocating surplus cash to eliminate debt first yields an estimated net financial position that is $${netPositionDifference.toLocaleString()} higher than investing simultaneously ($${optionANetFinancialPosition.toLocaleString()} vs. $${optionBNetFinancialPosition.toLocaleString()}). Eliminating the ${debtInterestRatePercent}% interest provides interest charges avoided under the assumptions entered of $${Math.round(totalInterestB - totalInterestA).toLocaleString()} relative to variable market returns, freeing up monthly cash flow by month ${debtFreeMonthA}.`;
+    summaryText = `Over ${horizonYears} years, allocating surplus cash to eliminate debt first yields an estimated net financial position that is $${netPositionDifference.toLocaleString()} higher than investing simultaneously ($${optionANetFinancialPosition.toLocaleString()} vs. $${optionBNetFinancialPosition.toLocaleString()}). Eliminating the ${debtInterestRatePercent}% contractual interest rate provides interest charges avoided of $${Math.round(totalInterestB - totalInterestA).toLocaleString()} without exposure to market volatility, freeing up monthly cash flow by month ${debtFreeMonthA}.`;
   } else if (higherNetOption === 'invest_first') {
-    summaryText = `Over ${horizonYears} years, investing surplus cash while maintaining minimum debt payments produces an estimated net financial position that is $${netPositionDifference.toLocaleString()} higher ($${optionBNetFinancialPosition.toLocaleString()} vs. $${optionANetFinancialPosition.toLocaleString()}). Because the after-tax investment return (${afterTaxReturn.toFixed(1)}%) exceeds the net cost of the debt, compounding investment gains outpace interest charges over this horizon.`;
+    summaryText = `Over ${horizonYears} years, investing surplus cash while maintaining minimum debt payments produces an estimated net financial position that is $${netPositionDifference.toLocaleString()} higher ($${optionBNetFinancialPosition.toLocaleString()} vs. $${optionANetFinancialPosition.toLocaleString()}). Because the prospective after-tax investment return (${afterTaxReturn.toFixed(1)}%) exceeds the net borrowing cost of the debt, modeled investment compounding outpaces contractual interest charges over this horizon. However, actual market returns remain uncertain.`;
   } else {
-    summaryText = `Over ${horizonYears} years, both debt acceleration and concurrent investing result in comparable net financial positions ($${optionANetFinancialPosition.toLocaleString()}).`;
+    summaryText = `Over ${horizonYears} years, both debt acceleration and concurrent investing result in comparable modeled net financial positions ($${optionANetFinancialPosition.toLocaleString()}).`;
   }
 
   return {
@@ -187,6 +188,7 @@ export function calculateDebtVsInvest(input: DebtVsInvestInput): DebtVsInvestRes
     netPositionDifference,
     higherNetOption,
     fixedInterestRate: debtInterestRatePercent,
+    contractualInterestRate: debtInterestRatePercent,
     guaranteedInterestRate: debtInterestRatePercent,
     breakdown: yearlyBreakdown,
     summaryText,

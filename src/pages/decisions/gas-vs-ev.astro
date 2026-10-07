@@ -144,6 +144,30 @@ const relatedGuides = [
   relatedDecisions={['lease-vs-buy', 'new-vs-used']}
   relatedGuides={relatedGuides}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> Fuel savings alone do not determine whether an electric vehicle saves money. A per-mile energy advantage must overcome the initial purchase price premium, home Level 2 charging installation costs, insurance rate variations, and accelerated tire wear caused by higher vehicle curb weight.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: Powertrain Economics Across Five Dimensions</h3>
+    <p>
+      An objective total cost of ownership (TCO) comparison evaluates five interconnected economic categories:
+    </p>
+    <ul>
+      <li><strong>Upfront Acquisition & Infrastructure Premium:</strong> Electric vehicles often command higher initial purchase prices than equivalent gas-powered models. In addition, home charging requires purchasing a Level 2 EVSE unit and hiring a licensed electrician for dedicated 240V circuit installation ($600 to $2,000).</li>
+      <li><strong>Energy Outflows (Pump Prices vs. Utility Kilowatt-Hours):</strong> Internal combustion engine (ICE) fuel costs are dictated by regional gasoline prices ($/gal) and vehicle efficiency (MPG). EV charging costs depend on residential utility rates ($/kWh) and powertrain efficiency (miles/kWh). Home charging typically delivers a 60%–70% cost advantage per mile compared to $3.50/gallon gasoline.</li>
+      <li><strong>Scheduled Maintenance Divergence:</strong> ICE drivetrains contain hundreds of reciprocating mechanical parts requiring scheduled engine oil, spark plugs, timing belts, transmission fluid changes, and exhaust maintenance. EVs eliminate these fluids entirely and feature regenerative braking that extends brake pad and rotor lifespans to 70,000+ miles.</li>
+      <li><strong>Tire Replacement Variance:</strong> Because EV battery packs increase vehicle curb weight by 20%–30% and electric motors deliver instantaneous torque, EV tires wear out roughly 20% to 30% faster than tires on comparable combustion vehicles.</li>
+      <li><strong>Depreciation and Resale Realities:</strong> Vehicles are depreciating consumer durables. Long-term EV residual values are sensitive to battery degradation metrics and rapid pace of charging technology advancements.</li>
+    </ul>
+
+    <h3>2. The Driving Intensity Multiplier</h3>
+    <p>
+      Because energy efficiency is the primary savings engine of an electric vehicle, annual mileage acts as a direct financial multiplier. A commuter driving 20,000 miles per year recovers upfront capital premiums twice as fast as a driver covering 10,000 miles per year. Low-mileage drivers (under 7,500 miles/yr) often fail to achieve a positive financial payback before vehicle depreciation dominates the balance sheet.
+    </p>
+  </div>
+
   <!-- 1. INPUTS -->
   <div slot="inputs" class="inputs-container">
     <!-- INPUT CONTROLS -->
@@ -355,6 +379,61 @@ const relatedGuides = [
         items={initialCostItems}
       />
     </div>
+  </div>
+
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> The economic breakeven timeline between internal combustion and electric powertrains is highly sensitive to residential electricity tariffs, annual mileage, and access to home charging.
+    </div>
+
+    <h3>1. Home Charging vs. Public DC Fast Charging Dependence</h3>
+    <p>
+      The financial case for an EV relies almost entirely on residential Level 2 charging at off-peak rates (typically $0.10 to $0.18/kWh). If an EV driver lacks dedicated home charging (such as apartment dwellers or street parkers) and must rely on commercial DC fast-charging networks ($0.35 to $0.55/kWh), the per-mile cost of electricity equals or exceeds that of a 35 MPG gasoline hybrid, eliminating the primary operational savings driver.
+    </p>
+
+    <h3>2. Annual Mileage Inflection Points</h3>
+    <p>
+      At <strong>8,000 miles per year</strong>, annual fuel savings may only amount to $600 to $800, requiring 8 to 10 years to recover a $6,000 upfront EV purchase premium and home charger installation. At <strong>18,000 miles per year</strong>, annual energy and maintenance savings expand to $1,600–$2,000, compressing the payback window to approximately 3.5 to 4 years.
+    </p>
+
+    <h3>3. Regional Gasoline Price Volatility</h3>
+    <p>
+      In areas with $4.50+ per gallon gasoline (such as the West Coast), fuel savings compound rapidly against moderate electric rates. In regions where gasoline is $2.80 per gallon and electricity rates exceed $0.25/kWh (such as parts of New England), the operational savings spread narrows considerably.
+    </p>
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>Powertrain Model Limitations & Excluded Variables</h3>
+    <p>
+      To provide an objective comparison across typical driving patterns, this tool operates on predictable averages and excludes unpredictable environmental and policy factors:
+    </p>
+    <ul>
+      <li><strong>Tire Wear & Specialized Fitments:</strong> Due to immediate electric motor torque and higher vehicle curb weight from battery packs, electric vehicles can experience accelerated tire tread wear compared to lightweight gasoline sedans. While baseline routine maintenance is factored into the annual maintenance input, this calculator does not separately model individual tire replacement cycles or specialized acoustic foam-lined EV tire price premiums.</li>
+      <li><strong>Cold Weather Range Degradation:</strong> In sub-freezing winter temperatures, battery chemistry efficiency drops and resistive passenger cabin heating can reduce real-world EV range and efficiency by 20% to 35%, temporarily increasing winter kilowatt-hour consumption.</li>
+      <li><strong>Out-of-Warranty Battery Replacement Tail Risk:</strong> Manufacturer EV powertrain warranties typically cover high-voltage batteries for 8 years or 100,000 miles (retaining at least 70% capacity). Replacing an EV battery pack outside of warranty coverage can cost $8,000 to $18,000, a tail-risk event not modeled in routine maintenance curves.</li>
+      <li><strong>Complex Federal, State, and Utility Rebate Rules:</strong> Government EV tax credits involve complex vehicle MSRP caps, final assembly location mandates, battery critical mineral supply chain sourcing, and personal Modified Adjusted Gross Income (MAGI) phaseouts. Users should treat tax credits as an editable variable rather than a guaranteed discount.</li>
+      <li><strong>Electrical Service Panel Upgrades:</strong> In older homes with 100-amp electrical panels, installing a 50-amp 240V dedicated EV circuit may require a main panel upgrade costing an additional $1,500 to $3,500.</li>
+    </ul>
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The model simulates multi-year cash outflows and ending equity across both powertrains:
+    </p>
+    <ul>
+      <li>
+        <strong>Gasoline Energy Outflows:</strong> Annual gasoline cost is computed as: <code>(Annual Miles ÷ Gas MPG) × Price Per Gallon</code>, accumulated across the modeling horizon.
+      </li>
+      <li>
+        <strong>Electric Energy Outflows:</strong> Annual charging expense is computed as: <code>(Annual Miles ÷ Miles per kWh) × Electricity Cost ($/kWh)</code>, compounded over the ownership timeframe.
+      </li>
+      <li>
+        <strong>Net Ownership Cost:</strong> Combines upfront purchase costs (less applicable tax credits), home charging hardware and electrical installation, cumulative energy charges, routine maintenance reserves, and insurance premiums, then subtracts estimated ending vehicle resale equity: <code>Net Cost = Total Cash Outflows - Ending Resale Value</code>.
+      </li>
+    </ul>
   </div>
 </DecisionLayout>
 

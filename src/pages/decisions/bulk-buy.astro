@@ -124,6 +124,32 @@ const faqList: FAQItem[] = [
   faqItems={faqList}
   relatedSlugs={['buy-vs-subscribe', 'buy-vs-repair', 'diy-vs-hire']}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> The lowest unit price is not automatically the lowest effective cost. A wholesale bundle offering a 30% discount per ounce becomes more expensive than retail if package quantities exceed your consumption velocity and lead to spoilage, degradation, or capital lockup.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: Nominal Price vs. Effective Consumed Cost</h3>
+    <p>
+      An objective bulk purchasing analysis separates warehouse sticker tags from true household economics:
+    </p>
+    <ul>
+      <li><strong>Nominal Unit Price:</strong> Simply dividing the package price by the total count: <code>$36.00 ÷ 12 units = $3.00/unit</code>. This assumes 100% of the purchased inventory is utilized before expiration.</li>
+      <li><strong>Effective Consumed Unit Cost:</strong> Calculated as: <code>(Total Bulk Outflow + Storage Bins/Racks) ÷ (Total Units × (1 - Waste Spoilage %))</code>. If your household discards 3 units from a 12-pack due to expiration or stale quality, your effective cost is <code>$36.00 ÷ 9 usable units = $4.00/unit</code>. If retail units cost $3.80 each, bulk buying caused an unintended net financial loss.</li>
+    </ul>
+
+    <h3>2. The Three Friction Costs of Inventory Holding</h3>
+    <p>
+      Retail stores exist to hold inventory so consumers don't have to. When you buy in bulk, you become your own warehouse operator, incurring three distinct holding frictions:
+    </p>
+    <ul>
+      <li><strong>Spoilage and Quality Decay:</strong> Perishable foods, cooking oils that oxidize, vitamins that lose potency, and liquid detergents that separate over multi-year timeframes.</li>
+      <li><strong>Capital Lockup:</strong> Paying $200 upfront for a year's supply of household paper goods ties up liquid cash that could otherwise buffer unexpected monthly expenses.</li>
+      <li><strong>Physical Storage Overhead:</strong> Oversized warehouse club packaging consumes living square footage, dedicated pantry shelves, or garage floor space.</li>
+    </ul>
+  </div>
+
   <!-- INPUTS SLOT -->
   <div slot="inputs" class="inputs-container">
     <div class="inputs-header">
@@ -339,12 +365,47 @@ const faqList: FAQItem[] = [
     </div>
   </div>
 
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> The economic benefit of buying in bulk is exceptionally sensitive to consumption velocity and maximum tolerable spoilage thresholds.
+    </div>
+
+    <h3>1. Maximum Tolerable Spoilage (The Break-Even Wastage Point)</h3>
+    <p>
+      If a bulk package offers a 25% discount relative to retail pricing, the mathematical <strong>maximum tolerable spoilage rate is exactly 25%</strong>. If your household throws away more than 25% of the package volume, you paid more per usable ounce than if you had purchased smaller retail units as needed. For non-perishable consumables (toilet paper, trash bags, dish soap), spoilage is 0%, securing the full 25% discount. For perishable foods (berries, bread, fresh herbs, bulk condiments), discard rates often reach 30%–40%, wiping out all financial savings.
+    </p>
+
+    <h3>2. Consumption Velocity vs. Shelf-Life Horizons</h3>
+    <p>
+      Evaluate how long the package will physically remain in your home. A 10-pound bag of flour consumed at 0.5 pounds per month will take 20 months to deplete. Over that 20-month horizon, flour is exposed to humidity, weevils, and oxidation. If your consumption velocity cannot clear the package within its prime shelf life, small retail packaging preserves quality and money.
+    </p>
+
+    <h3>3. Warehouse Club Membership Fee Amortization</h3>
+    <p>
+      An annual warehouse membership ($65 to $130/year) represents a fixed overhead charge. If a household saves an average of $8 per bulk item across 25 shopping trips per year ($200 in gross savings), the membership is easily amortized. If you only visit the warehouse club three times a year, the membership adds over $20 to each shopping trip, reversing the unit cost advantage.
+    </p>
+  </div>
+
   <!-- ASSUMPTIONS SLOT -->
   <div slot="assumptions">
     <AssumptionBox
       assumptions={assumptions}
       exclusions={exclusions}
     />
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>Bulk Purchasing Model Limitations & Behavioral Friction</h3>
+    <p>
+      The calculator isolates unit price mathematics, but real-world consumer behavior introduces qualitative friction:
+    </p>
+    <ul>
+      <li><strong>Consumption Acceleration (The "Full Pantry" Effect):</strong> Documented consumer research demonstrates that individuals consume bulk snack foods, beverages, and treats significantly faster when large stockpiles are visibly accessible in the home, increasing total calories and spending.</li>
+      <li><strong>Palate Fatigue and Brand Lock-In:</strong> Buying a 48-pack of a single flavor often results in household palate fatigue after unit 15, leaving the remainder unconsumed in pantry corners.</li>
+      <li><strong>Warehouse Club Impulse Overhead:</strong> Visiting high-volume warehouse clubs often triggers unplanned discretionary purchases (electronics, apparel, seasonal goods) that dwarf the $12 saved on pantry staples.</li>
+    </ul>
   </div>
 
   <!-- METHODOLOGY SLOT -->

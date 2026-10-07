@@ -139,6 +139,28 @@ const relatedGuides = [
   relatedDecisions={['buy-vs-repair', 'job-offer']}
   relatedGuides={relatedGuides}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> Comparing a contractor bid ($2,500) directly to retail lumber or tile costs ($800) ignores the hidden iceberg of DIY projects: specialized tool purchases, consumables, waste factors (10%–20%), learning curves, rework risks, and the irreversible expenditure of your personal leisure hours.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: Direct Cash vs. Personal Human Capital</h3>
+    <p>
+      An objective DIY analysis evaluates two distinct currencies: liquid monetary capital and personal time assets:
+    </p>
+    <ul>
+      <li><strong>Cash Outlays in DIY:</strong> Materials rarely represent the complete cash cost. DIYers must purchase or rent specialized tools (saws, nailers, ladders, sprayers), consumable supplies (fasteners, adhesives, abrasives, painter's tape, joint compound), disposal fees, and extra material buffers to account for cutting errors and dimensional scrap.</li>
+      <li><strong>The Economic Value of Personal Time:</strong> A 35-hour DIY tiling or carpentry project consumes multiple weekends and evenings. If you assign your personal time an opportunity cost rate (e.g., $30 to $60/hour based on your wage rate or personal leisure value), 35 hours represents $1,050 to $2,100 in non-monetary resource expenditure.</li>
+      <li><strong>Contractor Professional Economics:</strong> A professional contractor quote includes licensed labor, professional equipment, established trade distributor material pricing, project liability insurance, and a completion timeline that frees you from weeks of household disruption.</li>
+    </ul>
+
+    <h3>2. The Break-Even Hourly Rate Framework</h3>
+    <p>
+      To remove emotion from the decision, calculate your <strong>implied hourly wage</strong> for the project: <code>(Contractor Quote - Total DIY Cash Outlays) ÷ DIY Project Hours</code>. If a DIY project saves $600 in net cash but requires 30 hours of arduous physical labor, you are effectively paying yourself $20.00 per hour. If your time is worth more to you than $20/hour, hiring is the economically rational choice.
+    </p>
+  </div>
+
   <!-- 1. INPUTS -->
   <div slot="inputs" class="inputs-container">
     <!-- INPUT CONTROLS -->
@@ -272,6 +294,60 @@ const relatedGuides = [
         items={initialCostItems}
       />
     </div>
+  </div>
+
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> Whether DIY saves money pivots on tool reusability, rework probability, and how you value personal leisure time.
+    </div>
+
+    <h3>1. Tool Depreciation vs. Single-Project Overhead</h3>
+    <p>
+      If a $400 miter saw or tile saw is purchased solely for a single powder-room remodel, that $400 is 100% project overhead. If you plan five subsequent woodworking or remodeling projects over the next three years, the tool cost amortizes across multiple tasks, effectively cutting the immediate project burden to $80.
+    </p>
+
+    <h3>2. Complexity and Rework Probability</h3>
+    <p>
+      For simple cosmetic tasks (painting interior walls, assembling flat-pack cabinetry, mulching flower beds), DIY rework probability is under 5%. For technical tasks (soldering copper plumbing lines, leveling subfloors, skim-coating drywall), amateur error rates range between 20% and 35%. Having to tear out incorrectly set mortar or hiring an emergency plumber to fix an accidental pipe leak can completely double your initial DIY material expense.
+    </p>
+
+    <h3>3. Time Valuation Elasticity</h3>
+    <p>
+      If you enjoy the craftsmanship and treat DIY hours as productive recreation, setting your personal time rate to $0 makes DIY look dramatically cheaper in pure cash terms. If your available weekends are scarce and taking on a project forces you to sacrifice overtime pay, billable freelance work, or family obligations, valuing your time at $50/hour often shows that hiring a contractor is the financially and personally superior move.
+    </p>
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>DIY vs. Hire Limitations & Qualitative Trade-Offs</h3>
+    <p>
+      The mathematical calculator models direct cash outlays and estimated labor hours, but excludes several critical non-monetary factors:
+    </p>
+    <ul>
+      <li><strong>Building Permits and Code Compliance:</strong> Professional contractors manage municipal permitting, structural inspections, and code documentation. Non-permitted DIY electrical or structural work can complicate home appraisals or void homeowner insurance claims in the event of fire or water damage.</li>
+      <li><strong>Physical Safety and Occupational Hazards:</strong> Operating high-rpm saws, working on two-story extension ladders, and handling toxic adhesives carry physical injury risks that professionals mitigate with commercial safety equipment and workers' compensation coverage.</li>
+      <li><strong>Workmanship Warranties:</strong> Reputable licensed contractors provide 1- to 5-year written warranties guaranteeing their work against leaks, settling, or material defects. DIY work carries zero warranty; you absorb 100% of future repair liability.</li>
+      <li><strong>Household Disruption Timeline:</strong> A contractor crew may finish a bathroom renovation in 5 contiguous working days. A solo DIYer working 6 hours every Saturday may leave the bathroom disassembled for 8 to 12 weeks.</li>
+    </ul>
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The model calculates total economic resource consumption across cash and human labor:
+    </p>
+    <ul>
+      <li>
+        <strong>DIY Total Resource Cost:</strong> <code>Materials + Tools & Equipment + (Materials × Rework Risk %) + (DIY Hours × Hourly Time Value)</code>.
+      </li>
+      <li>
+        <strong>Hire Total Resource Cost:</strong> <code>Contractor Quote + (Homeowner Coordination Hours × Hourly Time Value)</code>.
+      </li>
+      <li>
+        <strong>Break-Even Hourly Rate:</strong> The personal hourly wage threshold where both options achieve identical economic cost: <code>(Contractor Quote - DIY Out-of-Pocket Cash) ÷ (DIY Hours - Coordination Hours)</code>.
+      </li>
+    </ul>
   </div>
 </DecisionLayout>
 

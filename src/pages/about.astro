@@ -6,14 +6,14 @@ const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
   name: 'About Decision Tools | Methodology & Editorial Principles',
-  description: 'Learn how Decision Tools creates transparent, non-prescriptive models to help people understand everyday financial and lifestyle trade-offs.',
+  description: 'Understand the quantitative methodology, editorial standards, and transparency principles behind Decision Tools calculators and decision guides.',
   url: 'https://decision-tools.org/about',
 };
 ---
 
 <BaseLayout
-  title="About & Methodology | Decision Tools"
-  description="Our core product principle: we do not make decisions for you. We make the trade-offs easier to understand through transparent mathematics."
+  title="About Our Methodology & Editorial Standards | Decision Tools"
+  description="How Decision Tools evaluates decisions: transparent mathematical formulas, explicit assumptions, total cost of ownership models, and non-prescriptive editorial standards."
   canonicalPath="/about"
   structuredData={structuredData}
 >
@@ -23,112 +23,500 @@ const structuredData = {
         <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'About & Methodology' }]} />
       </div>
 
+      <!-- PAGE HEADER -->
       <header class="about-header">
-        <span class="about-kicker">Transparent Analysis</span>
-        <h1 class="about-title">About Decision Tools</h1>
+        <span class="about-kicker">Analytical Framework & Editorial Trust</span>
+        <h1 class="about-title">Methodology & Editorial Standards</h1>
         <p class="about-lead">
-          Decision Tools exists to make everyday decisions clearer. We build objective, non-prescriptive calculators and frameworks designed to clarify costs, time, and practical trade-offs.
+          Decision Tools is an independent analytical reference and interactive modeling library. We build transparent calculators and structured decision guides to help people examine the financial, temporal, and practical trade-offs of major life choices.
         </p>
       </header>
 
-      <!-- Core Principle Box -->
+      <!-- CORE PRINCIPLE CALLOUT -->
       <section class="principle-spotlight" id="principles">
         <div class="spotlight-inner">
-          <span class="spotlight-tag">Core Product Principle</span>
-          <h2 class="spotlight-heading">We do NOT tell you what you should choose.</h2>
+          <span class="spotlight-tag">Our Foundational Principle</span>
+          <h2 class="spotlight-heading">We do not tell you what to choose. We help you understand the trade-offs.</h2>
           <p class="spotlight-body">
-            Every major decision in life—from buying a house or accepting a new job offer to leasing a car or repairing an appliance—involves personal circumstances, risk tolerance, and unique priorities that no algorithm can know.
+            Every significant personal decision—whether deciding to rent or buy a home, evaluating two competing job offers, choosing between leasing or purchasing a vehicle, or weighing DIY effort against hiring a professional—involves personal risk tolerance, liquidity requirements, career aspirations, and subjective lifestyle priorities that no formula can know.
           </p>
           <p class="spotlight-body">
-            Our models calculate the mathematical outcomes and expose the underlying trade-offs so you can make your own informed choice with confidence.
+            Our mission is not to declare a universal "winner" or issue generic financial advice. Our mission is to make the arithmetic transparent, expose hidden friction and compounding costs, and clarify the trade-offs so you can make your own well-reasoned choice.
           </p>
         </div>
       </section>
 
-      <!-- The Four Analytical Pillars -->
-      <section class="pillars-section">
-        <h2 class="section-heading">Our Analytical Pillars</h2>
-        <div class="pillars-grid">
-          <div class="pillar-card">
-            <div class="pillar-num">01</div>
-            <h3>Zero Commercial Bias</h3>
-            <p>
-              We do not accept sponsored product placements, affiliate commissions for recommending specific lenders or vehicles, or payments to tilt calculation results. Our algorithms are independent and open.
-            </p>
-          </div>
+      <!-- QUICK NAVIGATION JUMP LINKS -->
+      <nav class="methodology-toc" aria-label="Methodology Sections">
+        <span class="toc-label">Jump to Section:</span>
+        <ul class="toc-links">
+          <li><a href="#analytical-foundations">1. Analytical Foundations</a></li>
+          <li><a href="#debt-vs-invest-standard">2. Debt vs. Investment Standard</a></li>
+          <li><a href="#what-we-measure">3. Modeled vs. Non-Modeled Factors</a></li>
+          <li><a href="#assumptions-framework">4. Assumptions Framework</a></li>
+          <li><a href="#editorial-standards">5. Editorial Standards</a></li>
+          <li><a href="#model-maintenance">6. Model Review & Maintenance</a></li>
+          <li><a href="#privacy-client-side">7. Data Privacy & Processing</a></li>
+        </ul>
+      </nav>
 
-          <div class="pillar-card">
-            <div class="pillar-num">02</div>
-            <h3>Formula Transparency</h3>
-            <p>
-              Every amortization schedule, depreciation curve, and tax adjustment is documented in plain English. You can inspect the exact assumptions and override every parameter.
-            </p>
-          </div>
+      <!-- SECTION 1: THE EIGHT ANALYTICAL FOUNDATIONS -->
+      <section class="content-section" id="analytical-foundations">
+        <h2 class="section-title">1. The Analytical Foundations of Decision Modeling</h2>
+        <p class="section-intro">
+          Quantitative decision-making often breaks down when everyday rules of thumb confuse cash flow with economic consumption, ignore opportunity costs, or treat uncertain projections as established facts. Our models are built on eight explicit methodological concepts:
+        </p>
 
-          <div class="pillar-card">
-            <div class="pillar-num">03</div>
-            <h3>Opportunity Cost Accounting</h3>
-            <p>
-              Real-world decisions do not exist in a vacuum. We account for what capital or time could accomplish if deployed elsewhere, including investment compounding and unpaid commute hours.
-            </p>
-          </div>
-
-          <div class="pillar-card">
-            <div class="pillar-num">04</div>
-            <h3>Language Discipline</h3>
-            <p>
-              You will never see words like "Winner," "Best Choice," or "Recommended Option" in our tools. We report numerical differences and sensitivity ranges neutrally.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Mathematical Methodology Section -->
-      <section class="methodology-section" id="methodology">
-        <h2 class="section-heading">Methodology & Modeling Standards</h2>
-        <div class="methodology-content">
-          <div class="method-block">
-            <h3>Deterministic Computation</h3>
-            <p>
-              All mathematical calculations run client-side in deterministic TypeScript. They do not rely on opaque generative AI predictions or probabilistic guesses. When you input an interest rate and term, the amortization formula matches standard banking actuarial tables.
-            </p>
-          </div>
-
-          <div class="method-block">
-            <h3>Standard Amortization Formulas</h3>
-            <p>
-              For mortgage, debt, and loan calculations, we apply standard compound interest equations:
-            </p>
-            <div class="code-box">
-              <code>M = P * [r(1+r)^n] / [(1+r)^n - 1]</code>
+        <div class="concepts-grid">
+          <!-- TOPIC 1: CASH COST VS ECONOMIC COST -->
+          <article class="concept-card" id="cash-vs-economic-cost">
+            <div class="concept-header">
+              <span class="concept-num">01</span>
+              <h3>Cash Outflow vs. Economic Cost</h3>
             </div>
             <p>
-              Where <em>M</em> is the monthly payment, <em>P</em> is principal, <em>r</em> is monthly interest rate, and <em>n</em> is total months.
+              A common error in financial comparisons is treating all cash leaving a bank account as identical consumption expense. In reality, cash outflow and economic cost represent entirely different balance-sheet transactions:
             </p>
-          </div>
-
-          <div class="method-block">
-            <h3>Empirical Benchmarks</h3>
-            <p>
-              Default values are grounded in reliable public sector and economic data:
-            </p>
-            <ul class="benchmarks-list">
-              <li><strong>IRS Standard Mileage Rate (Contextual Benchmark):</strong> The IRS standard business mileage rate is referenced solely as an illustrative public benchmark for comprehensive vehicle operating expenses (fuel, routine maintenance, tires, insurance, and asset depreciation wear). It does not represent tax advice or personal commuting deduction guidance, as ordinary commuting is non-deductible under federal tax rules.</li>
-              <li><strong>Federal Highway Administration (FHWA):</strong> Average annual household vehicle travel benchmark of approximately 13,500–14,000 miles per year (derived from FHWA Highway Statistics series data).</li>
-              <li><strong>U.S. Energy Information Administration (EIA):</strong> Baseline residential electricity tariffs ($/kWh) and retail motor gasoline prices ($/gallon) reference EIA monthly and annual state-level utility averages.</li>
+            <ul>
+              <li><strong>Unrecoverable Consumption Outlays:</strong> Cash that is permanently expended with no asset retained. Examples include rent payments, mortgage interest, property taxes, auto insurance premiums, utility bills, and fuel.</li>
+              <li><strong>Asset Equity Transfers:</strong> Cash that shifts from liquid savings into an illiquid asset. For example, the principal repayment portion of a monthly mortgage or auto loan payment is not a lost consumption expense; it reduces outstanding loan liability and increases equity.</li>
             </ul>
+            <p>
+              Our calculators, such as the <a href="/decisions/rent-vs-buy">Rent vs. Buy</a> and <a href="/decisions/lease-vs-buy">Lease vs. Buy</a> tools, model this distinction explicitly by tracking cumulative cash outlays separately from ending retained equity.
+            </p>
+          </article>
+
+          <!-- TOPIC 2: OPPORTUNITY COST -->
+          <article class="concept-card" id="opportunity-cost">
+            <div class="concept-header">
+              <span class="concept-num">02</span>
+              <h3>Opportunity Cost & Personal Time</h3>
+            </div>
+            <p>
+              Opportunity cost is the economic value of an alternative deployment of scarce resources. Capital or hours committed to one option cannot simultaneously be deployed elsewhere:
+            </p>
+            <ul>
+              <li><strong>Capital Opportunity Cost:</strong> Committing an $80,000 liquid down payment to real estate prevents those funds from compounding in diversified, liquid market investments.</li>
+              <li><strong>Temporal Opportunity Cost:</strong> Spending 30 personal hours performing home maintenance or an additional 8 hours per week commuting to a distant job represents uncompensated time diverted from rest, family, or income-producing work.</li>
+            </ul>
+            <div class="concept-note">
+              <strong>Critical Modeling Distinction:</strong> While market prices (such as a contractor's quote or retail purchase price) represent observable figures, an individual's hourly value of personal time is a <em>user-defined assumption</em>. Our tools treat personal time valuations as adjustable inputs rather than objective external facts.
+            </div>
+          </article>
+
+          <!-- TOPIC 3: TOTAL COST OF OWNERSHIP (TCO) -->
+          <article class="concept-card" id="ownership-cost">
+            <div class="concept-header">
+              <span class="concept-num">03</span>
+              <h3>Purchase Price vs. Total Cost of Ownership</h3>
+            </div>
+            <p>
+              The initial purchase price on a price tag is rarely the dominant driver of long-term economic cost. Total Cost of Ownership (TCO) aggregates every financial factor over an asset's lifespan:
+            </p>
+            <div class="formula-box">
+              <code>TCO = Acquisition Outlay + Financing Interest + Cumulative Operating & Maintenance + Taxes/Insurance - Ending Resale Equity</code>
+            </div>
+            <p>
+              In our <a href="/decisions/new-vs-used">New vs. Used</a> and <a href="/decisions/gas-vs-ev">Gas vs. EV</a> models, an asset with a lower upfront acquisition cost may actually generate higher total lifetime costs if its depreciation slope, scheduled maintenance, financing APR, or fuel consumption is substantially steeper.
+            </p>
+          </article>
+
+          <!-- TOPIC 4: RECURRING COSTS -->
+          <article class="concept-card" id="recurring-costs">
+            <div class="concept-header">
+              <span class="concept-num">04</span>
+              <h3>Recurring Costs & Compounding Horizons</h3>
+            </div>
+            <p>
+              Small recurring expenses—such as monthly software subscriptions, ongoing vehicle maintenance reserves, home maintenance allowances, or fuel charges—often appear negligible in isolation but dominate long-term economics:
+            </p>
+            <p>
+              Because recurring costs repeat indefinitely, their share of total expenditure expands with every passing month. Over a 5-year timeline, a $35/month recurring fee represents $2,100 in cumulative cash outflow. When comparing perpetual subscriptions against outright asset ownership in our <a href="/decisions/buy-vs-subscribe">Buy vs. Subscribe</a> model, recurring fees eventually surpass one-time capital purchases.
+            </p>
+          </article>
+
+          <!-- TOPIC 5: TIME HORIZON -->
+          <article class="concept-card" id="time-horizon">
+            <div class="concept-header">
+              <span class="concept-num">05</span>
+              <h3>The Critical Role of the Time Horizon</h3>
+            </div>
+            <p>
+              A decision can yield opposite conclusions depending on whether it is evaluated over 1 year, 3 years, 7 years, or 15 years:
+            </p>
+            <ul>
+              <li><strong>Upfront Transaction Friction:</strong> Real estate purchase closing costs (2% to 4%), seller exit commissions (5% to 7%), vehicle sales taxes, and home EV charger installations create substantial upfront friction that requires several years of ongoing savings to amortize.</li>
+              <li><strong>No Universal Horizon:</strong> Decision Tools does not prescribe arbitrary "universal" timeframes. The appropriate holding horizon depends entirely on how long you realistically plan to occupy a home, drive a vehicle, or utilize a piece of equipment.</li>
+            </ul>
+          </article>
+
+          <!-- TOPIC 6: BREAK-EVEN ANALYSIS -->
+          <article class="concept-card" id="break-even">
+            <div class="concept-header">
+              <span class="concept-num">06</span>
+              <h3>The Precise Meaning of Break-Even</h3>
+            </div>
+            <p>
+              A break-even point is defined strictly as: <strong>the specific point in time or usage volume at which two modeled alternatives produce equal cumulative net economic cost under specified assumptions.</strong>
+            </p>
+            <p>
+              Break-even is a mathematical crossover point—it is <em>not</em> an objective signal that one option becomes universally superior or that lifestyle friction disappears.
+            </p>
+            <div class="example-box">
+              <span class="example-tag">Illustrative Example</span>
+              <p>
+                In a Buy vs. Subscribe scenario for an $800 software tool with $50 annual maintenance versus a $35/month subscription ($420/year), the mathematical cumulative cash crossover occurs at month 26. Under these static assumptions, subscribing results in lower cash outflow prior to month 26, while purchasing results in lower cumulative cash outflow after month 26.
+              </p>
+            </div>
+          </article>
+
+          <!-- TOPIC 7: SENSITIVITY ANALYSIS -->
+          <article class="concept-card" id="sensitivity-analysis">
+            <div class="concept-header">
+              <span class="concept-num">07</span>
+              <h3>Sensitivity Analysis & Core Leverage Points</h3>
+            </div>
+            <p>
+              Not all input variables carry equal mathematical weight. In any complex decision model, one or two variables act as high-leverage drivers that can flip the result:
+            </p>
+            <ul>
+              <li><strong>Housing:</strong> The duration of stay and assumed mortgage interest rate generally exert far more influence than property insurance variance.</li>
+              <li><strong>Transportation:</strong> Annual driving mileage and residential electricity rates dictate whether electric vehicle operating savings can overcome upfront price premiums.</li>
+              <li><strong>DIY vs. Hiring:</strong> The homeowner's estimated hours and personal hourly valuation of leisure time dominate the comparison over small material discounts.</li>
+            </ul>
+            <p>
+              The most practical way to interpret our calculators is to ask: <em>"What would need to change in my life or the market for the other option to make sense?"</em>
+            </p>
+          </article>
+
+          <!-- TOPIC 8: UNCERTAINTY -->
+          <article class="concept-card" id="uncertainty">
+            <div class="concept-header">
+              <span class="concept-num">08</span>
+              <h3>Treatment of Uncertainty: Observable vs. Estimated</h3>
+            </div>
+            <p>
+              Our calculators combine two distinct types of quantitative parameters:
+            </p>
+            <div class="uncertainty-columns">
+              <div class="unc-col">
+                <h4>Relatively Observable Inputs</h4>
+                <p>Contractual, observable figures knowable at the moment of calculation:</p>
+                <ul>
+                  <li>Current purchase or quote price</li>
+                  <li>Contractual loan interest rate (APR)</li>
+                  <li>Current monthly rent or subscription fee</li>
+                  <li>Stated employer base salary</li>
+                </ul>
+              </div>
+              <div class="unc-col">
+                <h4>Uncertain & Estimated Inputs</h4>
+                <p>Forward-looking parameters subject to real-world market variance:</p>
+                <ul>
+                  <li>Future vehicle resale value in 5 years</li>
+                  <li>Annual property appreciation rates</li>
+                  <li>Future utility tariffs & fuel price swings</li>
+                  <li>Unexpected appliance secondary failure rates</li>
+                  <li>Long-term investment portfolio returns</li>
+                </ul>
+              </div>
+            </div>
+            <p>
+              A calculator cannot eliminate real-world uncertainty. Its purpose is to make assumptions explicit so you can stress-test different scenarios under varying conditions.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- SECTION 2: SPECIAL METHODOLOGY: DEBT VS INVESTING -->
+      <section class="content-section" id="debt-vs-invest-standard">
+        <h2 class="section-title">2. Methodological Standard: Debt Payoff vs. Investing</h2>
+        <div class="standard-panel">
+          <p class="panel-lead">
+            When comparing debt elimination against investment allocation in our <a href="/decisions/debt-vs-invest">Debt vs. Invest</a> tool, we enforce strict analytical discipline between contractual legal obligations and prospective market returns:
+          </p>
+          <div class="debt-invest-grid">
+            <div class="debt-invest-card debt-card">
+              <h3>Debt Payoff: Contractual Interest Avoided</h3>
+              <p>
+                Paying down debt principal produces a mathematically certain, contractual benefit: you avoid compound interest charges dictated by your loan agreement.
+              </p>
+              <ul>
+                <li>The interest avoided is guaranteed by the contractual terms of the loan note.</li>
+                <li>Reduces mandatory monthly fixed living overhead, lowering baseline financial vulnerability.</li>
+                <li>Represents an immediate, non-taxable financial return equal to the loan APR.</li>
+              </ul>
+            </div>
+            <div class="debt-invest-card invest-card">
+              <h3>Investing: Prospective, Uncertain Market Return</h3>
+              <p>
+                Allocating capital to investment markets involves risk, volatility, and uncertainty:
+              </p>
+              <ul>
+                <li>Investment returns are never guaranteed, risk-free, or predictable over fixed horizons.</li>
+                <li>Equity and bond portfolios experience periodic economic drawdowns and sequence-of-returns risk.</li>
+                <li>Realized capital gains and dividends in taxable accounts incur tax drag that reduces net yield.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="method-callout">
+            <strong>Analytical Principle:</strong> We never describe investment returns as "guaranteed," "risk-free," or "certain." Comparing an 18% credit card APR to an assumed 8% stock index return is an analytical exercise designed to illuminate the mathematical spread, not a promise of future market gains.
           </div>
         </div>
       </section>
 
-      <!-- Privacy & Ethics Policy -->
-      <section class="privacy-section" id="privacy">
-        <h2 class="section-heading">Data Privacy & Security</h2>
-        <div class="privacy-card">
-          <h3>Your Numbers Stay in Your Browser</h3>
+      <!-- SECTION 3: WHAT OUR CALCULATORS MEASURE VS WHAT THEY DO NOT -->
+      <section class="content-section" id="what-we-measure">
+        <h2 class="section-title">3. Model Scope: What Our Calculators Measure (and Do Not Measure)</h2>
+        <p class="section-intro">
+          Transparent decision analysis requires honest boundary lines. Here is the explicit distinction between factors our models quantify and contextual factors that remain outside the mathematics:
+        </p>
+
+        <div class="scope-comparison-table-wrapper">
+          <table class="scope-comparison-table">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 50%;">What Our Calculators Model (Quantified Factors)</th>
+                <th scope="col" style="width: 50%;">What Our Calculators Do NOT Model (Contextual Factors)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Direct Capital Outflows:</strong> Purchase prices, upfront down payments, installation charges, and delivery fees.</td>
+                <td><strong>Subjective Happiness & Stress:</strong> Peace of mind from homeownership, pride of DIY craftsmanship, or dread of maintenance chores.</td>
+              </tr>
+              <tr>
+                <td><strong>Contractual Financing Terms:</strong> Amortization schedules, loan term lengths, and compound interest charges.</td>
+                <td><strong>Individual Tax Complexities:</strong> Specific personal deductions, itemized vs. standard deduction thresholds, or local property tax caps.</td>
+              </tr>
+              <tr>
+                <td><strong>Operating & Energy Costs:</strong> Gasoline consumption, electricity tariffs, and scheduled routine maintenance estimates.</td>
+                <td><strong>Unmodeled Environmental Variables:</strong> Severe sub-zero EV battery range loss or specialized EV tire tread wear cycles.</td>
+              </tr>
+              <tr>
+                <td><strong>Asset Depreciation & Residual Value:</strong> Estimated ending equity recovered upon vehicle resale or property liquidation.</td>
+                <td><strong>Catastrophic Tail Risk:</strong> Out-of-warranty battery failure, complete foundation structural repair, or appliance flood damage.</td>
+              </tr>
+              <tr>
+                <td><strong>Mathematical Break-Even Milestones:</strong> The exact month or mileage where cumulative costs cross over under entered assumptions.</td>
+                <td><strong>Career & Lifestyle Dynamics:</strong> Promotion velocity, non-cash corporate culture, job security, or professional network strength.</td>
+              </tr>
+              <tr>
+                <td><strong>Opportunity Cost of Capital & Time:</strong> Compound growth of down payments and personal time spent on projects or commuting.</td>
+                <td><strong>Individual Financial Advice:</strong> Tailored legal, tax, or investment advice specific to your complete balance sheet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="contextual-factors-box">
+          <h3>The Rule of Contextual Factors</h3>
           <p>
-            When you enter your salary, mortgage balances, debt figures, or personal vehicle numbers into Decision Tools, that data is processed entirely in your browser memory. We do not store your inputs on remote servers, we do not require account registration, and we do not sell financial profiling data.
+            Whenever an unmodeled variable plays an important role in real-world decisions—such as seasonal battery loss in cold climates, contractor warranty protections, or the liquidity penalty of locking cash into real estate—we explicitly label it as a <strong>contextual non-modeled factor</strong> in our calculator guides and limitation sections. We do not pretend our mathematical formulas capture what they do not model.
           </p>
+        </div>
+      </section>
+
+      <!-- SECTION 4: ASSUMPTIONS FRAMEWORK -->
+      <section class="content-section" id="assumptions-framework">
+        <h2 class="section-title">4. Our Assumptions Framework</h2>
+        <p class="section-intro">
+          Every quantitative model requires inputs. We classify all data points into three transparent categories:
+        </p>
+
+        <div class="assumptions-grid">
+          <div class="assumption-type-card">
+            <span class="type-badge user-badge">Tier 1</span>
+            <h3>User Inputs</h3>
+            <p>
+              Values provided directly by you. These reflect your real numbers: your current rent, mortgage quote, hourly rate, commute distance, or debt balance. You can override every default on every tool.
+            </p>
+          </div>
+
+          <div class="assumption-type-card">
+            <span class="type-badge illustrative-badge">Tier 2</span>
+            <h3>Illustrative Assumptions</h3>
+            <p>
+              Baseline starting defaults (e.g., $2,200/month rent, 14,000 miles/year, 3% inflation) used solely to demonstrate how a model functions before custom numbers are entered.
+            </p>
+          </div>
+
+          <div class="assumption-type-card">
+            <span class="type-badge derived-badge">Tier 3</span>
+            <h3>Derived Values</h3>
+            <p>
+              Numbers calculated deterministically from standard mathematical equations (e.g., monthly mortgage payment from standard actuarial compounding formulas).
+            </p>
+          </div>
+        </div>
+
+        <div class="no-fake-data-box">
+          <div class="box-icon" aria-hidden="true">✓</div>
+          <div class="box-text">
+            <h3>Strict Commitment to Empirical Honesty</h3>
+            <p>
+              Decision Tools never fabricates source citations, "proprietary surveys," fictitious industry studies, or fake expert quotes. Where baseline defaults reference published benchmarks (such as the Federal Highway Administration’s average annual vehicle travel of ~13,500–14,000 miles, or U.S. Energy Information Administration state electricity averages), they are cited strictly as illustrative public benchmarks.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: EDITORIAL STANDARDS -->
+      <section class="content-section" id="editorial-standards">
+        <h2 class="section-title">5. Editorial Standards & Ethics</h2>
+        <p class="section-intro">
+          Our decision guides and analytical calculators adhere to nine strict editorial principles designed to preserve trust and objectivity:
+        </p>
+
+        <div class="principles-list">
+          <div class="principle-item">
+            <div class="principle-number">1</div>
+            <div class="principle-detail">
+              <h4>Transparent Assumptions</h4>
+              <p>Every calculation model reveals its core formulas, compound interest equations, and baseline assumptions in plain English. No black-box algorithms.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-number">2</div>
+            <div class="principle-detail">
+              <h4>Separation of Math and Human Judgment</h4>
+              <p>We present the quantitative arithmetic clearly, but we never confuse a mathematical delta with a definitive life decision. Personal priorities always govern the final choice.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-number">3</div>
+            <div class="principle-detail">
+              <h4>Zero False Certainty</h4>
+              <p>We avoid words like "guaranteed," "obvious choice," "winner," or "foolproof." We present sensitivity ranges and scenario analyses rather than illusory certainty.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-number">4</div>
+            <div class="principle-detail">
+              <h4>Complete Commercial Independence</h4>
+              <p>We do not accept sponsored product placements, affiliate commissions for steering users toward specific lenders or auto dealers, or payments to bias calculation outcomes.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-number">5</div>
+            <div class="principle-detail">
+              <h4>No Illustrative Data as Universal Truth</h4>
+              <p>We never claim that an illustrative baseline (such as a 3% home appreciation assumption or a 15% DIY rework rate) represents a universal law or guaranteed market outcome.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-number">6</div>
+            <div class="principle-detail">
+              <h4>Explicit Disclosure of Boundaries & Limitations</h4>
+              <p>Every tool and guide clearly identifies what the model does not include, such as income tax deduction caps, specialized tire wear, or warranty expiration risks.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-number">7</div>
+            <div class="principle-detail">
+              <h4>Systematic Model Error Correction</h4>
+              <p>If an arithmetic, amortization, or economic modeling defect is discovered, we investigate promptly and correct the code across both the calculator and its companion guide.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-number">8</div>
+            <div class="principle-detail">
+              <h4>Cautious Financial Language</h4>
+              <p>We strictly avoid speculative claims, financial advisory phrasing, or promises of investment returns. Our content is educational and analytical.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-number">9</div>
+            <div class="principle-detail">
+              <h4>Editorial and Commercial Separation</h4>
+              <p>Third-party advertisements served via standard display networks do not influence our editorial analysis, calculation logic, or guide recommendations in any way.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 6: MODEL REVIEW AND MAINTENANCE -->
+      <section class="content-section" id="model-maintenance">
+        <h2 class="section-title">6. Model Review & Maintenance Principles</h2>
+        <p class="section-intro">
+          Decision models and companion guides require ongoing stewardship to remain accurate and relevant. We follow four maintenance protocols:
+        </p>
+
+        <div class="maintenance-grid">
+          <div class="maint-card">
+            <h4>Formula-to-Text Synchronization</h4>
+            <p>
+              Whenever a calculator equation or parameter is refined, the corresponding guide narrative, worked numerical examples, and limitation notes are audited to maintain 100% synchronization.
+            </p>
+          </div>
+
+          <div class="maint-card">
+            <h4>Benchmark Baseline Re-evaluation</h4>
+            <p>
+              Default assumptions that reference macroeconomic conditions—such as prevailing mortgage rates, retail gasoline prices, and utility electricity tariffs—are reviewed against publicly reported benchmarks.
+            </p>
+          </div>
+
+          <div class="maint-card">
+            <h4>Worked Example Re-verification</h4>
+            <p>
+              Numerical examples throughout our guides are calculated using the exact formulas implemented in the TypeScript calculator engine to guarantee mathematical consistency.
+            </p>
+          </div>
+
+          <div class="maint-card">
+            <h4>Structured Data Alignment</h4>
+            <p>
+              Schema.org structured data (including WebPage, Article, and FAQ metadata) is kept strictly synchronized with visible on-page content, never outputting fabricated dates or ungrounded statistics.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 7: DATA PRIVACY & CLIENT-SIDE PROCESSING -->
+      <section class="content-section" id="privacy-client-side">
+        <h2 class="section-title">7. Data Privacy: Local Browser Processing</h2>
+        <div class="privacy-panel">
+          <div class="privacy-icon" aria-hidden="true">🔒</div>
+          <div class="privacy-body">
+            <h3>Your Financial Numbers Never Leave Your Device</h3>
+            <p>
+              When you enter your salary, mortgage loan balance, rent figures, vehicle purchase prices, or debt numbers into Decision Tools, all calculations are executed <strong>100% client-side in your device's web browser</strong> using deterministic TypeScript.
+            </p>
+            <ul>
+              <li>We do not transmit your financial or personal calculation inputs to our servers or any third-party database.</li>
+              <li>We do not require user accounts, logins, passwords, or personal identifying information to use our tools.</li>
+              <li>We use Google Analytics 4 strictly for aggregated, non-sensitive site traffic metrics (such as page views and general tool interaction events) without recording any user-entered numbers.</li>
+            </ul>
+            <p class="privacy-link-p">
+              For complete details regarding cookies, analytics parameters, and third-party advertising disclosures, review our comprehensive <a href="/privacy">Privacy Policy</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RELATED EXPLORATION LINKS -->
+      <section class="explore-tools-section">
+        <h2>Explore Our Analytical Tools & Guides</h2>
+        <div class="explore-links-grid">
+          <a href="/decisions" class="explore-card">
+            <h3>Decision Calculators</h3>
+            <p>Interact with our 10 transparent decision models across housing, career, transportation, and everyday finance.</p>
+            <span class="explore-cta">View All 10 Calculators →</span>
+          </a>
+          <a href="/guides" class="explore-card">
+            <h3>Decision Guides</h3>
+            <p>Read in-depth, structured decision analyses exploring break-even thresholds, hidden trade-offs, and sensitivity factors.</p>
+            <span class="explore-cta">Browse 16 Decision Guides →</span>
+          </a>
         </div>
       </section>
     </div>
@@ -143,7 +531,7 @@ const structuredData = {
     margin-bottom: var(--space-6);
   }
   .about-header {
-    max-width: 780px;
+    max-width: 820px;
     margin-bottom: var(--space-10);
   }
   .about-kicker {
@@ -152,13 +540,15 @@ const structuredData = {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--color-primary);
+    color: var(--color-brand-accent);
     margin-bottom: var(--space-2);
   }
   .about-title {
-    font-size: 2.3rem;
+    font-size: 2.4rem;
     font-weight: 700;
     letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--color-text-main);
     margin-bottom: var(--space-4);
   }
   .about-lead {
@@ -166,132 +556,622 @@ const structuredData = {
     line-height: 1.6;
     color: var(--color-text-muted);
   }
+
+  /* PRINCIPLE SPOTLIGHT */
   .principle-spotlight {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-left: 4px solid var(--color-primary);
+    border-left: 4px solid var(--color-brand-accent);
     border-radius: var(--radius-md);
     padding: var(--space-8);
-    margin-bottom: var(--space-12);
+    margin-bottom: var(--space-10);
     box-shadow: var(--shadow-sm);
   }
   .spotlight-tag {
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    color: var(--color-primary);
+    letter-spacing: 0.05em;
+    color: var(--color-brand-accent);
     display: block;
     margin-bottom: var(--space-2);
   }
   .spotlight-heading {
     font-size: 1.6rem;
     font-weight: 700;
+    color: var(--color-text-main);
+    line-height: 1.3;
     margin-bottom: var(--space-4);
   }
   .spotlight-body {
     font-size: 1.05rem;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--color-text-main);
     margin-bottom: var(--space-3);
   }
   .spotlight-body:last-child {
     margin-bottom: 0;
   }
-  .section-heading {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: var(--space-6);
-  }
-  .pillars-section {
+
+  /* TOC */
+  .methodology-toc {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5) var(--space-6);
     margin-bottom: var(--space-12);
   }
-  .pillars-grid {
+  .toc-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-subtle);
+    display: block;
+    margin-bottom: var(--space-3);
+  }
+  .toc-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+  }
+  .toc-links li a {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-brand-accent);
+    text-decoration: none;
+  }
+  .toc-links li a:hover {
+    text-decoration: underline;
+  }
+
+  /* CONTENT SECTIONS */
+  .content-section {
+    margin-bottom: var(--space-16);
+  }
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    letter-spacing: -0.01em;
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .section-intro {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-8);
+    max-width: 820px;
+  }
+
+  /* CONCEPTS GRID */
+  .concepts-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--space-6);
+    gap: var(--space-8);
   }
-  @media (min-width: 768px) {
-    .pillars-grid {
+  @media (min-width: 900px) {
+    .concepts-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
-  .pillar-card {
+  .concept-card {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
   }
-  .pillar-num {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-subtle);
-    margin-bottom: var(--space-2);
-  }
-  .pillar-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: var(--space-2);
-  }
-  .pillar-card p {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: var(--color-text-muted);
-    margin: 0;
-  }
-  .methodology-section {
-    margin-bottom: var(--space-12);
-  }
-  .method-block {
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-6);
-    margin-bottom: var(--space-4);
-  }
-  .method-block h3 {
-    font-size: 1.2rem;
+  .concept-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
     margin-bottom: var(--space-3);
   }
-  .method-block p {
+  .concept-num {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--color-brand-accent);
+    opacity: 0.8;
+  }
+  .concept-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin: 0;
+  }
+  .concept-card p {
     font-size: 0.95rem;
     line-height: 1.6;
     color: var(--color-text-main);
     margin-bottom: var(--space-3);
   }
-  .code-box {
+  .concept-card ul {
+    margin: 0 0 var(--space-4) 0;
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .concept-card li {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-main);
+  }
+  .concept-note {
+    background-color: var(--color-surface-subtle);
+    border-left: 3px solid var(--color-brand-accent);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) var(--space-4);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin-top: auto;
+  }
+  .formula-box {
     background-color: var(--color-surface-subtle);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     padding: var(--space-3) var(--space-4);
     margin: var(--space-3) 0;
-    font-family: monospace;
-    font-size: 0.95rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-text-main);
+    overflow-x: auto;
   }
-  .benchmarks-list {
+  .example-box {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
+    margin-top: auto;
+  }
+  .example-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #15803d;
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+  .example-box p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #166534;
+    margin: 0;
+  }
+  .uncertainty-columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    margin: var(--space-3) 0;
+  }
+  @media (min-width: 600px) {
+    .uncertainty-columns {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .unc-col {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
+  }
+  .unc-col h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+  .unc-col p {
+    font-size: 0.85rem;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-muted);
+  }
+  .unc-col ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    gap: var(--space-1);
+  }
+  .unc-col li {
+    font-size: 0.85rem;
+  }
+
+  /* DEBT VS INVEST STANDARD */
+  .standard-panel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-sm);
+  }
+  .panel-lead {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+  }
+  .debt-invest-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+  @media (min-width: 768px) {
+    .debt-invest-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .debt-invest-card {
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    border: 1px solid;
+  }
+  .debt-card {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+    border-top: 4px solid #334155;
+  }
+  .invest-card {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+    border-top: 4px solid var(--color-brand-accent);
+  }
+  .debt-invest-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+  .debt-invest-card p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+  .debt-invest-card ul {
     margin: 0;
     padding-left: var(--space-5);
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
   }
-  .benchmarks-list li {
+  .debt-invest-card li {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-main);
+  }
+  .method-callout {
+    background-color: var(--color-surface-subtle);
+    border-left: 4px solid var(--color-brand-accent);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4) var(--space-5);
     font-size: 0.95rem;
     line-height: 1.5;
     color: var(--color-text-main);
   }
-  .privacy-card {
-    background-color: var(--color-surface-subtle);
+
+  /* SCOPE COMPARISON TABLE */
+  .scope-comparison-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: var(--space-6);
     border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  .scope-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-surface);
+    text-align: left;
+  }
+  .scope-comparison-table th {
+    background-color: var(--color-surface-subtle);
+    padding: var(--space-4) var(--space-5);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    border-bottom: 2px solid var(--color-border);
+  }
+  .scope-comparison-table td {
+    padding: var(--space-4) var(--space-5);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-main);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+  .scope-comparison-table tr:last-child td {
+    border-bottom: none;
+  }
+  .contextual-factors-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid #64748b;
     border-radius: var(--radius-md);
     padding: var(--space-6);
   }
-  .privacy-card h3 {
-    font-size: 1.2rem;
+  .contextual-factors-box h3 {
+    font-size: 1.15rem;
     margin-bottom: var(--space-2);
+    color: var(--color-text-main);
   }
-  .privacy-card p {
+  .contextual-factors-box p {
     font-size: 0.95rem;
     line-height: 1.6;
     color: var(--color-text-muted);
     margin: 0;
+  }
+
+  /* ASSUMPTIONS FRAMEWORK */
+  .assumptions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+  @media (min-width: 768px) {
+    .assumptions-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .assumption-type-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+  .type-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-3);
+  }
+  .user-badge {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+  }
+  .illustrative-badge {
+    background-color: #fef3c7;
+    color: #b45309;
+  }
+  .derived-badge {
+    background-color: #dcfce7;
+    color: #15803d;
+  }
+  .assumption-type-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-main);
+  }
+  .assumption-type-card p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+  .no-fake-data-box {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+  }
+  .box-icon {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #15803d;
+    line-height: 1;
+  }
+  .box-text h3 {
+    font-size: 1.15rem;
+    color: #166534;
+    margin-bottom: var(--space-2);
+  }
+  .box-text p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #166534;
+    margin: 0;
+  }
+
+  /* EDITORIAL PRINCIPLES LIST */
+  .principles-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 768px) {
+    .principles-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .principles-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .principle-item {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    display: flex;
+    gap: var(--space-4);
+    box-shadow: var(--shadow-sm);
+  }
+  .principle-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-brand-accent);
+    opacity: 0.7;
+    line-height: 1;
+  }
+  .principle-detail h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+  }
+  .principle-detail p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  /* MAINTENANCE GRID */
+  .maintenance-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  @media (min-width: 768px) {
+    .maintenance-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .maint-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-brand-accent);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+  .maint-card h4 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+  }
+  .maint-card p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  /* PRIVACY PANEL */
+  .privacy-panel {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  @media (min-width: 600px) {
+    .privacy-panel {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--space-6);
+    }
+  }
+  .privacy-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+  }
+  .privacy-body h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+  }
+  .privacy-body p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-3);
+  }
+  .privacy-body ul {
+    margin: 0 0 var(--space-4) 0;
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .privacy-body li {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+  .privacy-link-p {
+    font-size: 0.9rem;
+    color: var(--color-text-subtle);
+    margin: 0;
+  }
+
+  /* EXPLORE SECTION */
+  .explore-tools-section {
+    padding-top: var(--space-10);
+    border-top: 1px solid var(--color-border);
+  }
+  .explore-tools-section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+    text-align: center;
+  }
+  .explore-links-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  @media (min-width: 768px) {
+    .explore-links-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .explore-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .explore-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-brand-accent);
+  }
+  .explore-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+  }
+  .explore-card p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-4);
+    flex-grow: 1;
+  }
+  .explore-cta {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-brand-accent);
   }
 </style>

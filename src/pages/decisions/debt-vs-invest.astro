@@ -131,6 +131,32 @@ const relatedGuides = [
   relatedDecisions={['rent-vs-buy', 'buy-vs-subscribe']}
   relatedGuides={relatedGuides}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> This decision compares a contractually certain financial outcome against an uncertain, variable market projection. Paying off debt eliminates a known contractual interest cost; investing surplus cash offers prospective market compounding that carries market volatility and downside risk.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: Contractual Certainty vs. Market Risk</h3>
+    <p>
+      Comparing debt paydown to capital investing requires recognizing a fundamental structural asymmetry:
+    </p>
+    <ul>
+      <li><strong>Contractual Interest Cost Avoided:</strong> When you pay down debt carrying an 18% APR, you eliminate a contractual finance charge that compounds against you every month. The return on debt payoff is mathematically certain, realized immediately, and immune to economic cycles or market downturns.</li>
+      <li><strong>Prospective Investment Return:</strong> Allocating capital to equities, index funds, or fixed-income assets provides the potential for long-term compound growth. However, market returns are never fixed; they fluctuate with volatility, experience multi-year drawdowns, and carry sequence-of-returns risk.</li>
+    </ul>
+
+    <h3>2. The Tax-Adjusted Hurdle Rate</h3>
+    <p>
+      Debt interest rates represent a net hurdle rate. For standard non-deductible debt (credit cards, auto loans, personal loans), avoiding an 18% APR is equivalent to earning an 18% after-tax return. Conversely, nominal investment returns in standard taxable brokerage accounts are reduced by capital gains taxes and dividend taxation. An 8.5% nominal equity return taxed at 15% yields a net prospective return of approximately 7.2%—a hurdle that falls far short of double-digit borrowing costs.
+    </p>
+
+    <h3>3. Liquidity Optionality vs. Overhead Elimination</h3>
+    <p>
+      Dollars paid toward debt principal are illiquid—once remitted to a lender, they cannot be retrieved without taking on new borrowing. In contrast, invested capital remains accessible (subject to market fluctuation) to cover unforeseen medical emergencies or income disruptions. However, eliminating debt permanently reduces your recurring monthly living overhead, dramatically lowering your baseline survival budget during a job loss.
+    </p>
+  </div>
+
   <!-- 1. INPUTS -->
   <div slot="inputs" class="inputs-container">
     <!-- INPUT CONTROLS -->
@@ -266,6 +292,60 @@ const relatedGuides = [
         items={initialCostItems}
       />
     </div>
+  </div>
+
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> The mathematical ranking between debt paydown and investing pivots on the interest rate spread, investment taxation, and your sensitivity to market volatility.
+    </div>
+
+    <h3>1. The Interest Rate Spread Threshold</h3>
+    <p>
+      When debt carries a high interest rate (e.g., <strong>12% to 26% APR</strong> on credit cards or unsecured personal loans), debt paydown dominates overwhelmingly. No broad market investment asset class reliably matches those hurdle rates after taxes without speculative risk. Conversely, when debt is low-rate and fixed (e.g., a <strong>3.0% to 4.0%</strong> mortgage), a diversified equity portfolio with an expected 7% to 9% long-term return has historically outpaced the borrowing cost over 15- to 30-year horizons.
+    </p>
+
+    <h3>2. Market Drawdowns and Sequence-of-Returns Risk</h3>
+    <p>
+      The calculator models a constant annualized investment return. In real financial markets, returns are lumpy and non-linear. If an investor allocates cash to equities and the market drops 25% in Year 1 while debt continues compounding at 18%, the investor suffers compound erosion. Contractual debt interest accrues relentlessly, regardless of economic conditions.
+    </p>
+
+    <h3>3. Employer 401(k) Match: The Immediate Return Exception</h3>
+    <p>
+      An essential real-world exception to the "high-interest debt first" guideline is employer 401(k) matching. An employer dollar-for-dollar match (100% immediate return) or 50% match represents an immediate compensation addition that outpaces even 22% credit card debt. Capturing the full matching tier before directing remaining cash to debt paydown is almost always the optimal sequence.
+    </p>
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>Debt vs. Invest Model Limitations & Behavioral Realities</h3>
+    <p>
+      While mathematical models assume rigid programmatic cash flow reallocation, real personal finances face psychological and structural constraints:
+    </p>
+    <ul>
+      <li><strong>Cash Flow Redirection Discipline:</strong> The model assumes that the exact moment Option A eliminates debt, the entire former minimum payment plus extra cash is immediately invested each month. In reality, individuals who lack strict budgeting discipline often absorb freed cash flow into lifestyle inflation, diluting the mathematical benefit of debt elimination.</li>
+      <li><strong>Emergency Liquidity Depletion:</strong> Aggressively exhausting all available cash to pay off debt without maintaining a liquid emergency cash reserve leaves individuals vulnerable. A surprise expense (transmission repair, medical bill) can force an individual back into high-interest revolving credit.</li>
+      <li><strong>Variable Debt APR Trajectories:</strong> The model treats debt APR as a fixed parameter. Credit card interest rates fluctuate directly with central bank benchmark rate changes, meaning debt costs can escalate mid-horizon.</li>
+      <li><strong>Subjective Psychological Burden:</strong> Living with significant debt imposes documented cognitive and psychological stress that mathematical formulas cannot quantify. For many individuals, becoming debt-free delivers peace of mind that outweighs a narrow statistical spreadsheet advantage.</li>
+    </ul>
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The model runs a month-by-month financial ledger tracking parallel scenarios across your selected horizon:
+    </p>
+    <ul>
+      <li>
+        <strong>Option A (Debt Payoff Priority):</strong> Allocates both the minimum payment and the extra monthly surplus directly toward debt principal. Monthly interest is calculated as: <code>Remaining Balance × (Annual APR ÷ 12)</code>. The moment the loan balance reaches $0, the entire freed cash flow (minimum payment + extra cash) is automatically channeled into the investment account compounding at the net after-tax return rate for all remaining months.
+      </li>
+      <li>
+        <strong>Option B (Investing Surplus Concurrently):</strong> The minimum monthly payment is paid to the lender, while all extra surplus cash is deposited monthly into the market investment portfolio compounding at: <code>Expected Nominal Return × (1 - Tax Rate %)</code>.
+      </li>
+      <li>
+        <strong>Net Financial Position:</strong> At the horizon conclusion, net position equals: <code>Final Investment Portfolio Value - Remaining Unpaid Debt Balance</code>.
+      </li>
+    </ul>
   </div>
 </DecisionLayout>
 

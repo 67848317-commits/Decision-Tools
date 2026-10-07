@@ -144,6 +144,27 @@ const relatedGuides = [
   relatedDecisions={['gas-vs-ev', 'new-vs-used']}
   relatedGuides={relatedGuides}
 >
+  <!-- FRAMEWORK SLOT: HOW TO THINK ABOUT THIS DECISION -->
+  <div slot="framework" class="framework-content">
+    <div class="framework-callout">
+      <strong>Core Analytical Dilemma:</strong> A lower monthly payment does not mean a lower total cost. A $390/month lease appears more affordable than a $610/month loan payment, but the lease finances only the vehicle's steep initial depreciation—leaving you with zero asset equity when the term concludes.
+    </div>
+
+    <h3>1. What This Decision Actually Compares: Financing Depreciation vs. Asset Acquisition</h3>
+    <p>
+      Evaluating vehicle leasing versus outright purchasing requires separating monthly cash flow from net economic cost:
+    </p>
+    <ul>
+      <li><strong>The Mechanics of a Lease:</strong> A vehicle lease is essentially a long-term rental contract that finances the predicted depreciation of the car between its initial negotiated capitalized cost and its projected residual value at term end, plus a financing fee known as the "money factor" (Money Factor × 2,400 ≈ APR equivalent). When the 36 months elapse, you have built zero equity.</li>
+      <li><strong>The Mechanics of Purchasing:</strong> An auto loan amortizes the entire purchase price of the vehicle. While monthly payments are higher during the loan term, each payment reduces debt principal and increases retained equity. When the loan is satisfied, you own an unencumbered physical asset that can be driven payment-free or liquidated for cash.</li>
+    </ul>
+
+    <h3>2. The Perpetual Payment Trap vs. The Equity Dividend</h3>
+    <p>
+      Serial leasing locks drivers into continuous, uninterrupted monthly payments in perpetuity. Over a 10-year span, leasing three consecutive vehicles incurs continuous financing charges and three rounds of acquisition fees. In contrast, purchasing a vehicle and driving it for 7 to 10 years creates an "equity dividend" phase (years 5 through 10) where monthly loan payments drop to $0, and ownership costs consist solely of routine maintenance, insurance, and fuel.
+    </p>
+  </div>
+
   <!-- 1. INPUTS -->
   <div slot="inputs" class="inputs-container">
     <!-- INPUT CONTROLS -->
@@ -339,6 +360,60 @@ const relatedGuides = [
         items={initialCostItems}
       />
     </div>
+  </div>
+
+  <!-- SENSITIVITY SLOT: WHEN THE RESULT CAN CHANGE -->
+  <div slot="sensitivity" class="sensitivity-content">
+    <div class="sensitivity-callout">
+      <strong>Sensitivity Warning:</strong> Whether leasing or purchasing results in a lower net cost depends heavily on your planned vehicle turnover cycle and annual driving mileage.
+    </div>
+
+    <h3>1. Turnover Frequency (3-Year Upgrade Habit vs. 7-Year Retention)</h3>
+    <p>
+      If your behavioral pattern is to trade in your vehicle every 36 months, purchasing exposes you to the most punitive section of the vehicle depreciation curve repeatedly without ever enjoying payment-free ownership. In this specific scenario, leasing protects you from trade-in valuation risk. However, extending your ownership horizon to 60, 72, or 84 months creates massive financial savings in favor of buying, as the loan balance reaches zero while the vehicle retains substantial market value.
+    </p>
+
+    <h3>2. Annual Mileage and Penalty Thresholds</h3>
+    <p>
+      Lease contracts strictly cap mileage (commonly 10,000, 12,000, or 15,000 miles per year). If you drive 18,000 to 20,000 miles annually, end-of-term excess mileage charges ($0.15 to $0.25 per mile) add $1,500 to $2,500 per year in unrecoverable penalties, completely eliminating any cash flow advantage leasing appeared to offer.
+    </p>
+
+    <h3>3. Financing Subsidies and Residual Inflation</h3>
+    <p>
+      Automakers frequently use promotional leasing to stimulate volume by setting an artificially high residual value (subvented lease). When a manufacturer inflates the projected residual, your monthly lease depreciation charge shrinks. Conversely, when manufacturers offer 0% or 1.9% APR purchase financing, buying becomes mathematically superior.
+    </p>
+  </div>
+
+  <!-- MODEL LIMITATIONS & EXCLUSIONS SLOT -->
+  <div slot="limitations" class="limitations-content">
+    <h3>Lease vs. Buy Model Limitations & Contractual Friction</h3>
+    <p>
+      Standard mathematical calculators focus on monthly payments and residual equity, but overlook contractual and operational lease constraints:
+    </p>
+    <ul>
+      <li><strong>Early Termination Penalties:</strong> Exiting a lease early due to job loss, relocation, or lifestyle change is notoriously expensive, often requiring payment of all remaining monthly installments plus early return fees. A financed car can be sold at any time on the private market.</li>
+      <li><strong>Down Payment Risk on Leases (Cap Cost Reduction):</strong> Putting a large down payment ($3,000 to $6,000) on a lease to lower monthly payments is financially hazardous. If the vehicle is totaled or stolen in the first month, gap insurance reimburses the leasing company, and your down payment is completely lost.</li>
+      <li><strong>Excess Wear and Tear Arbitrations:</strong> At lease inspection, scratches exceeding credit card size, curb rash on alloy wheels, or tire tread depth below 4/32" trigger mandatory penalty charges before the car is surrendered.</li>
+      <li><strong>Modification and Customization Restrictions:</strong> Leased vehicles must remain strictly stock; window tints, tow hitches, or aftermarket roof racks must be removed at your expense before return.</li>
+    </ul>
+  </div>
+
+  <!-- METHODOLOGY SLOT -->
+  <div slot="methodology" class="methodology-text">
+    <p>
+      The model calculates the true economic trade-off over identical evaluation horizons:
+    </p>
+    <ul>
+      <li>
+        <strong>Lease Total Net Outflow:</strong> Sums upfront down payment (capitalized cost reduction), acquisition fees, documentation fees, and total monthly lease installments across the term: <code>Total Lease Cost = Down Payment + Lease Fees + (Monthly Payment × Term Months)</code>. Because the vehicle is returned to the lessor at term end, ending equity is exactly $0.
+      </li>
+      <li>
+        <strong>Purchase Net Cost:</strong> Combines purchase down payment, loan origination fees, all monthly auto loan payments, and estimated maintenance reserves over the term, then subtracts the ending vehicle equity: <code>Net Purchase Cost = Total Outflows - Ending Resale Equity</code>.
+      </li>
+      <li>
+        <strong>Ending Equity Calculation:</strong> At term end, the vehicle's market value is estimated based on entered depreciation/residual percentages. The remaining unpaid loan principal is deducted from this market value to determine your net asset equity.
+      </li>
+    </ul>
   </div>
 </DecisionLayout>
 
