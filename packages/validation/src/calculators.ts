@@ -32,32 +32,119 @@ function addError(
   issues.push({ field, code, message });
 }
 
+interface NumberRuleSpec {
+  allowNegative?: boolean;
+  min?: number;
+  exclusiveMin?: number;
+  max?: number;
+  exclusiveMax?: number;
+  integer?: boolean;
+  requiredMessage?: string;
+  invalidMessage?: string;
+  rangeMessage: string;
+  integerMessage?: string;
+}
+
+function checkNumberRule(
+  errors: Record<string, string>,
+  issues: ValidationIssue[],
+  field: string,
+  value: unknown,
+  spec: NumberRuleSpec
+): value is number {
+  if (value === undefined || value === null) {
+    addError(
+      errors,
+      issues,
+      field,
+      'REQUIRED',
+      spec.requiredMessage ?? spec.rangeMessage
+    );
+    return false;
+  }
+
+  if (!isFiniteNumber(value)) {
+    addError(
+      errors,
+      issues,
+      field,
+      'INVALID_NUMBER',
+      spec.invalidMessage ?? spec.rangeMessage
+    );
+    return false;
+  }
+
+  if (!spec.allowNegative && value < 0) {
+    const code: ValidationErrorCode =
+      spec.exclusiveMin === 0 ? 'MUST_BE_POSITIVE' : 'NEGATIVE_NOT_ALLOWED';
+    addError(errors, issues, field, code, spec.rangeMessage);
+    return false;
+  }
+
+  if (spec.exclusiveMin !== undefined && value <= spec.exclusiveMin) {
+    const code: ValidationErrorCode =
+      spec.exclusiveMin === 0 ? 'MUST_BE_POSITIVE' : 'BELOW_MIN';
+    addError(errors, issues, field, code, spec.rangeMessage);
+    return false;
+  }
+
+  if (spec.min !== undefined && value < spec.min) {
+    addError(errors, issues, field, 'BELOW_MIN', spec.rangeMessage);
+    return false;
+  }
+
+  if (spec.exclusiveMax !== undefined && value >= spec.exclusiveMax) {
+    addError(errors, issues, field, 'ABOVE_MAX', spec.rangeMessage);
+    return false;
+  }
+
+  if (spec.max !== undefined && value > spec.max) {
+    addError(errors, issues, field, 'ABOVE_MAX', spec.rangeMessage);
+    return false;
+  }
+
+  if (spec.integer && !Number.isInteger(value)) {
+    addError(
+      errors,
+      issues,
+      field,
+      'MUST_BE_INTEGER',
+      spec.integerMessage ?? `${field} must be a whole number.`
+    );
+    return false;
+  }
+
+  return true;
+}
+
 export function validateRentVsBuyInput(input: Partial<RentVsBuyInput>): ValidationResult {
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.monthlyRent) || input.monthlyRent < 0) {
-    addError(errors, issues, 'monthlyRent', 'BELOW_MIN', 'Monthly rent must be 0 or greater.');
-  }
-  if (
-    !isFiniteNumber(input.annualRentIncreasePercent) ||
-    input.annualRentIncreasePercent < 0 ||
-    input.annualRentIncreasePercent > 20
-  ) {
-    addError(
-      errors,
-      issues,
-      'annualRentIncreasePercent',
-      'BELOW_MIN',
-      'Annual rent increase must be between 0% and 20%.'
-    );
-  }
-  if (!isFiniteNumber(input.homePrice) || input.homePrice <= 0) {
-    addError(errors, issues, 'homePrice', 'MUST_BE_POSITIVE', 'Home price must be greater than $0.');
-  }
-  if (!isFiniteNumber(input.downPayment) || input.downPayment < 0) {
-    addError(errors, issues, 'downPayment', 'NEGATIVE_NOT_ALLOWED', 'Down payment cannot be negative.');
-  } else if (isFiniteNumber(input.homePrice) && input.downPayment > input.homePrice) {
+  checkNumberRule(errors, issues, 'monthlyRent', input.monthlyRent, {
+    min: 0,
+    rangeMessage: 'Monthly rent must be 0 or greater.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'annualRentIncreasePercent',
+    input.annualRentIncreasePercent,
+    {
+      min: 0,
+      max: 20,
+      rangeMessage: 'Annual rent increase must be between 0% and 20%.',
+    }
+  );
+  const hasValidHomePrice = checkNumberRule(errors, issues, 'homePrice', input.homePrice, {
+    exclusiveMin: 0,
+    rangeMessage: 'Home price must be greater than $0.',
+  });
+  const hasValidDownPayment = checkNumberRule(errors, issues, 'downPayment', input.downPayment, {
+    min: 0,
+    rangeMessage: 'Down payment cannot be negative.',
+  });
+  if (hasValidHomePrice && hasValidDownPayment && input.downPayment! > input.homePrice!) {
     addError(
       errors,
       issues,
@@ -66,94 +153,67 @@ export function validateRentVsBuyInput(input: Partial<RentVsBuyInput>): Validati
       'Down payment cannot exceed home purchase price.'
     );
   }
-  if (
-    !isFiniteNumber(input.mortgageRatePercent) ||
-    input.mortgageRatePercent < 0 ||
-    input.mortgageRatePercent > 25
-  ) {
-    addError(
-      errors,
-      issues,
-      'mortgageRatePercent',
-      'BELOW_MIN',
-      'Mortgage rate must be between 0% and 25%.'
-    );
-  }
-  if (!isFiniteNumber(input.loanTermYears) || input.loanTermYears < 1 || input.loanTermYears > 50) {
-    addError(
-      errors,
-      issues,
-      'loanTermYears',
-      'BELOW_MIN',
-      'Loan term must be between 1 and 50 years.'
-    );
-  }
-  if (
-    !isFiniteNumber(input.propertyTaxRatePercent) ||
-    input.propertyTaxRatePercent < 0 ||
-    input.propertyTaxRatePercent > 10
-  ) {
-    addError(
-      errors,
-      issues,
-      'propertyTaxRatePercent',
-      'BELOW_MIN',
-      'Property tax rate must be between 0% and 10%.'
-    );
-  }
-  if (!isFiniteNumber(input.homeInsuranceAnnual) || input.homeInsuranceAnnual < 0) {
-    addError(
-      errors,
-      issues,
-      'homeInsuranceAnnual',
-      'NEGATIVE_NOT_ALLOWED',
-      'Home insurance must be 0 or greater.'
-    );
-  }
-  if (
-    !isFiniteNumber(input.annualMaintenancePercent) ||
-    input.annualMaintenancePercent < 0 ||
-    input.annualMaintenancePercent > 10
-  ) {
-    addError(
-      errors,
-      issues,
-      'annualMaintenancePercent',
-      'BELOW_MIN',
-      'Maintenance rate must be between 0% and 10%.'
-    );
-  }
-  if (!isFiniteNumber(input.closingCostsPurchase) || input.closingCostsPurchase < 0) {
-    addError(
-      errors,
-      issues,
-      'closingCostsPurchase',
-      'NEGATIVE_NOT_ALLOWED',
-      'Closing costs cannot be negative.'
-    );
-  }
-  if (
-    !isFiniteNumber(input.expectedAppreciationPercent) ||
-    input.expectedAppreciationPercent < -15 ||
-    input.expectedAppreciationPercent > 25
-  ) {
-    addError(
-      errors,
-      issues,
-      'expectedAppreciationPercent',
-      'BELOW_MIN',
-      'Expected appreciation must be between -15% and 25%.'
-    );
-  }
-  if (!isFiniteNumber(input.horizonYears) || input.horizonYears < 1 || input.horizonYears > 50) {
-    addError(
-      errors,
-      issues,
-      'horizonYears',
-      'BELOW_MIN',
-      'Time horizon must be between 1 and 50 years.'
-    );
-  }
+  checkNumberRule(errors, issues, 'mortgageRatePercent', input.mortgageRatePercent, {
+    min: 0,
+    max: 25,
+    rangeMessage: 'Mortgage rate must be between 0% and 25%.',
+  });
+  checkNumberRule(errors, issues, 'loanTermYears', input.loanTermYears, {
+    min: 1,
+    max: 50,
+    integer: true,
+    rangeMessage: 'Loan term must be between 1 and 50 years.',
+    integerMessage: 'Loan term must be a whole number of years.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'propertyTaxRatePercent',
+    input.propertyTaxRatePercent,
+    {
+      min: 0,
+      max: 10,
+      rangeMessage: 'Property tax rate must be between 0% and 10%.',
+    }
+  );
+  checkNumberRule(errors, issues, 'homeInsuranceAnnual', input.homeInsuranceAnnual, {
+    min: 0,
+    rangeMessage: 'Home insurance must be 0 or greater.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'annualMaintenancePercent',
+    input.annualMaintenancePercent,
+    {
+      min: 0,
+      max: 10,
+      rangeMessage: 'Maintenance rate must be between 0% and 10%.',
+    }
+  );
+  checkNumberRule(errors, issues, 'closingCostsPurchase', input.closingCostsPurchase, {
+    min: 0,
+    rangeMessage: 'Closing costs cannot be negative.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'expectedAppreciationPercent',
+    input.expectedAppreciationPercent,
+    {
+      allowNegative: true,
+      min: -15,
+      max: 25,
+      rangeMessage: 'Expected appreciation must be between -15% and 25%.',
+    }
+  );
+  checkNumberRule(errors, issues, 'horizonYears', input.horizonYears, {
+    min: 1,
+    max: 50,
+    integer: true,
+    rangeMessage: 'Time horizon must be between 1 and 50 years.',
+    integerMessage: 'Time horizon must be a whole number of years.',
+  });
 
   return { valid: issues.length === 0, errors, issues };
 }
@@ -165,70 +225,65 @@ export function validateJobOfferInput(
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(offer.baseSalary) || offer.baseSalary < 0) {
-    addError(errors, issues, 'baseSalary', 'NEGATIVE_NOT_ALLOWED', `${label}: Base salary must be $0 or greater.`);
-  }
-  if (!isFiniteNumber(offer.annualBonus) || offer.annualBonus < 0) {
-    addError(errors, issues, 'annualBonus', 'NEGATIVE_NOT_ALLOWED', `${label}: Annual bonus cannot be negative.`);
-  }
-  if (!isFiniteNumber(offer.employerMatchPercent) || offer.employerMatchPercent < 0 || offer.employerMatchPercent > 100) {
-    addError(
-      errors,
-      issues,
-      'employerMatchPercent',
-      'BELOW_MIN',
-      `${label}: 401(k) match must be between 0% and 100%.`
-    );
-  }
-  if (!isFiniteNumber(offer.annualHealthInsuranceCost) || offer.annualHealthInsuranceCost < 0) {
-    addError(
-      errors,
-      issues,
-      'annualHealthInsuranceCost',
-      'NEGATIVE_NOT_ALLOWED',
-      `${label}: Health insurance cost cannot be negative.`
-    );
-  }
-  if (!isFiniteNumber(offer.paidVacationDays) || offer.paidVacationDays < 0 || offer.paidVacationDays > 100) {
-    addError(
-      errors,
-      issues,
-      'paidVacationDays',
-      'BELOW_MIN',
-      `${label}: Vacation days must be between 0 and 100.`
-    );
-  }
-  if (!isFiniteNumber(offer.commuteMilesOneWay) || offer.commuteMilesOneWay < 0 || offer.commuteMilesOneWay > 300) {
-    addError(
-      errors,
-      issues,
-      'commuteMilesOneWay',
-      'BELOW_MIN',
-      `${label}: Commute distance must be between 0 and 300 miles.`
-    );
-  }
-  if (!isFiniteNumber(offer.commuteDaysPerWeek) || offer.commuteDaysPerWeek < 0 || offer.commuteDaysPerWeek > 7) {
-    addError(
-      errors,
-      issues,
-      'commuteDaysPerWeek',
-      'BELOW_MIN',
-      `${label}: Commute days must be between 0 and 7.`
-    );
-  }
-  if (!isFiniteNumber(offer.remoteDaysPerWeek) || offer.remoteDaysPerWeek < 0 || offer.remoteDaysPerWeek > 7) {
-    addError(
-      errors,
-      issues,
-      'remoteDaysPerWeek',
-      'BELOW_MIN',
-      `${label}: Remote days must be between 0 and 7.`
-    );
-  }
+  checkNumberRule(errors, issues, 'baseSalary', offer.baseSalary, {
+    min: 0,
+    rangeMessage: `${label}: Base salary must be $0 or greater.`,
+  });
+  checkNumberRule(errors, issues, 'annualBonus', offer.annualBonus, {
+    min: 0,
+    rangeMessage: `${label}: Annual bonus cannot be negative.`,
+  });
+  checkNumberRule(errors, issues, 'employerMatchPercent', offer.employerMatchPercent, {
+    min: 0,
+    max: 100,
+    rangeMessage: `${label}: 401(k) match must be between 0% and 100%.`,
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'annualHealthInsuranceCost',
+    offer.annualHealthInsuranceCost,
+    {
+      min: 0,
+      rangeMessage: `${label}: Health insurance cost cannot be negative.`,
+    }
+  );
+  checkNumberRule(errors, issues, 'paidVacationDays', offer.paidVacationDays, {
+    min: 0,
+    max: 100,
+    rangeMessage: `${label}: Vacation days must be between 0 and 100.`,
+  });
+  checkNumberRule(errors, issues, 'commuteMilesOneWay', offer.commuteMilesOneWay, {
+    min: 0,
+    max: 300,
+    rangeMessage: `${label}: Commute distance must be between 0 and 300 miles.`,
+  });
+  const hasValidCommuteDays = checkNumberRule(
+    errors,
+    issues,
+    'commuteDaysPerWeek',
+    offer.commuteDaysPerWeek,
+    {
+      min: 0,
+      max: 7,
+      rangeMessage: `${label}: Commute days must be between 0 and 7.`,
+    }
+  );
+  const hasValidRemoteDays = checkNumberRule(
+    errors,
+    issues,
+    'remoteDaysPerWeek',
+    offer.remoteDaysPerWeek,
+    {
+      min: 0,
+      max: 7,
+      rangeMessage: `${label}: Remote days must be between 0 and 7.`,
+    }
+  );
   if (
-    isFiniteNumber(offer.commuteDaysPerWeek) &&
-    isFiniteNumber(offer.remoteDaysPerWeek) &&
-    offer.commuteDaysPerWeek + offer.remoteDaysPerWeek > 7
+    hasValidCommuteDays &&
+    hasValidRemoteDays &&
+    offer.commuteDaysPerWeek! + offer.remoteDaysPerWeek! > 7
   ) {
     addError(
       errors,
@@ -238,27 +293,21 @@ export function validateJobOfferInput(
       `${label}: Combined commute and remote days cannot exceed 7 days per week.`
     );
   }
-  if (!isFiniteNumber(offer.otherCompensationAnnual) || offer.otherCompensationAnnual < 0) {
-    addError(
-      errors,
-      issues,
-      'otherCompensationAnnual',
-      'NEGATIVE_NOT_ALLOWED',
-      `${label}: Other compensation cannot be negative.`
-    );
-  }
-  if (
-    offer.estimatedVehicleCostPerMile !== undefined &&
-    (!isFiniteNumber(offer.estimatedVehicleCostPerMile) ||
-      offer.estimatedVehicleCostPerMile < 0 ||
-      offer.estimatedVehicleCostPerMile > 10)
-  ) {
-    addError(
+  checkNumberRule(errors, issues, 'otherCompensationAnnual', offer.otherCompensationAnnual, {
+    min: 0,
+    rangeMessage: `${label}: Other compensation cannot be negative.`,
+  });
+  if (offer.estimatedVehicleCostPerMile !== undefined) {
+    checkNumberRule(
       errors,
       issues,
       'estimatedVehicleCostPerMile',
-      'BELOW_MIN',
-      `${label}: Vehicle cost per mile must be between $0.00 and $10.00.`
+      offer.estimatedVehicleCostPerMile,
+      {
+        min: 0,
+        max: 10,
+        rangeMessage: `${label}: Vehicle cost per mile must be between $0.00 and $10.00.`,
+      }
     );
   }
 
@@ -269,33 +318,62 @@ export function validateLeaseVsBuyInput(input: Partial<LeaseVsBuyInput>): Valida
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.vehicleMSRP) || input.vehicleMSRP <= 0) {
-    addError(errors, issues, 'vehicleMSRP', 'MUST_BE_POSITIVE', 'Vehicle MSRP must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.analysisTermMonths) || input.analysisTermMonths < 12 || input.analysisTermMonths > 84) {
-    addError(errors, issues, 'analysisTermMonths', 'BELOW_MIN', 'Term must be 12 to 84 months.');
-  }
-  if (!isFiniteNumber(input.leaseDownPayment) || input.leaseDownPayment < 0) {
-    addError(errors, issues, 'leaseDownPayment', 'NEGATIVE_NOT_ALLOWED', 'Lease down payment cannot be negative.');
-  }
-  if (!isFiniteNumber(input.leaseMonthlyPayment) || input.leaseMonthlyPayment <= 0) {
-    addError(errors, issues, 'leaseMonthlyPayment', 'MUST_BE_POSITIVE', 'Lease payment must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.leaseFees) || input.leaseFees < 0) {
-    addError(errors, issues, 'leaseFees', 'NEGATIVE_NOT_ALLOWED', 'Lease fees cannot be negative.');
-  }
-  if (!isFiniteNumber(input.leaseAnnualInsurance) || input.leaseAnnualInsurance < 0) {
-    addError(errors, issues, 'leaseAnnualInsurance', 'NEGATIVE_NOT_ALLOWED', 'Lease insurance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.leaseAnnualMaintenance) || input.leaseAnnualMaintenance < 0) {
-    addError(errors, issues, 'leaseAnnualMaintenance', 'NEGATIVE_NOT_ALLOWED', 'Lease maintenance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.purchasePrice) || input.purchasePrice <= 0) {
-    addError(errors, issues, 'purchasePrice', 'MUST_BE_POSITIVE', 'Purchase price must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.purchaseDownPayment) || input.purchaseDownPayment < 0) {
-    addError(errors, issues, 'purchaseDownPayment', 'NEGATIVE_NOT_ALLOWED', 'Purchase down payment cannot be negative.');
-  } else if (isFiniteNumber(input.purchasePrice) && input.purchaseDownPayment > input.purchasePrice) {
+  checkNumberRule(errors, issues, 'vehicleMSRP', input.vehicleMSRP, {
+    exclusiveMin: 0,
+    rangeMessage: 'Vehicle MSRP must be greater than zero.',
+  });
+  checkNumberRule(errors, issues, 'analysisTermMonths', input.analysisTermMonths, {
+    min: 12,
+    max: 84,
+    integer: true,
+    rangeMessage: 'Term must be 12 to 84 months.',
+    integerMessage: 'Analysis term must be a whole number of months.',
+  });
+  checkNumberRule(errors, issues, 'leaseDownPayment', input.leaseDownPayment, {
+    min: 0,
+    rangeMessage: 'Lease down payment cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'leaseMonthlyPayment', input.leaseMonthlyPayment, {
+    exclusiveMin: 0,
+    rangeMessage: 'Lease payment must be greater than zero.',
+  });
+  checkNumberRule(errors, issues, 'leaseFees', input.leaseFees, {
+    min: 0,
+    rangeMessage: 'Lease fees cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'leaseAnnualInsurance', input.leaseAnnualInsurance, {
+    min: 0,
+    rangeMessage: 'Lease insurance cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'leaseAnnualMaintenance', input.leaseAnnualMaintenance, {
+    min: 0,
+    rangeMessage: 'Lease maintenance cannot be negative.',
+  });
+  const hasValidPurchasePrice = checkNumberRule(
+    errors,
+    issues,
+    'purchasePrice',
+    input.purchasePrice,
+    {
+      exclusiveMin: 0,
+      rangeMessage: 'Purchase price must be greater than zero.',
+    }
+  );
+  const hasValidPurchaseDown = checkNumberRule(
+    errors,
+    issues,
+    'purchaseDownPayment',
+    input.purchaseDownPayment,
+    {
+      min: 0,
+      rangeMessage: 'Purchase down payment cannot be negative.',
+    }
+  );
+  if (
+    hasValidPurchasePrice &&
+    hasValidPurchaseDown &&
+    input.purchaseDownPayment! > input.purchasePrice!
+  ) {
     addError(
       errors,
       issues,
@@ -304,40 +382,48 @@ export function validateLeaseVsBuyInput(input: Partial<LeaseVsBuyInput>): Valida
       'Purchase down payment cannot exceed purchase price.'
     );
   }
-  if (!isFiniteNumber(input.loanInterestRatePercent) || input.loanInterestRatePercent < 0 || input.loanInterestRatePercent > 35) {
-    addError(
-      errors,
-      issues,
-      'loanInterestRatePercent',
-      'BELOW_MIN',
-      'Loan interest rate must be between 0% and 35%.'
-    );
-  }
-  if (!isFiniteNumber(input.loanTermMonths) || input.loanTermMonths < 1 || input.loanTermMonths > 96) {
-    addError(errors, issues, 'loanTermMonths', 'BELOW_MIN', 'Loan term must be between 1 and 96 months.');
-  }
-  if (!isFiniteNumber(input.salesTaxPercent) || input.salesTaxPercent < 0 || input.salesTaxPercent > 25) {
-    addError(errors, issues, 'salesTaxPercent', 'BELOW_MIN', 'Sales tax must be between 0% and 25%.');
-  }
-  if (!isFiniteNumber(input.buyAnnualInsurance) || input.buyAnnualInsurance < 0) {
-    addError(errors, issues, 'buyAnnualInsurance', 'NEGATIVE_NOT_ALLOWED', 'Buy insurance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.buyAnnualMaintenance) || input.buyAnnualMaintenance < 0) {
-    addError(errors, issues, 'buyAnnualMaintenance', 'NEGATIVE_NOT_ALLOWED', 'Buy maintenance cannot be negative.');
-  }
-  if (
-    !isFiniteNumber(input.vehicleResaleValuePercent) ||
-    input.vehicleResaleValuePercent < 0 ||
-    input.vehicleResaleValuePercent > 100
-  ) {
-    addError(
-      errors,
-      issues,
-      'vehicleResaleValuePercent',
-      'BELOW_MIN',
-      'Residual value must be between 0% and 100%.'
-    );
-  }
+  checkNumberRule(
+    errors,
+    issues,
+    'loanInterestRatePercent',
+    input.loanInterestRatePercent,
+    {
+      min: 0,
+      max: 35,
+      rangeMessage: 'Loan interest rate must be between 0% and 35%.',
+    }
+  );
+  checkNumberRule(errors, issues, 'loanTermMonths', input.loanTermMonths, {
+    min: 1,
+    max: 96,
+    integer: true,
+    rangeMessage: 'Loan term must be between 1 and 96 months.',
+    integerMessage: 'Loan term must be a whole number of months.',
+  });
+  checkNumberRule(errors, issues, 'salesTaxPercent', input.salesTaxPercent, {
+    min: 0,
+    max: 25,
+    rangeMessage: 'Sales tax must be between 0% and 25%.',
+  });
+  checkNumberRule(errors, issues, 'buyAnnualInsurance', input.buyAnnualInsurance, {
+    min: 0,
+    rangeMessage: 'Buy insurance cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'buyAnnualMaintenance', input.buyAnnualMaintenance, {
+    min: 0,
+    rangeMessage: 'Buy maintenance cannot be negative.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'vehicleResaleValuePercent',
+    input.vehicleResaleValuePercent,
+    {
+      min: 0,
+      max: 100,
+      rangeMessage: 'Residual value must be between 0% and 100%.',
+    }
+  );
 
   return { valid: issues.length === 0, errors, issues };
 }
@@ -346,66 +432,81 @@ export function validateGasVsEvInput(input: Partial<GasVsEvInput>): ValidationRe
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.annualMiles) || input.annualMiles < 500) {
-    addError(errors, issues, 'annualMiles', 'BELOW_MIN', 'Enter at least 500 annual miles.');
-  }
-  if (!isFiniteNumber(input.horizonYears) || input.horizonYears < 1 || input.horizonYears > 20) {
-    addError(errors, issues, 'horizonYears', 'BELOW_MIN', 'Horizon must be 1 to 20 years.');
-  }
-  if (!isFiniteNumber(input.gasVehiclePrice) || input.gasVehiclePrice <= 0) {
-    addError(errors, issues, 'gasVehiclePrice', 'MUST_BE_POSITIVE', 'Gas car price must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.gasMpg) || input.gasMpg <= 0) {
-    addError(errors, issues, 'gasMpg', 'MUST_BE_POSITIVE', 'MPG must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.gasPricePerGallon) || input.gasPricePerGallon < 0) {
-    addError(errors, issues, 'gasPricePerGallon', 'NEGATIVE_NOT_ALLOWED', 'Gas price cannot be negative.');
-  }
-  if (!isFiniteNumber(input.gasAnnualMaintenance) || input.gasAnnualMaintenance < 0) {
-    addError(errors, issues, 'gasAnnualMaintenance', 'NEGATIVE_NOT_ALLOWED', 'Gas maintenance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.gasInsuranceAnnual) || input.gasInsuranceAnnual < 0) {
-    addError(errors, issues, 'gasInsuranceAnnual', 'NEGATIVE_NOT_ALLOWED', 'Gas insurance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.gasResaleValuePercent) || input.gasResaleValuePercent < 0 || input.gasResaleValuePercent > 100) {
-    addError(
-      errors,
-      issues,
-      'gasResaleValuePercent',
-      'BELOW_MIN',
-      'Gas resale percentage must be between 0% and 100%.'
-    );
-  }
-  if (!isFiniteNumber(input.evVehiclePrice) || input.evVehiclePrice <= 0) {
-    addError(errors, issues, 'evVehiclePrice', 'MUST_BE_POSITIVE', 'EV price must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.evEfficiencyMilesPerKwh) || input.evEfficiencyMilesPerKwh <= 0) {
-    addError(errors, issues, 'evEfficiencyMilesPerKwh', 'MUST_BE_POSITIVE', 'Efficiency must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.electricityCostPerKwh) || input.electricityCostPerKwh < 0) {
-    addError(errors, issues, 'electricityCostPerKwh', 'NEGATIVE_NOT_ALLOWED', 'Electricity cost cannot be negative.');
-  }
-  if (!isFiniteNumber(input.evHomeChargerInstall) || input.evHomeChargerInstall < 0) {
-    addError(errors, issues, 'evHomeChargerInstall', 'NEGATIVE_NOT_ALLOWED', 'Charger install cost cannot be negative.');
-  }
-  if (!isFiniteNumber(input.evTaxCredit) || input.evTaxCredit < 0) {
-    addError(errors, issues, 'evTaxCredit', 'NEGATIVE_NOT_ALLOWED', 'Tax credit cannot be negative.');
-  }
-  if (!isFiniteNumber(input.evAnnualMaintenance) || input.evAnnualMaintenance < 0) {
-    addError(errors, issues, 'evAnnualMaintenance', 'NEGATIVE_NOT_ALLOWED', 'EV maintenance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.evInsuranceAnnual) || input.evInsuranceAnnual < 0) {
-    addError(errors, issues, 'evInsuranceAnnual', 'NEGATIVE_NOT_ALLOWED', 'EV insurance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.evResaleValuePercent) || input.evResaleValuePercent < 0 || input.evResaleValuePercent > 100) {
-    addError(
-      errors,
-      issues,
-      'evResaleValuePercent',
-      'BELOW_MIN',
-      'EV resale percentage must be between 0% and 100%.'
-    );
-  }
+  checkNumberRule(errors, issues, 'annualMiles', input.annualMiles, {
+    min: 500,
+    rangeMessage: 'Enter at least 500 annual miles.',
+  });
+  checkNumberRule(errors, issues, 'horizonYears', input.horizonYears, {
+    min: 1,
+    max: 20,
+    integer: true,
+    rangeMessage: 'Horizon must be 1 to 20 years.',
+    integerMessage: 'Horizon must be a whole number of years.',
+  });
+  checkNumberRule(errors, issues, 'gasVehiclePrice', input.gasVehiclePrice, {
+    exclusiveMin: 0,
+    rangeMessage: 'Gas car price must be greater than zero.',
+  });
+  checkNumberRule(errors, issues, 'gasMpg', input.gasMpg, {
+    exclusiveMin: 0,
+    rangeMessage: 'MPG must be greater than zero.',
+  });
+  checkNumberRule(errors, issues, 'gasPricePerGallon', input.gasPricePerGallon, {
+    min: 0,
+    rangeMessage: 'Gas price cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'gasAnnualMaintenance', input.gasAnnualMaintenance, {
+    min: 0,
+    rangeMessage: 'Gas maintenance cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'gasInsuranceAnnual', input.gasInsuranceAnnual, {
+    min: 0,
+    rangeMessage: 'Gas insurance cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'gasResaleValuePercent', input.gasResaleValuePercent, {
+    min: 0,
+    max: 100,
+    rangeMessage: 'Gas resale percentage must be between 0% and 100%.',
+  });
+  checkNumberRule(errors, issues, 'evVehiclePrice', input.evVehiclePrice, {
+    exclusiveMin: 0,
+    rangeMessage: 'EV price must be greater than zero.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'evEfficiencyMilesPerKwh',
+    input.evEfficiencyMilesPerKwh,
+    {
+      exclusiveMin: 0,
+      rangeMessage: 'Efficiency must be greater than zero.',
+    }
+  );
+  checkNumberRule(errors, issues, 'electricityCostPerKwh', input.electricityCostPerKwh, {
+    min: 0,
+    rangeMessage: 'Electricity cost cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'evHomeChargerInstall', input.evHomeChargerInstall, {
+    min: 0,
+    rangeMessage: 'Charger install cost cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'evTaxCredit', input.evTaxCredit, {
+    min: 0,
+    rangeMessage: 'Tax credit cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'evAnnualMaintenance', input.evAnnualMaintenance, {
+    min: 0,
+    rangeMessage: 'EV maintenance cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'evInsuranceAnnual', input.evInsuranceAnnual, {
+    min: 0,
+    rangeMessage: 'EV insurance cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'evResaleValuePercent', input.evResaleValuePercent, {
+    min: 0,
+    max: 100,
+    rangeMessage: 'EV resale percentage must be between 0% and 100%.',
+  });
 
   return { valid: issues.length === 0, errors, issues };
 }
@@ -414,73 +515,79 @@ export function validateBuyVsRepairInput(input: Partial<BuyVsRepairInput>): Vali
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.repairQuote) || input.repairQuote < 0) {
-    addError(errors, issues, 'repairQuote', 'NEGATIVE_NOT_ALLOWED', 'Repair quote cannot be negative.');
-  }
-  if (!isFiniteNumber(input.expectedLifespanAfterRepairYears) || input.expectedLifespanAfterRepairYears <= 0) {
-    addError(
-      errors,
-      issues,
-      'expectedLifespanAfterRepairYears',
-      'MUST_BE_POSITIVE',
-      'Expected lifespan must be greater than zero.'
-    );
-  }
-  if (!isFiniteNumber(input.currentAnnualOperatingCost) || input.currentAnnualOperatingCost < 0) {
-    addError(
-      errors,
-      issues,
-      'currentAnnualOperatingCost',
-      'NEGATIVE_NOT_ALLOWED',
-      'Current operating cost cannot be negative.'
-    );
-  }
-  if (
-    !isFiniteNumber(input.subsequentRepairRiskPercent) ||
-    input.subsequentRepairRiskPercent < 0 ||
-    input.subsequentRepairRiskPercent > 100
-  ) {
-    addError(
-      errors,
-      issues,
-      'subsequentRepairRiskPercent',
-      'BELOW_MIN',
-      'Secondary repair risk must be between 0% and 100%.'
-    );
-  }
-  if (!isFiniteNumber(input.subsequentRepairCost) || input.subsequentRepairCost < 0) {
-    addError(
-      errors,
-      issues,
-      'subsequentRepairCost',
-      'NEGATIVE_NOT_ALLOWED',
-      'Secondary repair cost cannot be negative.'
-    );
-  }
-  if (!isFiniteNumber(input.replacementPrice) || input.replacementPrice <= 0) {
-    addError(errors, issues, 'replacementPrice', 'MUST_BE_POSITIVE', 'Replacement price must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.installationAndDisposalFee) || input.installationAndDisposalFee < 0) {
-    addError(
-      errors,
-      issues,
-      'installationAndDisposalFee',
-      'NEGATIVE_NOT_ALLOWED',
-      'Installation and disposal fee cannot be negative.'
-    );
-  }
-  if (!isFiniteNumber(input.replacementExpectedLifespanYears) || input.replacementExpectedLifespanYears <= 0) {
-    addError(errors, issues, 'replacementExpectedLifespanYears', 'MUST_BE_POSITIVE', 'Lifespan must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.replacementAnnualOperatingCost) || input.replacementAnnualOperatingCost < 0) {
-    addError(
-      errors,
-      issues,
-      'replacementAnnualOperatingCost',
-      'NEGATIVE_NOT_ALLOWED',
-      'Replacement operating cost cannot be negative.'
-    );
-  }
+  checkNumberRule(errors, issues, 'repairQuote', input.repairQuote, {
+    min: 0,
+    rangeMessage: 'Repair quote cannot be negative.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'expectedLifespanAfterRepairYears',
+    input.expectedLifespanAfterRepairYears,
+    {
+      exclusiveMin: 0,
+      rangeMessage: 'Expected lifespan must be greater than zero.',
+    }
+  );
+  checkNumberRule(
+    errors,
+    issues,
+    'currentAnnualOperatingCost',
+    input.currentAnnualOperatingCost,
+    {
+      min: 0,
+      rangeMessage: 'Current operating cost cannot be negative.',
+    }
+  );
+  checkNumberRule(
+    errors,
+    issues,
+    'subsequentRepairRiskPercent',
+    input.subsequentRepairRiskPercent,
+    {
+      min: 0,
+      max: 100,
+      rangeMessage: 'Secondary repair risk must be between 0% and 100%.',
+    }
+  );
+  checkNumberRule(errors, issues, 'subsequentRepairCost', input.subsequentRepairCost, {
+    min: 0,
+    rangeMessage: 'Secondary repair cost cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'replacementPrice', input.replacementPrice, {
+    exclusiveMin: 0,
+    rangeMessage: 'Replacement price must be greater than zero.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'installationAndDisposalFee',
+    input.installationAndDisposalFee,
+    {
+      min: 0,
+      rangeMessage: 'Installation and disposal fee cannot be negative.',
+    }
+  );
+  checkNumberRule(
+    errors,
+    issues,
+    'replacementExpectedLifespanYears',
+    input.replacementExpectedLifespanYears,
+    {
+      exclusiveMin: 0,
+      rangeMessage: 'Lifespan must be greater than zero.',
+    }
+  );
+  checkNumberRule(
+    errors,
+    issues,
+    'replacementAnnualOperatingCost',
+    input.replacementAnnualOperatingCost,
+    {
+      min: 0,
+      rangeMessage: 'Replacement operating cost cannot be negative.',
+    }
+  );
 
   return { valid: issues.length === 0, errors, issues };
 }
@@ -489,33 +596,41 @@ export function validateDiyVsHireInput(input: Partial<DiyVsHireInput>): Validati
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.diyMaterialsCost) || input.diyMaterialsCost < 0) {
-    addError(errors, issues, 'diyMaterialsCost', 'NEGATIVE_NOT_ALLOWED', 'Materials cost cannot be negative.');
-  }
-  if (!isFiniteNumber(input.diyToolsEquipmentCost) || input.diyToolsEquipmentCost < 0) {
-    addError(errors, issues, 'diyToolsEquipmentCost', 'NEGATIVE_NOT_ALLOWED', 'Tools cost cannot be negative.');
-  }
-  if (!isFiniteNumber(input.diyEstimatedHours) || input.diyEstimatedHours < 0) {
-    addError(errors, issues, 'diyEstimatedHours', 'NEGATIVE_NOT_ALLOWED', 'Estimated hours cannot be negative.');
-  }
-  if (!isFiniteNumber(input.personalHourlyRate) || input.personalHourlyRate < 0) {
-    addError(errors, issues, 'personalHourlyRate', 'NEGATIVE_NOT_ALLOWED', 'Hourly rate cannot be negative.');
-  }
-  if (!isFiniteNumber(input.diyReworkRiskPercent) || input.diyReworkRiskPercent < 0 || input.diyReworkRiskPercent > 100) {
-    addError(errors, issues, 'diyReworkRiskPercent', 'BELOW_MIN', 'Rework risk must be between 0% and 100%.');
-  }
-  if (!isFiniteNumber(input.contractorQuote) || input.contractorQuote <= 0) {
-    addError(errors, issues, 'contractorQuote', 'MUST_BE_POSITIVE', 'Contractor quote must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.homeownerCoordinationHours) || input.homeownerCoordinationHours < 0) {
-    addError(
-      errors,
-      issues,
-      'homeownerCoordinationHours',
-      'NEGATIVE_NOT_ALLOWED',
-      'Coordination hours cannot be negative.'
-    );
-  }
+  checkNumberRule(errors, issues, 'diyMaterialsCost', input.diyMaterialsCost, {
+    min: 0,
+    rangeMessage: 'Materials cost cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'diyToolsEquipmentCost', input.diyToolsEquipmentCost, {
+    min: 0,
+    rangeMessage: 'Tools cost cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'diyEstimatedHours', input.diyEstimatedHours, {
+    min: 0,
+    rangeMessage: 'Estimated hours cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'personalHourlyRate', input.personalHourlyRate, {
+    min: 0,
+    rangeMessage: 'Hourly rate cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'diyReworkRiskPercent', input.diyReworkRiskPercent, {
+    min: 0,
+    max: 100,
+    rangeMessage: 'Rework risk must be between 0% and 100%.',
+  });
+  checkNumberRule(errors, issues, 'contractorQuote', input.contractorQuote, {
+    exclusiveMin: 0,
+    rangeMessage: 'Contractor quote must be greater than zero.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'homeownerCoordinationHours',
+    input.homeownerCoordinationHours,
+    {
+      min: 0,
+      rangeMessage: 'Coordination hours cannot be negative.',
+    }
+  );
 
   return { valid: issues.length === 0, errors, issues };
 }
@@ -524,84 +639,119 @@ export function validateDebtVsInvestInput(input: Partial<DebtVsInvestInput>): Va
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.extraMonthlyCash) || input.extraMonthlyCash < 0) {
-    addError(errors, issues, 'extraMonthlyCash', 'NEGATIVE_NOT_ALLOWED', 'Extra cash cannot be negative.');
-  }
-  if (!isFiniteNumber(input.debtBalance) || input.debtBalance < 0) {
-    addError(errors, issues, 'debtBalance', 'NEGATIVE_NOT_ALLOWED', 'Debt balance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.debtInterestRatePercent) || input.debtInterestRatePercent < 0 || input.debtInterestRatePercent > 100) {
-    addError(
-      errors,
-      issues,
-      'debtInterestRatePercent',
-      'BELOW_MIN',
-      'Interest rate must be between 0% and 100%.'
-    );
-  }
-  if (!isFiniteNumber(input.debtMinimumMonthlyPayment) || input.debtMinimumMonthlyPayment <= 0) {
-    addError(
-      errors,
-      issues,
-      'debtMinimumMonthlyPayment',
-      'MUST_BE_POSITIVE',
-      'Minimum payment must be greater than zero.'
-    );
-  }
-  if (
-    !isFiniteNumber(input.expectedInvestmentReturnPercent) ||
-    input.expectedInvestmentReturnPercent < -50 ||
-    input.expectedInvestmentReturnPercent > 100
-  ) {
-    addError(
-      errors,
-      issues,
-      'expectedInvestmentReturnPercent',
-      'BELOW_MIN',
-      'Expected investment return must be between -50% and 100%.'
-    );
-  }
-  if (!isFiniteNumber(input.investmentTaxRatePercent) || input.investmentTaxRatePercent < 0 || input.investmentTaxRatePercent > 100) {
-    addError(
-      errors,
-      issues,
-      'investmentTaxRatePercent',
-      'BELOW_MIN',
-      'Tax rate must be between 0% and 100%.'
-    );
-  }
-  if (!isFiniteNumber(input.horizonYears) || input.horizonYears < 1 || input.horizonYears > 30) {
-    addError(errors, issues, 'horizonYears', 'BELOW_MIN', 'Horizon must be 1 to 30 years.');
-  }
+  checkNumberRule(errors, issues, 'extraMonthlyCash', input.extraMonthlyCash, {
+    min: 0,
+    rangeMessage: 'Extra cash cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'debtBalance', input.debtBalance, {
+    min: 0,
+    rangeMessage: 'Debt balance cannot be negative.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    'debtInterestRatePercent',
+    input.debtInterestRatePercent,
+    {
+      min: 0,
+      max: 100,
+      rangeMessage: 'Interest rate must be between 0% and 100%.',
+    }
+  );
+  checkNumberRule(
+    errors,
+    issues,
+    'debtMinimumMonthlyPayment',
+    input.debtMinimumMonthlyPayment,
+    {
+      exclusiveMin: 0,
+      rangeMessage: 'Minimum payment must be greater than zero.',
+    }
+  );
+  checkNumberRule(
+    errors,
+    issues,
+    'expectedInvestmentReturnPercent',
+    input.expectedInvestmentReturnPercent,
+    {
+      allowNegative: true,
+      min: -50,
+      max: 100,
+      rangeMessage: 'Expected investment return must be between -50% and 100%.',
+    }
+  );
+  checkNumberRule(
+    errors,
+    issues,
+    'investmentTaxRatePercent',
+    input.investmentTaxRatePercent,
+    {
+      min: 0,
+      max: 100,
+      rangeMessage: 'Tax rate must be between 0% and 100%.',
+    }
+  );
+  checkNumberRule(errors, issues, 'horizonYears', input.horizonYears, {
+    min: 1,
+    max: 30,
+    integer: true,
+    rangeMessage: 'Horizon must be 1 to 30 years.',
+    integerMessage: 'Horizon must be a whole number of years.',
+  });
 
   return { valid: issues.length === 0, errors, issues };
 }
 
-export function validateBuyVsSubscribeInput(input: Partial<BuyVsSubscribeInput>): ValidationResult {
+export function validateBuyVsSubscribeInput(
+  input: Partial<BuyVsSubscribeInput>
+): ValidationResult {
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.horizonYears) || input.horizonYears <= 0) {
-    addError(errors, issues, 'horizonYears', 'MUST_BE_POSITIVE', 'Comparison horizon must be greater than zero.');
-  } else if (input.horizonYears > 25) {
-    addError(errors, issues, 'horizonYears', 'ABOVE_MAX', 'Comparison horizon cannot exceed 25 years.');
-  }
+  checkNumberRule(errors, issues, 'horizonYears', input.horizonYears, {
+    exclusiveMin: 0,
+    max: 25,
+    rangeMessage:
+      isFiniteNumber(input.horizonYears) && input.horizonYears > 25
+        ? 'Comparison horizon cannot exceed 25 years.'
+        : 'Comparison horizon must be greater than zero.',
+  });
 
-  if (!isFiniteNumber(input.purchasePrice) || input.purchasePrice < 0) {
-    addError(errors, issues, 'purchasePrice', 'NEGATIVE_NOT_ALLOWED', 'Purchase price cannot be negative.');
-  }
-  if (!isFiniteNumber(input.setupOrActivationCost) || input.setupOrActivationCost < 0) {
-    addError(errors, issues, 'setupOrActivationCost', 'NEGATIVE_NOT_ALLOWED', 'Setup cost cannot be negative.');
-  }
-  if (!isFiniteNumber(input.annualMaintenanceCost) || input.annualMaintenanceCost < 0) {
-    addError(errors, issues, 'annualMaintenanceCost', 'NEGATIVE_NOT_ALLOWED', 'Annual maintenance cannot be negative.');
-  }
-  if (!isFiniteNumber(input.estimatedResaleValue) || input.estimatedResaleValue < 0) {
-    addError(errors, issues, 'estimatedResaleValue', 'NEGATIVE_NOT_ALLOWED', 'Resale value cannot be negative.');
-  } else if (
-    isFiniteNumber(input.purchasePrice) &&
-    input.purchasePrice > 0 &&
-    input.estimatedResaleValue > input.purchasePrice + (isFiniteNumber(input.setupOrActivationCost) ? input.setupOrActivationCost : 0)
+  const hasValidPurchasePrice = checkNumberRule(
+    errors,
+    issues,
+    'purchasePrice',
+    input.purchasePrice,
+    {
+      min: 0,
+      rangeMessage: 'Purchase price cannot be negative.',
+    }
+  );
+  checkNumberRule(errors, issues, 'setupOrActivationCost', input.setupOrActivationCost, {
+    min: 0,
+    rangeMessage: 'Setup cost cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'annualMaintenanceCost', input.annualMaintenanceCost, {
+    min: 0,
+    rangeMessage: 'Annual maintenance cannot be negative.',
+  });
+  const hasValidResale = checkNumberRule(
+    errors,
+    issues,
+    'estimatedResaleValue',
+    input.estimatedResaleValue,
+    {
+      min: 0,
+      rangeMessage: 'Resale value cannot be negative.',
+    }
+  );
+  if (
+    hasValidPurchasePrice &&
+    hasValidResale &&
+    input.purchasePrice! > 0 &&
+    input.estimatedResaleValue! >
+      input.purchasePrice! +
+        (isFiniteNumber(input.setupOrActivationCost) ? input.setupOrActivationCost : 0)
   ) {
     addError(
       errors,
@@ -614,33 +764,37 @@ export function validateBuyVsSubscribeInput(input: Partial<BuyVsSubscribeInput>)
 
   const cycle = input.billingCycle ?? 'monthly';
   if (cycle === 'monthly') {
-    if (!isFiniteNumber(input.monthlySubscriptionPrice) || input.monthlySubscriptionPrice < 0) {
-      addError(
-        errors,
-        issues,
-        'monthlySubscriptionPrice',
-        'NEGATIVE_NOT_ALLOWED',
-        'Monthly subscription price cannot be negative.'
-      );
-    }
+    checkNumberRule(
+      errors,
+      issues,
+      'monthlySubscriptionPrice',
+      input.monthlySubscriptionPrice,
+      {
+        min: 0,
+        rangeMessage: 'Monthly subscription price cannot be negative.',
+      }
+    );
   } else {
-    if (!isFiniteNumber(input.annualSubscriptionPrice) || input.annualSubscriptionPrice < 0) {
-      addError(
-        errors,
-        issues,
-        'annualSubscriptionPrice',
-        'NEGATIVE_NOT_ALLOWED',
-        'Annual subscription price cannot be negative.'
-      );
-    }
+    checkNumberRule(
+      errors,
+      issues,
+      'annualSubscriptionPrice',
+      input.annualSubscriptionPrice,
+      {
+        min: 0,
+        rangeMessage: 'Annual subscription price cannot be negative.',
+      }
+    );
   }
 
-  if (!isFiniteNumber(input.signupFee) || input.signupFee < 0) {
-    addError(errors, issues, 'signupFee', 'NEGATIVE_NOT_ALLOWED', 'Signup fee cannot be negative.');
-  }
-  if (!isFiniteNumber(input.annualRecurringFees) || input.annualRecurringFees < 0) {
-    addError(errors, issues, 'annualRecurringFees', 'NEGATIVE_NOT_ALLOWED', 'Recurring fees cannot be negative.');
-  }
+  checkNumberRule(errors, issues, 'signupFee', input.signupFee, {
+    min: 0,
+    rangeMessage: 'Signup fee cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'annualRecurringFees', input.annualRecurringFees, {
+    min: 0,
+    rangeMessage: 'Recurring fees cannot be negative.',
+  });
 
   return { valid: issues.length === 0, errors, issues };
 }
@@ -653,48 +807,92 @@ function validateVehicleOption(
   issues: ValidationIssue[]
 ) {
   if (!option) {
-    addError(errors, issues, `${prefix}PurchasePrice`, 'REQUIRED', `${label} option details are required.`);
+    addError(
+      errors,
+      issues,
+      `${prefix}PurchasePrice`,
+      'REQUIRED',
+      `${label} option details are required.`
+    );
     return;
   }
-  if (!isFiniteNumber(option.purchasePrice) || option.purchasePrice <= 0) {
-    addError(errors, issues, `${prefix}PurchasePrice`, 'MUST_BE_POSITIVE', `${label} purchase price must be greater than zero.`);
+  const hasValidPrice = checkNumberRule(
+    errors,
+    issues,
+    `${prefix}PurchasePrice`,
+    option.purchasePrice,
+    {
+      exclusiveMin: 0,
+      rangeMessage: `${label} purchase price must be greater than zero.`,
+    }
+  );
+  const hasValidDown = checkNumberRule(
+    errors,
+    issues,
+    `${prefix}DownPayment`,
+    option.downPayment,
+    {
+      min: 0,
+      rangeMessage: 'Down payment cannot be negative.',
+    }
+  );
+  if (hasValidPrice && hasValidDown && option.downPayment! > option.purchasePrice!) {
+    addError(
+      errors,
+      issues,
+      `${prefix}DownPayment`,
+      'CROSS_FIELD_CONSTRAINT',
+      'Down payment cannot exceed purchase price.'
+    );
   }
-  if (!isFiniteNumber(option.downPayment) || option.downPayment < 0) {
-    addError(errors, issues, `${prefix}DownPayment`, 'NEGATIVE_NOT_ALLOWED', 'Down payment cannot be negative.');
-  } else if (isFiniteNumber(option.purchasePrice) && option.downPayment > option.purchasePrice) {
-    addError(errors, issues, `${prefix}DownPayment`, 'CROSS_FIELD_CONSTRAINT', 'Down payment cannot exceed purchase price.');
-  }
-  if (!isFiniteNumber(option.financingApr) || option.financingApr < 0) {
-    addError(errors, issues, `${prefix}FinancingApr`, 'NEGATIVE_NOT_ALLOWED', 'Financing APR cannot be negative.');
-  }
-  if (!isFiniteNumber(option.loanTermMonths) || option.loanTermMonths <= 0) {
-    addError(errors, issues, `${prefix}LoanTermMonths`, 'MUST_BE_POSITIVE', 'Loan term must be at least 1 month.');
-  }
-  if (!isFiniteNumber(option.annualInsurance) || option.annualInsurance < 0) {
-    addError(errors, issues, `${prefix}AnnualInsurance`, 'NEGATIVE_NOT_ALLOWED', 'Annual insurance cannot be negative.');
-  }
-  if (!isFiniteNumber(option.annualMaintenance) || option.annualMaintenance < 0) {
-    addError(errors, issues, `${prefix}AnnualMaintenance`, 'NEGATIVE_NOT_ALLOWED', 'Annual maintenance cannot be negative.');
-  }
-  if (!isFiniteNumber(option.annualOperatingCost) || option.annualOperatingCost < 0) {
-    addError(errors, issues, `${prefix}AnnualOperatingCost`, 'NEGATIVE_NOT_ALLOWED', 'Annual operating cost cannot be negative.');
-  }
-  if (!isFiniteNumber(option.expectedResaleValue) || option.expectedResaleValue < 0) {
-    addError(errors, issues, `${prefix}ResaleValue`, 'NEGATIVE_NOT_ALLOWED', 'Resale value cannot be negative.');
-  }
+  checkNumberRule(errors, issues, `${prefix}FinancingApr`, option.financingApr, {
+    min: 0,
+    rangeMessage: 'Financing APR cannot be negative.',
+  });
+  checkNumberRule(errors, issues, `${prefix}LoanTermMonths`, option.loanTermMonths, {
+    min: 1,
+    integer: true,
+    rangeMessage: 'Loan term must be at least 1 month.',
+    integerMessage: 'Loan term must be a whole number of months.',
+  });
+  checkNumberRule(errors, issues, `${prefix}AnnualInsurance`, option.annualInsurance, {
+    min: 0,
+    rangeMessage: 'Annual insurance cannot be negative.',
+  });
+  checkNumberRule(errors, issues, `${prefix}AnnualMaintenance`, option.annualMaintenance, {
+    min: 0,
+    rangeMessage: 'Annual maintenance cannot be negative.',
+  });
+  checkNumberRule(
+    errors,
+    issues,
+    `${prefix}AnnualOperatingCost`,
+    option.annualOperatingCost,
+    {
+      min: 0,
+      rangeMessage: 'Annual operating cost cannot be negative.',
+    }
+  );
+  checkNumberRule(errors, issues, `${prefix}ResaleValue`, option.expectedResaleValue, {
+    min: 0,
+    rangeMessage: 'Resale value cannot be negative.',
+  });
 }
 
-export function validateNewVsUsedInput(
-  input: Partial<NewVsUsedInput>
-): ValidationResult {
+export function validateNewVsUsedInput(input: Partial<NewVsUsedInput>): ValidationResult {
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.horizonYears) || input.horizonYears <= 0) {
-    addError(errors, issues, 'horizonYears', 'MUST_BE_POSITIVE', 'Comparison horizon must be greater than zero.');
-  } else if (input.horizonYears > 20) {
-    addError(errors, issues, 'horizonYears', 'ABOVE_MAX', 'Comparison horizon cannot exceed 20 years.');
-  }
+  checkNumberRule(errors, issues, 'horizonYears', input.horizonYears, {
+    min: 1,
+    max: 20,
+    integer: true,
+    rangeMessage:
+      isFiniteNumber(input.horizonYears) && input.horizonYears > 20
+        ? 'Comparison horizon cannot exceed 20 years.'
+        : 'Comparison horizon must be at least 1 year.',
+    integerMessage: 'Comparison horizon must be a whole number of years.',
+  });
 
   validateVehicleOption(input.newOption, 'new', 'New', errors, issues);
   validateVehicleOption(input.usedOption, 'used', 'Used', errors, issues);
@@ -706,18 +904,39 @@ export function validateBulkBuyInput(input: Partial<BulkBuyInput>): ValidationRe
   const errors: Record<string, string> = {};
   const issues: ValidationIssue[] = [];
 
-  if (!isFiniteNumber(input.normalUnitPrice) || input.normalUnitPrice <= 0) {
-    addError(errors, issues, 'normalUnitPrice', 'MUST_BE_POSITIVE', 'Normal retail price must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.normalQuantity) || input.normalQuantity <= 0) {
-    addError(errors, issues, 'normalQuantity', 'BELOW_MIN', 'Normal quantity must be at least 1.');
-  }
-  if (!isFiniteNumber(input.bulkPackagePrice) || input.bulkPackagePrice <= 0) {
-    addError(errors, issues, 'bulkPackagePrice', 'MUST_BE_POSITIVE', 'Bulk package price must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.bulkQuantity) || input.bulkQuantity <= 0) {
-    addError(errors, issues, 'bulkQuantity', 'BELOW_MIN', 'Bulk quantity must be at least 1.');
-  } else if (isFiniteNumber(input.normalQuantity) && input.bulkQuantity < input.normalQuantity) {
+  checkNumberRule(errors, issues, 'normalUnitPrice', input.normalUnitPrice, {
+    exclusiveMin: 0,
+    rangeMessage: 'Normal retail price must be greater than zero.',
+  });
+  const hasValidNormalQty = checkNumberRule(
+    errors,
+    issues,
+    'normalQuantity',
+    input.normalQuantity,
+    {
+      min: 1,
+      integer: true,
+      rangeMessage: 'Normal quantity must be at least 1.',
+      integerMessage: 'Normal quantity must be a whole number.',
+    }
+  );
+  checkNumberRule(errors, issues, 'bulkPackagePrice', input.bulkPackagePrice, {
+    exclusiveMin: 0,
+    rangeMessage: 'Bulk package price must be greater than zero.',
+  });
+  const hasValidBulkQty = checkNumberRule(
+    errors,
+    issues,
+    'bulkQuantity',
+    input.bulkQuantity,
+    {
+      min: 1,
+      integer: true,
+      rangeMessage: 'Bulk quantity must be at least 1.',
+      integerMessage: 'Bulk quantity must be a whole number.',
+    }
+  );
+  if (hasValidNormalQty && hasValidBulkQty && input.bulkQuantity! < input.normalQuantity!) {
     addError(
       errors,
       issues,
@@ -726,25 +945,19 @@ export function validateBulkBuyInput(input: Partial<BulkBuyInput>): ValidationRe
       'Bulk quantity should be greater than normal quantity.'
     );
   }
-  if (!isFiniteNumber(input.expectedMonthlyUsage) || input.expectedMonthlyUsage <= 0) {
-    addError(errors, issues, 'expectedMonthlyUsage', 'MUST_BE_POSITIVE', 'Expected usage rate must be greater than zero.');
-  }
-  if (!isFiniteNumber(input.storageCost) || input.storageCost < 0) {
-    addError(errors, issues, 'storageCost', 'NEGATIVE_NOT_ALLOWED', 'Storage cost cannot be negative.');
-  }
-  if (
-    !isFiniteNumber(input.expectedWastePercent) ||
-    input.expectedWastePercent < 0 ||
-    input.expectedWastePercent >= 100
-  ) {
-    addError(
-      errors,
-      issues,
-      'expectedWastePercent',
-      'BELOW_MIN',
-      'Waste percentage must be between 0% and 99%.'
-    );
-  }
+  checkNumberRule(errors, issues, 'expectedMonthlyUsage', input.expectedMonthlyUsage, {
+    exclusiveMin: 0,
+    rangeMessage: 'Expected usage rate must be greater than zero.',
+  });
+  checkNumberRule(errors, issues, 'storageCost', input.storageCost, {
+    min: 0,
+    rangeMessage: 'Storage cost cannot be negative.',
+  });
+  checkNumberRule(errors, issues, 'expectedWastePercent', input.expectedWastePercent, {
+    min: 0,
+    exclusiveMax: 100,
+    rangeMessage: 'Waste percentage must be between 0% and 99%.',
+  });
 
   return { valid: issues.length === 0, errors, issues };
 }

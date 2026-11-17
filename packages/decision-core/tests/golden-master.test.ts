@@ -13,6 +13,20 @@ import {
   calculateRentVsBuyCostCategoryTotals,
   calculateSingleJobOffer,
   compareJobOffers,
+  formatCurrency,
+  formatFixedDecimal,
+  formatNumber,
+  formatSummaryDollar,
+  BULK_BUY_DEFAULTS,
+  BUY_VS_REPAIR_DEFAULTS,
+  BUY_VS_SUBSCRIBE_DEFAULTS,
+  DEBT_VS_INVEST_DEFAULTS,
+  DIY_VS_HIRE_DEFAULTS,
+  GAS_VS_EV_DEFAULTS,
+  JOB_OFFER_DEFAULTS_A,
+  JOB_OFFER_DEFAULTS_B,
+  LEASE_VS_BUY_DEFAULTS,
+  NEW_VS_USED_DEFAULTS,
   RENT_VS_BUY_DEFAULTS,
 } from '@decision-tools/decision-core';
 
@@ -41,6 +55,13 @@ type FixtureFile<TInput, TExpected> = {
   scenarios: Array<FixtureScenario<TInput, TExpected>>;
 };
 
+/**
+ * Compares engine output against committed golden-master fixture expectations:
+ * - Integer numbers, strings, booleans, and null use exact `Object.is` equality (`toBe`).
+ * - Non-integer floating-point numbers use 6-decimal precision (`toBeCloseTo(expected, 6)`).
+ * - Objects require exact sorted key-set equality (detects missing and unexpected fields).
+ * - Arrays require exact length and recursive element-by-element parity.
+ */
 function assertMatchesFixture(actual: unknown, expected: unknown, path = 'result') {
   if (expected === null || typeof expected !== 'object') {
     if (typeof expected === 'number') {
@@ -155,6 +176,109 @@ describe('Golden-Master Regression Suite (all 10 calculators, 69 scenarios)', ()
       assertMatchesFixture(actual, scenario.expected);
     }
   );
+});
+
+describe('Golden-Master Comparator & Precision Verification', () => {
+  it('enforces exact Object.is integer equality and rejects off-by-1 or -0 discrepancies', () => {
+    expect(() => assertMatchesFixture({ count: 10 }, { count: 10 })).not.toThrow();
+    expect(() => assertMatchesFixture({ count: 11 }, { count: 10 })).toThrow();
+    expect(() => assertMatchesFixture({ count: 10.000001 }, { count: 10 })).toThrow();
+    expect(() => assertMatchesFixture({ count: -0 }, { count: 0 })).toThrow();
+
+    // 4 engines emit exclusively integer numeric metrics across all fixture scenarios
+    const rent = calculateRentVsBuy(RENT_VS_BUY_DEFAULTS);
+    expect(Number.isInteger(rent.totalRentCost)).toBe(true);
+    expect(Number.isInteger(rent.netOwnershipCost)).toBe(true);
+    expect(Number.isInteger(rent.netDifference)).toBe(true);
+  });
+
+  it('enforces 6-decimal floating-point tolerance and rejects larger deviations', () => {
+    expect(() => assertMatchesFixture({ rate: 0.12345678 }, { rate: 0.1234567 })).not.toThrow();
+    expect(() => assertMatchesFixture({ rate: 0.12346 }, { rate: 0.12345 })).toThrow();
+
+    const gasEv = calculateGasVsEv(GAS_VS_EV_DEFAULTS);
+    expect(gasEv.gasFuelCostPerMile).toBeCloseTo(0.126, 6);
+    expect(gasEv.evElectricityCostPerMile).toBeCloseTo(0.052, 6);
+
+    const diy = calculateDiyVsHire(DIY_VS_HIRE_DEFAULTS);
+    expect(diy.breakEvenHourlyRate).toBeCloseTo(39.25, 6);
+  });
+
+  it('detects missing or unexpected result fields strictly', () => {
+    expect(() => assertMatchesFixture({ a: 1 }, { a: 1, b: 2 })).toThrow();
+    expect(() => assertMatchesFixture({ a: 1, b: 2, extra: 3 }, { a: 1, b: 2 })).toThrow();
+  });
+
+  it('verifies nested breakdown arrays and breakdown object schemas across engines', () => {
+    const rent = calculateRentVsBuy(RENT_VS_BUY_DEFAULTS);
+    expect(rent.breakdown).toHaveLength(RENT_VS_BUY_DEFAULTS.horizonYears);
+    expect(rent.breakdown.map((r) => r.year)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+
+    const lease = calculateLeaseVsBuy(LEASE_VS_BUY_DEFAULTS);
+    expect(lease.breakdown.map((r) => r.month)).toEqual([6, 12, 18, 24, 30, 36]);
+
+    const debt = calculateDebtVsInvest(DEBT_VS_INVEST_DEFAULTS);
+    expect(debt.breakdown).toHaveLength(DEBT_VS_INVEST_DEFAULTS.horizonYears);
+    expect(debt.breakdown.map((r) => r.year)).toEqual([1, 2, 3, 4, 5]);
+
+    const sub = calculateBuyVsSubscribe(BUY_VS_SUBSCRIBE_DEFAULTS);
+    expect(sub.yearlyBreakdown.map((r) => r.year)).toEqual([1, 2, 3]);
+
+    expect(() =>
+      assertMatchesFixture(
+        { breakdown: [{ year: 1, cost: 100 }] },
+        { breakdown: [{ year: 1, cost: 100 }, { year: 2, cost: 200 }] }
+      )
+    ).toThrow();
+    expect(() =>
+      assertMatchesFixture(
+        { breakdown: [{ year: 1, cost: 101 }] },
+        { breakdown: [{ year: 1, cost: 100 }] }
+      )
+    ).toThrow();
+  });
+
+  it('normalizes negative zero (-0) across formatters and engine summaries', () => {
+    expect(formatNumber(-0)).toBe('0');
+    expect(formatCurrency(-0)).toBe('$0');
+    expect(formatSummaryDollar(-0)).toBe('$0');
+    expect(formatFixedDecimal(-0, 2)).toBe('0.00');
+
+    const outputs = [
+      calculateRentVsBuy({ ...RENT_VS_BUY_DEFAULTS, monthlyRent: -0, homeInsuranceAnnual: -0 }).summaryText,
+      compareJobOffers(
+        { ...JOB_OFFER_DEFAULTS_A, annualBonus: -0, otherCompensationAnnual: -0 },
+        { ...JOB_OFFER_DEFAULTS_B, annualBonus: -0 }
+      ).summaryText,
+      calculateLeaseVsBuy({ ...LEASE_VS_BUY_DEFAULTS, leaseDownPayment: -0, leaseFees: -0 }).summaryText,
+      calculateGasVsEv({ ...GAS_VS_EV_DEFAULTS, gasPricePerGallon: -0, electricityCostPerKwh: -0 }).summaryText,
+      calculateBuyVsRepair({ ...BUY_VS_REPAIR_DEFAULTS, repairQuote: -0 }).summaryText,
+      calculateDiyVsHire({ ...DIY_VS_HIRE_DEFAULTS, diyMaterialsCost: -0 }).summaryText,
+      calculateDebtVsInvest({ ...DEBT_VS_INVEST_DEFAULTS, extraMonthlyCash: -0, debtBalance: -0 }).summaryText,
+      calculateBuyVsSubscribe({ ...BUY_VS_SUBSCRIBE_DEFAULTS, purchasePrice: -0 }).summaryText,
+      calculateNewVsUsed({ ...NEW_VS_USED_DEFAULTS, newOption: { ...NEW_VS_USED_DEFAULTS.newOption, downPayment: -0 } }).summaryText,
+      calculateBulkBuy({ ...BULK_BUY_DEFAULTS, storageCost: -0, expectedWastePercent: -0 }).summaryText,
+    ];
+
+    for (const summary of outputs) {
+      expect(summary).not.toContain('$-0');
+      expect(summary).not.toContain('-$0');
+    }
+  });
+
+  it('produces deterministic en-US summary formatting across engines', () => {
+    const rentSummary = calculateRentVsBuy(RENT_VS_BUY_DEFAULTS).summaryText;
+    const jobSummary = compareJobOffers(JOB_OFFER_DEFAULTS_A, JOB_OFFER_DEFAULTS_B).summaryText;
+    const newUsedSummary = calculateNewVsUsed(NEW_VS_USED_DEFAULTS).summaryText;
+    const bulkSummary = calculateBulkBuy(BULK_BUY_DEFAULTS).summaryText;
+
+    expect(rentSummary).toContain('$220,679');
+    expect(jobSummary).toContain('$112,885');
+    expect(jobSummary).toContain('$1,915');
+    expect(newUsedSummary).toContain('$41,971');
+    expect(newUsedSummary).toContain('$7,203');
+    expect(bulkSummary).toContain('$11.60');
+  });
 });
 
 describe('Supplementary engine helper behavior', () => {
