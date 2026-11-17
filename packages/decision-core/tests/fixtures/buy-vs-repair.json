@@ -1,0 +1,466 @@
+{
+  "calculator": "buy-vs-repair",
+  "capturedFrom": "src/lib/decisions/buyVsRepair.ts",
+  "locale": "en-US",
+  "tolerancePolicy": {
+    "integerFields": 0,
+    "decimalFields": 0.000001
+  },
+  "scenarios": [
+    {
+      "id": "defaults",
+      "description": "Default Buy vs Repair baseline parameters",
+      "input": {
+        "itemName": "Household Appliance",
+        "repairQuote": 350,
+        "expectedLifespanAfterRepairYears": 2.5,
+        "currentAnnualOperatingCost": 165,
+        "subsequentRepairRiskPercent": 25,
+        "subsequentRepairCost": 200,
+        "replacementPrice": 900,
+        "installationAndDisposalFee": 75,
+        "replacementExpectedLifespanYears": 10,
+        "replacementAnnualOperatingCost": 95,
+        "warrantyYears": 2
+      },
+      "expected": {
+        "itemName": "Household Appliance",
+        "repairRatioPercent": 38.9,
+        "repairUpfrontCost": 350,
+        "repairAnnualizedCapitalCost": 160,
+        "repairAnnualizedTotalCost": 325,
+        "repairTotal5YearEstimatedCost": 1275,
+        "buyUpfrontCost": 975,
+        "buyAnnualizedCapitalCost": 98,
+        "buyAnnualizedTotalCost": 193,
+        "buyTotal5YearEstimatedCost": 1450,
+        "annualOperatingDifference": 70,
+        "lowerAnnualizedOption": "buy",
+        "annualDifference": 132,
+        "breakdown": [
+          {
+            "year": 1,
+            "cumulativeRepairCash": 515,
+            "cumulativeBuyCash": 1070,
+            "cumulativeOperatingSavingsWithNew": 70
+          },
+          {
+            "year": 2,
+            "cumulativeRepairCash": 680,
+            "cumulativeBuyCash": 1165,
+            "cumulativeOperatingSavingsWithNew": 140
+          },
+          {
+            "year": 3,
+            "cumulativeRepairCash": 895,
+            "cumulativeBuyCash": 1260,
+            "cumulativeOperatingSavingsWithNew": 210
+          },
+          {
+            "year": 4,
+            "cumulativeRepairCash": 1110,
+            "cumulativeBuyCash": 1355,
+            "cumulativeOperatingSavingsWithNew": 280
+          },
+          {
+            "year": 5,
+            "cumulativeRepairCash": 1275,
+            "cumulativeBuyCash": 1450,
+            "cumulativeOperatingSavingsWithNew": 350
+          }
+        ],
+        "summaryText": "On an annualized basis, purchasing a brand-new replacement results in an estimated cost of $193/year versus $325/year to repair the existing item. Although purchasing requires a higher immediate cash outlay ($975 vs. $350), the new item's 10-year lifespan and $70/year lower operating costs offset the upfront difference over time."
+      }
+    },
+    {
+      "id": "direction-flip-repair-lower",
+      "description": "Inexpensive repair extending life 4 years -> Repair lower annualized cost",
+      "input": {
+        "itemName": "Household Appliance",
+        "repairQuote": 160,
+        "expectedLifespanAfterRepairYears": 4,
+        "currentAnnualOperatingCost": 110,
+        "subsequentRepairRiskPercent": 10,
+        "subsequentRepairCost": 200,
+        "replacementPrice": 900,
+        "installationAndDisposalFee": 75,
+        "replacementExpectedLifespanYears": 10,
+        "replacementAnnualOperatingCost": 95,
+        "warrantyYears": 2
+      },
+      "expected": {
+        "itemName": "Household Appliance",
+        "repairRatioPercent": 17.8,
+        "repairUpfrontCost": 160,
+        "repairAnnualizedCapitalCost": 45,
+        "repairAnnualizedTotalCost": 155,
+        "repairTotal5YearEstimatedCost": 730,
+        "buyUpfrontCost": 975,
+        "buyAnnualizedCapitalCost": 98,
+        "buyAnnualizedTotalCost": 193,
+        "buyTotal5YearEstimatedCost": 1450,
+        "annualOperatingDifference": 15,
+        "lowerAnnualizedOption": "repair",
+        "annualDifference": 38,
+        "breakdown": [
+          {
+            "year": 1,
+            "cumulativeRepairCash": 270,
+            "cumulativeBuyCash": 1070,
+            "cumulativeOperatingSavingsWithNew": 15
+          },
+          {
+            "year": 2,
+            "cumulativeRepairCash": 380,
+            "cumulativeBuyCash": 1165,
+            "cumulativeOperatingSavingsWithNew": 30
+          },
+          {
+            "year": 3,
+            "cumulativeRepairCash": 490,
+            "cumulativeBuyCash": 1260,
+            "cumulativeOperatingSavingsWithNew": 45
+          },
+          {
+            "year": 4,
+            "cumulativeRepairCash": 600,
+            "cumulativeBuyCash": 1355,
+            "cumulativeOperatingSavingsWithNew": 60
+          },
+          {
+            "year": 5,
+            "cumulativeRepairCash": 730,
+            "cumulativeBuyCash": 1450,
+            "cumulativeOperatingSavingsWithNew": 75
+          }
+        ],
+        "summaryText": "On an annualized basis, repairing the item costs an estimated $155/year (including operating energy) versus $193/year for buying a replacement. Repairing requires $160 upfront, compared to $975 to purchase new. Because the repair quote is 17.8% of the replacement price and adds an estimated 4 years of functional life, repairing is the lower-cost option in the near term under these assumptions."
+      }
+    },
+    {
+      "id": "zero-repair-zero-risk-zero-fees",
+      "description": "Valid zeros: $0 repair quote, 0% subsequent risk, $0 install fee, $0 operating cost",
+      "input": {
+        "itemName": "Warranty-Covered Unit",
+        "repairQuote": 0,
+        "expectedLifespanAfterRepairYears": 3,
+        "currentAnnualOperatingCost": 0,
+        "subsequentRepairRiskPercent": 0,
+        "subsequentRepairCost": 0,
+        "replacementPrice": 800,
+        "installationAndDisposalFee": 0,
+        "replacementExpectedLifespanYears": 10,
+        "replacementAnnualOperatingCost": 0,
+        "warrantyYears": 2
+      },
+      "expected": {
+        "itemName": "Warranty-Covered Unit",
+        "repairRatioPercent": 0,
+        "repairUpfrontCost": 0,
+        "repairAnnualizedCapitalCost": 0,
+        "repairAnnualizedTotalCost": 0,
+        "repairTotal5YearEstimatedCost": 0,
+        "buyUpfrontCost": 800,
+        "buyAnnualizedCapitalCost": 80,
+        "buyAnnualizedTotalCost": 80,
+        "buyTotal5YearEstimatedCost": 800,
+        "annualOperatingDifference": 0,
+        "lowerAnnualizedOption": "repair",
+        "annualDifference": 80,
+        "breakdown": [
+          {
+            "year": 1,
+            "cumulativeRepairCash": 0,
+            "cumulativeBuyCash": 800,
+            "cumulativeOperatingSavingsWithNew": 0
+          },
+          {
+            "year": 2,
+            "cumulativeRepairCash": 0,
+            "cumulativeBuyCash": 800,
+            "cumulativeOperatingSavingsWithNew": 0
+          },
+          {
+            "year": 3,
+            "cumulativeRepairCash": 0,
+            "cumulativeBuyCash": 800,
+            "cumulativeOperatingSavingsWithNew": 0
+          },
+          {
+            "year": 4,
+            "cumulativeRepairCash": 0,
+            "cumulativeBuyCash": 800,
+            "cumulativeOperatingSavingsWithNew": 0
+          },
+          {
+            "year": 5,
+            "cumulativeRepairCash": 0,
+            "cumulativeBuyCash": 800,
+            "cumulativeOperatingSavingsWithNew": 0
+          }
+        ],
+        "summaryText": "On an annualized basis, repairing the item costs an estimated $0/year (including operating energy) versus $80/year for buying a replacement. Repairing requires $0 upfront, compared to $800 to purchase new. Because the repair quote is 0% of the replacement price and adds an estimated 3 years of functional life, repairing is the lower-cost option in the near term under these assumptions."
+      }
+    },
+    {
+      "id": "negative-operating-savings",
+      "description": "New replacement has higher annual operating cost than existing unit",
+      "input": {
+        "itemName": "Household Appliance",
+        "repairQuote": 350,
+        "expectedLifespanAfterRepairYears": 2.5,
+        "currentAnnualOperatingCost": 60,
+        "subsequentRepairRiskPercent": 25,
+        "subsequentRepairCost": 200,
+        "replacementPrice": 900,
+        "installationAndDisposalFee": 75,
+        "replacementExpectedLifespanYears": 10,
+        "replacementAnnualOperatingCost": 180,
+        "warrantyYears": 2
+      },
+      "expected": {
+        "itemName": "Household Appliance",
+        "repairRatioPercent": 38.9,
+        "repairUpfrontCost": 350,
+        "repairAnnualizedCapitalCost": 160,
+        "repairAnnualizedTotalCost": 220,
+        "repairTotal5YearEstimatedCost": 750,
+        "buyUpfrontCost": 975,
+        "buyAnnualizedCapitalCost": 98,
+        "buyAnnualizedTotalCost": 278,
+        "buyTotal5YearEstimatedCost": 1875,
+        "annualOperatingDifference": -120,
+        "lowerAnnualizedOption": "repair",
+        "annualDifference": 58,
+        "breakdown": [
+          {
+            "year": 1,
+            "cumulativeRepairCash": 410,
+            "cumulativeBuyCash": 1155,
+            "cumulativeOperatingSavingsWithNew": -120
+          },
+          {
+            "year": 2,
+            "cumulativeRepairCash": 470,
+            "cumulativeBuyCash": 1335,
+            "cumulativeOperatingSavingsWithNew": -240
+          },
+          {
+            "year": 3,
+            "cumulativeRepairCash": 580,
+            "cumulativeBuyCash": 1515,
+            "cumulativeOperatingSavingsWithNew": -360
+          },
+          {
+            "year": 4,
+            "cumulativeRepairCash": 690,
+            "cumulativeBuyCash": 1695,
+            "cumulativeOperatingSavingsWithNew": -480
+          },
+          {
+            "year": 5,
+            "cumulativeRepairCash": 750,
+            "cumulativeBuyCash": 1875,
+            "cumulativeOperatingSavingsWithNew": -600
+          }
+        ],
+        "summaryText": "On an annualized basis, repairing the item costs an estimated $220/year (including operating energy) versus $278/year for buying a replacement. Repairing requires $350 upfront, compared to $975 to purchase new. Because the repair quote is 38.9% of the replacement price and adds an estimated 2.5 years of functional life, repairing is the lower-cost option in the near term under these assumptions."
+      }
+    },
+    {
+      "id": "high-cost-hvac",
+      "description": "High-cost residential HVAC repair vs replacement",
+      "input": {
+        "itemName": "Heat Pump System",
+        "repairQuote": 2400,
+        "expectedLifespanAfterRepairYears": 2,
+        "currentAnnualOperatingCost": 1200,
+        "subsequentRepairRiskPercent": 45,
+        "subsequentRepairCost": 1500,
+        "replacementPrice": 8500,
+        "installationAndDisposalFee": 1200,
+        "replacementExpectedLifespanYears": 15,
+        "replacementAnnualOperatingCost": 750,
+        "warrantyYears": 5
+      },
+      "expected": {
+        "itemName": "Heat Pump System",
+        "repairRatioPercent": 28.2,
+        "repairUpfrontCost": 2400,
+        "repairAnnualizedCapitalCost": 1538,
+        "repairAnnualizedTotalCost": 2738,
+        "repairTotal5YearEstimatedCost": 9075,
+        "buyUpfrontCost": 9700,
+        "buyAnnualizedCapitalCost": 647,
+        "buyAnnualizedTotalCost": 1397,
+        "buyTotal5YearEstimatedCost": 13450,
+        "annualOperatingDifference": 450,
+        "lowerAnnualizedOption": "buy",
+        "annualDifference": 1341,
+        "breakdown": [
+          {
+            "year": 1,
+            "cumulativeRepairCash": 3600,
+            "cumulativeBuyCash": 10450,
+            "cumulativeOperatingSavingsWithNew": 450
+          },
+          {
+            "year": 2,
+            "cumulativeRepairCash": 4800,
+            "cumulativeBuyCash": 11200,
+            "cumulativeOperatingSavingsWithNew": 900
+          },
+          {
+            "year": 3,
+            "cumulativeRepairCash": 6675,
+            "cumulativeBuyCash": 11950,
+            "cumulativeOperatingSavingsWithNew": 1350
+          },
+          {
+            "year": 4,
+            "cumulativeRepairCash": 7875,
+            "cumulativeBuyCash": 12700,
+            "cumulativeOperatingSavingsWithNew": 1800
+          },
+          {
+            "year": 5,
+            "cumulativeRepairCash": 9075,
+            "cumulativeBuyCash": 13450,
+            "cumulativeOperatingSavingsWithNew": 2250
+          }
+        ],
+        "summaryText": "On an annualized basis, purchasing a brand-new replacement results in an estimated cost of $1,397/year versus $2,738/year to repair the existing item. Although purchasing requires a higher immediate cash outlay ($9,700 vs. $2,400), the new item's 15-year lifespan and $450/year lower operating costs offset the upfront difference over time."
+      }
+    },
+    {
+      "id": "boundary-short-life",
+      "description": "Boundary very short expected lifespan after repair (0.25 years)",
+      "input": {
+        "itemName": "Household Appliance",
+        "repairQuote": 350,
+        "expectedLifespanAfterRepairYears": 0.25,
+        "currentAnnualOperatingCost": 165,
+        "subsequentRepairRiskPercent": 25,
+        "subsequentRepairCost": 200,
+        "replacementPrice": 900,
+        "installationAndDisposalFee": 75,
+        "replacementExpectedLifespanYears": 10,
+        "replacementAnnualOperatingCost": 95,
+        "warrantyYears": 2
+      },
+      "expected": {
+        "itemName": "Household Appliance",
+        "repairRatioPercent": 38.9,
+        "repairUpfrontCost": 350,
+        "repairAnnualizedCapitalCost": 1600,
+        "repairAnnualizedTotalCost": 1765,
+        "repairTotal5YearEstimatedCost": 1275,
+        "buyUpfrontCost": 975,
+        "buyAnnualizedCapitalCost": 98,
+        "buyAnnualizedTotalCost": 193,
+        "buyTotal5YearEstimatedCost": 1450,
+        "annualOperatingDifference": 70,
+        "lowerAnnualizedOption": "buy",
+        "annualDifference": 1572,
+        "breakdown": [
+          {
+            "year": 1,
+            "cumulativeRepairCash": 565,
+            "cumulativeBuyCash": 1070,
+            "cumulativeOperatingSavingsWithNew": 70
+          },
+          {
+            "year": 2,
+            "cumulativeRepairCash": 780,
+            "cumulativeBuyCash": 1165,
+            "cumulativeOperatingSavingsWithNew": 140
+          },
+          {
+            "year": 3,
+            "cumulativeRepairCash": 945,
+            "cumulativeBuyCash": 1260,
+            "cumulativeOperatingSavingsWithNew": 210
+          },
+          {
+            "year": 4,
+            "cumulativeRepairCash": 1110,
+            "cumulativeBuyCash": 1355,
+            "cumulativeOperatingSavingsWithNew": 280
+          },
+          {
+            "year": 5,
+            "cumulativeRepairCash": 1275,
+            "cumulativeBuyCash": 1450,
+            "cumulativeOperatingSavingsWithNew": 350
+          }
+        ],
+        "summaryText": "On an annualized basis, purchasing a brand-new replacement results in an estimated cost of $193/year versus $1,765/year to repair the existing item. Although purchasing requires a higher immediate cash outlay ($975 vs. $350), the new item's 10-year lifespan and $70/year lower operating costs offset the upfront difference over time."
+      }
+    },
+    {
+      "id": "equal-annualized",
+      "description": "Exact tie where repairAnnualizedTotalCost equals buyAnnualizedTotalCost",
+      "input": {
+        "itemName": "Equal Test Item",
+        "repairQuote": 200,
+        "expectedLifespanAfterRepairYears": 2,
+        "currentAnnualOperatingCost": 100,
+        "subsequentRepairRiskPercent": 0,
+        "subsequentRepairCost": 0,
+        "replacementPrice": 1000,
+        "installationAndDisposalFee": 0,
+        "replacementExpectedLifespanYears": 10,
+        "replacementAnnualOperatingCost": 100,
+        "warrantyYears": 2
+      },
+      "expected": {
+        "itemName": "Equal Test Item",
+        "repairRatioPercent": 20,
+        "repairUpfrontCost": 200,
+        "repairAnnualizedCapitalCost": 100,
+        "repairAnnualizedTotalCost": 200,
+        "repairTotal5YearEstimatedCost": 700,
+        "buyUpfrontCost": 1000,
+        "buyAnnualizedCapitalCost": 100,
+        "buyAnnualizedTotalCost": 200,
+        "buyTotal5YearEstimatedCost": 1500,
+        "annualOperatingDifference": 0,
+        "lowerAnnualizedOption": "equal",
+        "annualDifference": 0,
+        "breakdown": [
+          {
+            "year": 1,
+            "cumulativeRepairCash": 300,
+            "cumulativeBuyCash": 1100,
+            "cumulativeOperatingSavingsWithNew": 0
+          },
+          {
+            "year": 2,
+            "cumulativeRepairCash": 400,
+            "cumulativeBuyCash": 1200,
+            "cumulativeOperatingSavingsWithNew": 0
+          },
+          {
+            "year": 3,
+            "cumulativeRepairCash": 500,
+            "cumulativeBuyCash": 1300,
+            "cumulativeOperatingSavingsWithNew": 0
+          },
+          {
+            "year": 4,
+            "cumulativeRepairCash": 600,
+            "cumulativeBuyCash": 1400,
+            "cumulativeOperatingSavingsWithNew": 0
+          },
+          {
+            "year": 5,
+            "cumulativeRepairCash": 700,
+            "cumulativeBuyCash": 1500,
+            "cumulativeOperatingSavingsWithNew": 0
+          }
+        ],
+        "summaryText": "Both repairing and buying yield virtually identical annualized operating costs ($200/year). The primary trade-off is conserving immediate cash ($200 repair) versus gaining factory warranty and modern reliability with a replacement."
+      }
+    }
+  ]
+}

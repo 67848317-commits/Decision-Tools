@@ -1,0 +1,755 @@
+{
+  "calculator": "lease-vs-buy",
+  "capturedFrom": "src/lib/decisions/leaseVsBuy.ts",
+  "locale": "en-US",
+  "tolerancePolicy": {
+    "integerFields": 0,
+    "decimalFields": 0.000001
+  },
+  "scenarios": [
+    {
+      "id": "defaults",
+      "description": "Default Lease vs Buy baseline parameters",
+      "input": {
+        "analysisTermMonths": 36,
+        "vehicleMSRP": 38000,
+        "leaseDownPayment": 2500,
+        "leaseMonthlyPayment": 460,
+        "leaseFees": 950,
+        "leaseAnnualInsurance": 1800,
+        "leaseAnnualMaintenance": 250,
+        "purchasePrice": 38000,
+        "purchaseDownPayment": 5000,
+        "loanInterestRatePercent": 6,
+        "loanTermMonths": 60,
+        "salesTaxPercent": 6.5,
+        "buyAnnualInsurance": 1700,
+        "buyAnnualMaintenance": 650,
+        "vehicleResaleValuePercent": 54
+      },
+      "expected": {
+        "analysisTermMonths": 36,
+        "analysisTermYears": 3,
+        "leaseTotalPayments": 16560,
+        "leaseTotalUpfront": 3450,
+        "leaseTotalOperating": 6150,
+        "leaseTotalCashOutflow": 26160,
+        "leaseEndEquity": 0,
+        "leaseNetCost": 26160,
+        "purchaseLoanMonthlyPayment": 638,
+        "purchaseTotalPrincipalAndInterest": 22967,
+        "purchaseTotalUpfront": 7470,
+        "purchaseTotalOperating": 7050,
+        "purchaseTotalCashOutflow": 37487,
+        "purchaseRemainingLoanBalance": 14395,
+        "purchaseEstimatedVehicleValue": 20520,
+        "purchaseEndEquity": 6125,
+        "purchaseNetCost": 31362,
+        "netDifference": 5202,
+        "lowerNetCostOption": "lease",
+        "breakdown": [
+          {
+            "month": 6,
+            "leaseCumulativeCash": 7235,
+            "buyCumulativeCash": 12473,
+            "remainingLoanBalance": 30126,
+            "estimatedVehicleEquity": 4960,
+            "netBuyCostToDate": 7513
+          },
+          {
+            "month": 12,
+            "leaseCumulativeCash": 11020,
+            "buyCumulativeCash": 17476,
+            "remainingLoanBalance": 27165,
+            "estimatedVehicleEquity": 5008,
+            "netBuyCostToDate": 12468
+          },
+          {
+            "month": 18,
+            "leaseCumulativeCash": 14805,
+            "buyCumulativeCash": 22479,
+            "remainingLoanBalance": 24115,
+            "estimatedVehicleEquity": 5145,
+            "netBuyCostToDate": 17333
+          },
+          {
+            "month": 24,
+            "leaseCumulativeCash": 18590,
+            "buyCumulativeCash": 27482,
+            "remainingLoanBalance": 20971,
+            "estimatedVehicleEquity": 5376,
+            "netBuyCostToDate": 22106
+          },
+          {
+            "month": 30,
+            "leaseCumulativeCash": 22375,
+            "buyCumulativeCash": 32484,
+            "remainingLoanBalance": 17732,
+            "estimatedVehicleEquity": 5701,
+            "netBuyCostToDate": 26783
+          },
+          {
+            "month": 36,
+            "leaseCumulativeCash": 26160,
+            "buyCumulativeCash": 37487,
+            "remainingLoanBalance": 14395,
+            "estimatedVehicleEquity": 6125,
+            "netBuyCostToDate": 31362
+          }
+        ],
+        "summaryText": "Over 36 months, leasing results in an estimated net cost that is $5,202 lower than purchasing ($26,160 vs. $31,362). Lower monthly commitments and zero exposure to vehicle market depreciation make leasing less costly over this short time window under current assumptions."
+      }
+    },
+    {
+      "id": "direction-flip-lease-wins",
+      "description": "Favorable promotional lease + steep depreciation where leasing has lower net cost",
+      "input": {
+        "analysisTermMonths": 36,
+        "vehicleMSRP": 38000,
+        "leaseDownPayment": 0,
+        "leaseMonthlyPayment": 290,
+        "leaseFees": 400,
+        "leaseAnnualInsurance": 1800,
+        "leaseAnnualMaintenance": 250,
+        "purchasePrice": 38000,
+        "purchaseDownPayment": 5000,
+        "loanInterestRatePercent": 9,
+        "loanTermMonths": 60,
+        "salesTaxPercent": 6.5,
+        "buyAnnualInsurance": 1700,
+        "buyAnnualMaintenance": 650,
+        "vehicleResaleValuePercent": 32
+      },
+      "expected": {
+        "analysisTermMonths": 36,
+        "analysisTermYears": 3,
+        "leaseTotalPayments": 10440,
+        "leaseTotalUpfront": 400,
+        "leaseTotalOperating": 6150,
+        "leaseTotalCashOutflow": 16990,
+        "leaseEndEquity": 0,
+        "leaseNetCost": 16990,
+        "purchaseLoanMonthlyPayment": 685,
+        "purchaseTotalPrincipalAndInterest": 24661,
+        "purchaseTotalUpfront": 7470,
+        "purchaseTotalOperating": 7050,
+        "purchaseTotalCashOutflow": 39181,
+        "purchaseRemainingLoanBalance": 14995,
+        "purchaseEstimatedVehicleValue": 12160,
+        "purchaseEndEquity": 0,
+        "purchaseNetCost": 39181,
+        "netDifference": 22191,
+        "lowerNetCostOption": "lease",
+        "breakdown": [
+          {
+            "month": 6,
+            "leaseCumulativeCash": 3165,
+            "buyCumulativeCash": 12755,
+            "remainingLoanBalance": 30325,
+            "estimatedVehicleEquity": 3368,
+            "netBuyCostToDate": 9387
+          },
+          {
+            "month": 12,
+            "leaseCumulativeCash": 5930,
+            "buyCumulativeCash": 18040,
+            "remainingLoanBalance": 27528,
+            "estimatedVehicleEquity": 1859,
+            "netBuyCostToDate": 16181
+          },
+          {
+            "month": 18,
+            "leaseCumulativeCash": 8695,
+            "buyCumulativeCash": 23325,
+            "remainingLoanBalance": 24602,
+            "estimatedVehicleEquity": 478,
+            "netBuyCostToDate": 22847
+          },
+          {
+            "month": 24,
+            "leaseCumulativeCash": 11460,
+            "buyCumulativeCash": 28611,
+            "remainingLoanBalance": 21542,
+            "estimatedVehicleEquity": 0,
+            "netBuyCostToDate": 28611
+          },
+          {
+            "month": 30,
+            "leaseCumulativeCash": 14225,
+            "buyCumulativeCash": 33896,
+            "remainingLoanBalance": 18342,
+            "estimatedVehicleEquity": 0,
+            "netBuyCostToDate": 33896
+          },
+          {
+            "month": 36,
+            "leaseCumulativeCash": 16990,
+            "buyCumulativeCash": 39181,
+            "remainingLoanBalance": 14995,
+            "estimatedVehicleEquity": 0,
+            "netBuyCostToDate": 39181
+          }
+        ],
+        "summaryText": "Over 36 months, leasing results in an estimated net cost that is $22,191 lower than purchasing ($16,990 vs. $39,181). Lower monthly commitments and zero exposure to vehicle market depreciation make leasing less costly over this short time window under current assumptions."
+      }
+    },
+    {
+      "id": "zero-apr-zero-tax-zero-down",
+      "description": "Valid zeros: 0% loan APR, 0% sales tax, $0 down payments, $0 fees, $0 maintenance",
+      "input": {
+        "analysisTermMonths": 36,
+        "vehicleMSRP": 35000,
+        "leaseDownPayment": 0,
+        "leaseMonthlyPayment": 420,
+        "leaseFees": 0,
+        "leaseAnnualInsurance": 1500,
+        "leaseAnnualMaintenance": 0,
+        "purchasePrice": 35000,
+        "purchaseDownPayment": 0,
+        "loanInterestRatePercent": 0,
+        "loanTermMonths": 60,
+        "salesTaxPercent": 0,
+        "buyAnnualInsurance": 1500,
+        "buyAnnualMaintenance": 0,
+        "vehicleResaleValuePercent": 55
+      },
+      "expected": {
+        "analysisTermMonths": 36,
+        "analysisTermYears": 3,
+        "leaseTotalPayments": 15120,
+        "leaseTotalUpfront": 0,
+        "leaseTotalOperating": 4500,
+        "leaseTotalCashOutflow": 19620,
+        "leaseEndEquity": 0,
+        "leaseNetCost": 19620,
+        "purchaseLoanMonthlyPayment": 583,
+        "purchaseTotalPrincipalAndInterest": 21000,
+        "purchaseTotalUpfront": 0,
+        "purchaseTotalOperating": 4500,
+        "purchaseTotalCashOutflow": 25500,
+        "purchaseRemainingLoanBalance": 14000,
+        "purchaseEstimatedVehicleValue": 19250,
+        "purchaseEndEquity": 5250,
+        "purchaseNetCost": 20250,
+        "netDifference": 630,
+        "lowerNetCostOption": "lease",
+        "breakdown": [
+          {
+            "month": 6,
+            "leaseCumulativeCash": 3270,
+            "buyCumulativeCash": 4250,
+            "remainingLoanBalance": 31500,
+            "estimatedVehicleEquity": 875,
+            "netBuyCostToDate": 3375
+          },
+          {
+            "month": 12,
+            "leaseCumulativeCash": 6540,
+            "buyCumulativeCash": 8500,
+            "remainingLoanBalance": 28000,
+            "estimatedVehicleEquity": 1750,
+            "netBuyCostToDate": 6750
+          },
+          {
+            "month": 18,
+            "leaseCumulativeCash": 9810,
+            "buyCumulativeCash": 12750,
+            "remainingLoanBalance": 24500,
+            "estimatedVehicleEquity": 2625,
+            "netBuyCostToDate": 10125
+          },
+          {
+            "month": 24,
+            "leaseCumulativeCash": 13080,
+            "buyCumulativeCash": 17000,
+            "remainingLoanBalance": 21000,
+            "estimatedVehicleEquity": 3500,
+            "netBuyCostToDate": 13500
+          },
+          {
+            "month": 30,
+            "leaseCumulativeCash": 16350,
+            "buyCumulativeCash": 21250,
+            "remainingLoanBalance": 17500,
+            "estimatedVehicleEquity": 4375,
+            "netBuyCostToDate": 16875
+          },
+          {
+            "month": 36,
+            "leaseCumulativeCash": 19620,
+            "buyCumulativeCash": 25500,
+            "remainingLoanBalance": 14000,
+            "estimatedVehicleEquity": 5250,
+            "netBuyCostToDate": 20250
+          }
+        ],
+        "summaryText": "Over 36 months, leasing results in an estimated net cost that is $630 lower than purchasing ($19,620 vs. $20,250). Lower monthly commitments and zero exposure to vehicle market depreciation make leasing less costly over this short time window under current assumptions."
+      }
+    },
+    {
+      "id": "boundary-short-12mo",
+      "description": "Boundary minimum 12-month analysis term",
+      "input": {
+        "analysisTermMonths": 12,
+        "vehicleMSRP": 38000,
+        "leaseDownPayment": 2500,
+        "leaseMonthlyPayment": 460,
+        "leaseFees": 950,
+        "leaseAnnualInsurance": 1800,
+        "leaseAnnualMaintenance": 250,
+        "purchasePrice": 38000,
+        "purchaseDownPayment": 5000,
+        "loanInterestRatePercent": 6,
+        "loanTermMonths": 60,
+        "salesTaxPercent": 6.5,
+        "buyAnnualInsurance": 1700,
+        "buyAnnualMaintenance": 650,
+        "vehicleResaleValuePercent": 54
+      },
+      "expected": {
+        "analysisTermMonths": 12,
+        "analysisTermYears": 1,
+        "leaseTotalPayments": 5520,
+        "leaseTotalUpfront": 3450,
+        "leaseTotalOperating": 2050,
+        "leaseTotalCashOutflow": 11020,
+        "leaseEndEquity": 0,
+        "leaseNetCost": 11020,
+        "purchaseLoanMonthlyPayment": 638,
+        "purchaseTotalPrincipalAndInterest": 7656,
+        "purchaseTotalUpfront": 7470,
+        "purchaseTotalOperating": 2350,
+        "purchaseTotalCashOutflow": 17476,
+        "purchaseRemainingLoanBalance": 27165,
+        "purchaseEstimatedVehicleValue": 20520,
+        "purchaseEndEquity": 0,
+        "purchaseNetCost": 17476,
+        "netDifference": 6456,
+        "lowerNetCostOption": "lease",
+        "breakdown": [
+          {
+            "month": 6,
+            "leaseCumulativeCash": 7235,
+            "buyCumulativeCash": 12473,
+            "remainingLoanBalance": 30126,
+            "estimatedVehicleEquity": 0,
+            "netBuyCostToDate": 12473
+          },
+          {
+            "month": 12,
+            "leaseCumulativeCash": 11020,
+            "buyCumulativeCash": 17476,
+            "remainingLoanBalance": 27165,
+            "estimatedVehicleEquity": 0,
+            "netBuyCostToDate": 17476
+          }
+        ],
+        "summaryText": "Over 12 months, leasing results in an estimated net cost that is $6,456 lower than purchasing ($11,020 vs. $17,476). Lower monthly commitments and zero exposure to vehicle market depreciation make leasing less costly over this short time window under current assumptions."
+      }
+    },
+    {
+      "id": "boundary-long-84mo",
+      "description": "Boundary maximum 84-month horizon exceeding 60-month loan term",
+      "input": {
+        "analysisTermMonths": 84,
+        "vehicleMSRP": 38000,
+        "leaseDownPayment": 2500,
+        "leaseMonthlyPayment": 460,
+        "leaseFees": 950,
+        "leaseAnnualInsurance": 1800,
+        "leaseAnnualMaintenance": 250,
+        "purchasePrice": 38000,
+        "purchaseDownPayment": 5000,
+        "loanInterestRatePercent": 6,
+        "loanTermMonths": 60,
+        "salesTaxPercent": 6.5,
+        "buyAnnualInsurance": 1700,
+        "buyAnnualMaintenance": 650,
+        "vehicleResaleValuePercent": 25
+      },
+      "expected": {
+        "analysisTermMonths": 84,
+        "analysisTermYears": 7,
+        "leaseTotalPayments": 38640,
+        "leaseTotalUpfront": 3450,
+        "leaseTotalOperating": 14350,
+        "leaseTotalCashOutflow": 56440,
+        "leaseEndEquity": 0,
+        "leaseNetCost": 56440,
+        "purchaseLoanMonthlyPayment": 638,
+        "purchaseTotalPrincipalAndInterest": 38279,
+        "purchaseTotalUpfront": 7470,
+        "purchaseTotalOperating": 16450,
+        "purchaseTotalCashOutflow": 62199,
+        "purchaseRemainingLoanBalance": 0,
+        "purchaseEstimatedVehicleValue": 9500,
+        "purchaseEndEquity": 9500,
+        "purchaseNetCost": 52699,
+        "netDifference": 3741,
+        "lowerNetCostOption": "buy",
+        "breakdown": [
+          {
+            "month": 6,
+            "leaseCumulativeCash": 7235,
+            "buyCumulativeCash": 12473,
+            "remainingLoanBalance": 30126,
+            "estimatedVehicleEquity": 5838,
+            "netBuyCostToDate": 6635
+          },
+          {
+            "month": 12,
+            "leaseCumulativeCash": 11020,
+            "buyCumulativeCash": 17476,
+            "remainingLoanBalance": 27165,
+            "estimatedVehicleEquity": 6763,
+            "netBuyCostToDate": 10713
+          },
+          {
+            "month": 18,
+            "leaseCumulativeCash": 14805,
+            "buyCumulativeCash": 22479,
+            "remainingLoanBalance": 24115,
+            "estimatedVehicleEquity": 7778,
+            "netBuyCostToDate": 14700
+          },
+          {
+            "month": 24,
+            "leaseCumulativeCash": 18590,
+            "buyCumulativeCash": 27482,
+            "remainingLoanBalance": 20971,
+            "estimatedVehicleEquity": 8886,
+            "netBuyCostToDate": 18596
+          },
+          {
+            "month": 30,
+            "leaseCumulativeCash": 22375,
+            "buyCumulativeCash": 32484,
+            "remainingLoanBalance": 17732,
+            "estimatedVehicleEquity": 10089,
+            "netBuyCostToDate": 22395
+          },
+          {
+            "month": 36,
+            "leaseCumulativeCash": 26160,
+            "buyCumulativeCash": 37487,
+            "remainingLoanBalance": 14395,
+            "estimatedVehicleEquity": 11391,
+            "netBuyCostToDate": 26096
+          },
+          {
+            "month": 42,
+            "leaseCumulativeCash": 29945,
+            "buyCumulativeCash": 42490,
+            "remainingLoanBalance": 10956,
+            "estimatedVehicleEquity": 12794,
+            "netBuyCostToDate": 29696
+          },
+          {
+            "month": 48,
+            "leaseCumulativeCash": 33730,
+            "buyCumulativeCash": 47493,
+            "remainingLoanBalance": 7413,
+            "estimatedVehicleEquity": 14302,
+            "netBuyCostToDate": 33192
+          },
+          {
+            "month": 54,
+            "leaseCumulativeCash": 37515,
+            "buyCumulativeCash": 52496,
+            "remainingLoanBalance": 3762,
+            "estimatedVehicleEquity": 15917,
+            "netBuyCostToDate": 36579
+          },
+          {
+            "month": 60,
+            "leaseCumulativeCash": 41300,
+            "buyCumulativeCash": 57499,
+            "remainingLoanBalance": 0,
+            "estimatedVehicleEquity": 17643,
+            "netBuyCostToDate": 39856
+          },
+          {
+            "month": 66,
+            "leaseCumulativeCash": 45085,
+            "buyCumulativeCash": 58674,
+            "remainingLoanBalance": 0,
+            "estimatedVehicleEquity": 15607,
+            "netBuyCostToDate": 43067
+          },
+          {
+            "month": 72,
+            "leaseCumulativeCash": 48870,
+            "buyCumulativeCash": 59849,
+            "remainingLoanBalance": 0,
+            "estimatedVehicleEquity": 13571,
+            "netBuyCostToDate": 46278
+          },
+          {
+            "month": 78,
+            "leaseCumulativeCash": 52655,
+            "buyCumulativeCash": 61024,
+            "remainingLoanBalance": 0,
+            "estimatedVehicleEquity": 11536,
+            "netBuyCostToDate": 49488
+          },
+          {
+            "month": 84,
+            "leaseCumulativeCash": 56440,
+            "buyCumulativeCash": 62199,
+            "remainingLoanBalance": 0,
+            "estimatedVehicleEquity": 9500,
+            "netBuyCostToDate": 52699
+          }
+        ],
+        "summaryText": "Over 84 months, purchasing results in an estimated net cost that is $3,741 lower than leasing ($52,699 net cost vs. $56,440). While purchasing requires higher monthly cash outflow ($638/mo vs. $460/mo), you retain an estimated $9,500 in asset equity at the end of month 84."
+      }
+    },
+    {
+      "id": "high-cost-luxury",
+      "description": "High-cost $95k luxury vehicle comparison",
+      "input": {
+        "analysisTermMonths": 36,
+        "vehicleMSRP": 95000,
+        "leaseDownPayment": 5000,
+        "leaseMonthlyPayment": 1180,
+        "leaseFees": 1400,
+        "leaseAnnualInsurance": 3200,
+        "leaseAnnualMaintenance": 400,
+        "purchasePrice": 95000,
+        "purchaseDownPayment": 15000,
+        "loanInterestRatePercent": 6.75,
+        "loanTermMonths": 60,
+        "salesTaxPercent": 8.25,
+        "buyAnnualInsurance": 3100,
+        "buyAnnualMaintenance": 1200,
+        "vehicleResaleValuePercent": 48
+      },
+      "expected": {
+        "analysisTermMonths": 36,
+        "analysisTermYears": 3,
+        "leaseTotalPayments": 42480,
+        "leaseTotalUpfront": 6400,
+        "leaseTotalOperating": 10800,
+        "leaseTotalCashOutflow": 59680,
+        "leaseEndEquity": 0,
+        "leaseNetCost": 59680,
+        "purchaseLoanMonthlyPayment": 1575,
+        "purchaseTotalPrincipalAndInterest": 56688,
+        "purchaseTotalUpfront": 22838,
+        "purchaseTotalOperating": 12900,
+        "purchaseTotalCashOutflow": 92426,
+        "purchaseRemainingLoanBalance": 35260,
+        "purchaseEstimatedVehicleValue": 45600,
+        "purchaseEndEquity": 10340,
+        "purchaseNetCost": 82086,
+        "netDifference": 22406,
+        "lowerNetCostOption": "lease",
+        "breakdown": [
+          {
+            "month": 6,
+            "leaseCumulativeCash": 15280,
+            "buyCumulativeCash": 34436,
+            "remainingLoanBalance": 73156,
+            "estimatedVehicleEquity": 13610,
+            "netBuyCostToDate": 20825
+          },
+          {
+            "month": 12,
+            "leaseCumulativeCash": 24160,
+            "buyCumulativeCash": 46034,
+            "remainingLoanBalance": 66078,
+            "estimatedVehicleEquity": 12455,
+            "netBuyCostToDate": 33579
+          },
+          {
+            "month": 18,
+            "leaseCumulativeCash": 33040,
+            "buyCumulativeCash": 57632,
+            "remainingLoanBalance": 58758,
+            "estimatedVehicleEquity": 11542,
+            "netBuyCostToDate": 46090
+          },
+          {
+            "month": 24,
+            "leaseCumulativeCash": 41920,
+            "buyCumulativeCash": 69230,
+            "remainingLoanBalance": 51187,
+            "estimatedVehicleEquity": 10879,
+            "netBuyCostToDate": 58351
+          },
+          {
+            "month": 30,
+            "leaseCumulativeCash": 50800,
+            "buyCumulativeCash": 80828,
+            "remainingLoanBalance": 43358,
+            "estimatedVehicleEquity": 10476,
+            "netBuyCostToDate": 70352
+          },
+          {
+            "month": 36,
+            "leaseCumulativeCash": 59680,
+            "buyCumulativeCash": 92426,
+            "remainingLoanBalance": 35260,
+            "estimatedVehicleEquity": 10340,
+            "netBuyCostToDate": 82086
+          }
+        ],
+        "summaryText": "Over 36 months, leasing results in an estimated net cost that is $22,406 lower than purchasing ($59,680 vs. $82,086). Lower monthly commitments and zero exposure to vehicle market depreciation make leasing less costly over this short time window under current assumptions."
+      }
+    },
+    {
+      "id": "low-cost-compact",
+      "description": "Low-cost $21k compact vehicle comparison",
+      "input": {
+        "analysisTermMonths": 36,
+        "vehicleMSRP": 21000,
+        "leaseDownPayment": 1500,
+        "leaseMonthlyPayment": 265,
+        "leaseFees": 695,
+        "leaseAnnualInsurance": 1300,
+        "leaseAnnualMaintenance": 150,
+        "purchasePrice": 21000,
+        "purchaseDownPayment": 3000,
+        "loanInterestRatePercent": 5,
+        "loanTermMonths": 48,
+        "salesTaxPercent": 5,
+        "buyAnnualInsurance": 1250,
+        "buyAnnualMaintenance": 400,
+        "vehicleResaleValuePercent": 58
+      },
+      "expected": {
+        "analysisTermMonths": 36,
+        "analysisTermYears": 3,
+        "leaseTotalPayments": 9540,
+        "leaseTotalUpfront": 2195,
+        "leaseTotalOperating": 4350,
+        "leaseTotalCashOutflow": 16085,
+        "leaseEndEquity": 0,
+        "leaseNetCost": 16085,
+        "purchaseLoanMonthlyPayment": 415,
+        "purchaseTotalPrincipalAndInterest": 14923,
+        "purchaseTotalUpfront": 4050,
+        "purchaseTotalOperating": 4950,
+        "purchaseTotalCashOutflow": 23923,
+        "purchaseRemainingLoanBalance": 4842,
+        "purchaseEstimatedVehicleValue": 12180,
+        "purchaseEndEquity": 7338,
+        "purchaseNetCost": 16585,
+        "netDifference": 500,
+        "lowerNetCostOption": "lease",
+        "breakdown": [
+          {
+            "month": 6,
+            "leaseCumulativeCash": 4510,
+            "buyCumulativeCash": 7362,
+            "remainingLoanBalance": 15941,
+            "estimatedVehicleEquity": 3589,
+            "netBuyCostToDate": 3774
+          },
+          {
+            "month": 12,
+            "leaseCumulativeCash": 6825,
+            "buyCumulativeCash": 10674,
+            "remainingLoanBalance": 13831,
+            "estimatedVehicleEquity": 4229,
+            "netBuyCostToDate": 6445
+          },
+          {
+            "month": 18,
+            "leaseCumulativeCash": 9140,
+            "buyCumulativeCash": 13986,
+            "remainingLoanBalance": 11667,
+            "estimatedVehicleEquity": 4923,
+            "netBuyCostToDate": 9064
+          },
+          {
+            "month": 24,
+            "leaseCumulativeCash": 11455,
+            "buyCumulativeCash": 17299,
+            "remainingLoanBalance": 9449,
+            "estimatedVehicleEquity": 5671,
+            "netBuyCostToDate": 11627
+          },
+          {
+            "month": 30,
+            "leaseCumulativeCash": 13770,
+            "buyCumulativeCash": 20611,
+            "remainingLoanBalance": 7174,
+            "estimatedVehicleEquity": 6476,
+            "netBuyCostToDate": 14135
+          },
+          {
+            "month": 36,
+            "leaseCumulativeCash": 16085,
+            "buyCumulativeCash": 23923,
+            "remainingLoanBalance": 4842,
+            "estimatedVehicleEquity": 7338,
+            "netBuyCostToDate": 16585
+          }
+        ],
+        "summaryText": "Over 36 months, leasing results in an estimated net cost that is $500 lower than purchasing ($16,085 vs. $16,585). Lower monthly commitments and zero exposure to vehicle market depreciation make leasing less costly over this short time window under current assumptions."
+      }
+    },
+    {
+      "id": "equal-net-cost",
+      "description": "Exact tie where leaseNetCost equals purchaseNetCost",
+      "input": {
+        "analysisTermMonths": 12,
+        "vehicleMSRP": 20000,
+        "leaseDownPayment": 0,
+        "leaseMonthlyPayment": 500,
+        "leaseFees": 0,
+        "leaseAnnualInsurance": 0,
+        "leaseAnnualMaintenance": 0,
+        "purchasePrice": 20000,
+        "purchaseDownPayment": 20000,
+        "loanInterestRatePercent": 0,
+        "loanTermMonths": 12,
+        "salesTaxPercent": 0,
+        "buyAnnualInsurance": 0,
+        "buyAnnualMaintenance": 0,
+        "vehicleResaleValuePercent": 70
+      },
+      "expected": {
+        "analysisTermMonths": 12,
+        "analysisTermYears": 1,
+        "leaseTotalPayments": 6000,
+        "leaseTotalUpfront": 0,
+        "leaseTotalOperating": 0,
+        "leaseTotalCashOutflow": 6000,
+        "leaseEndEquity": 0,
+        "leaseNetCost": 6000,
+        "purchaseLoanMonthlyPayment": 0,
+        "purchaseTotalPrincipalAndInterest": 0,
+        "purchaseTotalUpfront": 20000,
+        "purchaseTotalOperating": 0,
+        "purchaseTotalCashOutflow": 20000,
+        "purchaseRemainingLoanBalance": 0,
+        "purchaseEstimatedVehicleValue": 14000,
+        "purchaseEndEquity": 14000,
+        "purchaseNetCost": 6000,
+        "netDifference": 0,
+        "lowerNetCostOption": "equal",
+        "breakdown": [
+          {
+            "month": 6,
+            "leaseCumulativeCash": 3000,
+            "buyCumulativeCash": 20000,
+            "remainingLoanBalance": 0,
+            "estimatedVehicleEquity": 17000,
+            "netBuyCostToDate": 3000
+          },
+          {
+            "month": 12,
+            "leaseCumulativeCash": 6000,
+            "buyCumulativeCash": 20000,
+            "remainingLoanBalance": 0,
+            "estimatedVehicleEquity": 14000,
+            "netBuyCostToDate": 6000
+          }
+        ],
+        "summaryText": "Over 12 months, both leasing and purchasing yield comparable estimated net costs ($6,000)."
+      }
+    }
+  ]
+}

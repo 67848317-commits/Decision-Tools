@@ -174,6 +174,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-diy-materials" value={DIY_VS_HIRE_DEFAULTS.diyMaterialsCost} min="0" max="25000" step="25" />
           </div>
+          <span class="validation-error" id="err-diyMaterialsCost" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-diy-tools">Tools & Equipment</label>
@@ -181,6 +182,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-diy-tools" value={DIY_VS_HIRE_DEFAULTS.diyToolsEquipmentCost} min="0" max="10000" step="25" />
           </div>
+          <span class="validation-error" id="err-diyToolsEquipmentCost" role="alert"></span>
         </div>
       </div>
 
@@ -188,9 +190,10 @@ const relatedGuides = [
         <div class="form-group">
           <label for="input-diy-hours">Estimated DIY Hours</label>
           <div class="input-with-unit">
-            <input type="number" id="input-diy-hours" value={DIY_VS_HIRE_DEFAULTS.diyEstimatedHours} min="1" max="500" step="1" />
+            <input type="number" id="input-diy-hours" value={DIY_VS_HIRE_DEFAULTS.diyEstimatedHours} min="0" max="500" step="1" />
             <span class="unit-label">hours</span>
           </div>
+          <span class="validation-error" id="err-diyEstimatedHours" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-time-rate">Personal Time Value ($/hr)</label>
@@ -198,6 +201,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-time-rate" value={DIY_VS_HIRE_DEFAULTS.personalHourlyRate} min="0" max="500" step="5" />
           </div>
+          <span class="validation-error" id="err-personalHourlyRate" role="alert"></span>
         </div>
       </div>
 
@@ -207,6 +211,7 @@ const relatedGuides = [
           <input type="number" id="input-rework-risk" value={DIY_VS_HIRE_DEFAULTS.diyReworkRiskPercent} min="0" max="50" step="5" />
           <span class="unit-label">% of materials</span>
         </div>
+        <span class="validation-error" id="err-diyReworkRiskPercent" role="alert"></span>
       </div>
     </OptionPanel>
 
@@ -218,6 +223,7 @@ const relatedGuides = [
           <span class="currency-prefix">$</span>
           <input type="number" id="input-contractor-quote" value={DIY_VS_HIRE_DEFAULTS.contractorQuote} min="50" max="100000" step="50" />
         </div>
+        <span class="validation-error" id="err-contractorQuote" role="alert"></span>
       </div>
 
       <div class="form-group">
@@ -226,6 +232,7 @@ const relatedGuides = [
           <input type="number" id="input-coord-hours" value={DIY_VS_HIRE_DEFAULTS.homeownerCoordinationHours} min="0" max="40" step="0.5" />
           <span class="unit-label">hours</span>
         </div>
+        <span class="validation-error" id="err-homeownerCoordinationHours" role="alert"></span>
       </div>
     </OptionPanel>
   </div>
@@ -352,7 +359,8 @@ const relatedGuides = [
 </DecisionLayout>
 
 <script>
-  import { calculateDiyVsHire, DIY_VS_HIRE_DEFAULTS, type DiyVsHireInput } from '../../lib/decisions/diyVsHire';
+  import { calculateDiyVsHire, validateDiyVsHireInput, DIY_VS_HIRE_DEFAULTS, type DiyVsHireInput } from '../../lib/decisions/diyVsHire';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function initCalculator() {
     const inputs = {
@@ -365,17 +373,33 @@ const relatedGuides = [
       homeownerCoordinationHours: document.getElementById('input-coord-hours') as HTMLInputElement,
     };
 
+    function clearErrors() {
+      document.querySelectorAll('.validation-error').forEach((el) => {
+        el.textContent = '';
+      });
+    }
+
     function recalculate() {
+      clearErrors();
       const currentInput: DiyVsHireInput = {
         projectName: 'Home Improvement Project',
-        diyMaterialsCost: Number(inputs.diyMaterialsCost.value) || 0,
-        diyToolsEquipmentCost: Number(inputs.diyToolsEquipmentCost.value) || 0,
-        diyEstimatedHours: Number(inputs.diyEstimatedHours.value) || 1,
-        personalHourlyRate: Number(inputs.personalHourlyRate.value) || 0,
-        diyReworkRiskPercent: Number(inputs.diyReworkRiskPercent.value) || 0,
-        contractorQuote: Number(inputs.contractorQuote.value) || 1,
-        homeownerCoordinationHours: Number(inputs.homeownerCoordinationHours.value) || 0,
+        diyMaterialsCost: parseNumericFieldOrNaN(inputs.diyMaterialsCost?.value),
+        diyToolsEquipmentCost: parseNumericFieldOrNaN(inputs.diyToolsEquipmentCost?.value),
+        diyEstimatedHours: parseNumericFieldOrNaN(inputs.diyEstimatedHours?.value),
+        personalHourlyRate: parseNumericFieldOrNaN(inputs.personalHourlyRate?.value),
+        diyReworkRiskPercent: parseNumericFieldOrNaN(inputs.diyReworkRiskPercent?.value),
+        contractorQuote: parseNumericFieldOrNaN(inputs.contractorQuote?.value),
+        homeownerCoordinationHours: parseNumericFieldOrNaN(inputs.homeownerCoordinationHours?.value),
       };
+
+      const validation = validateDiyVsHireInput(currentInput);
+      if (!validation.valid) {
+        for (const [field, msg] of Object.entries(validation.errors)) {
+          const errorEl = document.getElementById(`err-${field}`);
+          if (errorEl) errorEl.textContent = msg;
+        }
+        return;
+      }
 
       const result = calculateDiyVsHire(currentInput);
 
@@ -505,6 +529,13 @@ const relatedGuides = [
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-text-main);
+  }
+  .validation-error {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-status-danger);
+    margin-top: 2px;
+    min-height: 1rem;
   }
   .form-row-2 {
     display: grid;

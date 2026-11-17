@@ -164,8 +164,9 @@ const relatedGuides = [
         <label for="input-repair-quote">Repair Estimate / Quote</label>
         <div class="input-with-prefix">
           <span class="currency-prefix">$</span>
-          <input type="number" id="input-repair-quote" value={BUY_VS_REPAIR_DEFAULTS.repairQuote} min="20" max="5000" step="10" />
+          <input type="number" id="input-repair-quote" value={BUY_VS_REPAIR_DEFAULTS.repairQuote} min="0" max="5000" step="10" />
         </div>
+        <span class="validation-error" id="err-repairQuote" role="alert"></span>
       </div>
 
       <div class="form-row-2">
@@ -175,6 +176,7 @@ const relatedGuides = [
             <input type="number" id="input-repair-life" value={BUY_VS_REPAIR_DEFAULTS.expectedLifespanAfterRepairYears} min="0.5" max="10" step="0.5" />
             <span class="unit-label">years</span>
           </div>
+          <span class="validation-error" id="err-expectedLifespanAfterRepairYears" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-current-energy">Current Annual Energy/Op Cost</label>
@@ -182,6 +184,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-current-energy" value={BUY_VS_REPAIR_DEFAULTS.currentAnnualOperatingCost} min="0" max="1000" step="10" />
           </div>
+          <span class="validation-error" id="err-currentAnnualOperatingCost" role="alert"></span>
         </div>
       </div>
 
@@ -192,6 +195,7 @@ const relatedGuides = [
             <input type="number" id="input-risk-percent" value={BUY_VS_REPAIR_DEFAULTS.subsequentRepairRiskPercent} min="0" max="100" step="5" />
             <span class="unit-label">% chance</span>
           </div>
+          <span class="validation-error" id="err-subsequentRepairRiskPercent" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-risk-amount">Secondary Repair Cost</label>
@@ -199,6 +203,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-risk-amount" value={BUY_VS_REPAIR_DEFAULTS.subsequentRepairCost} min="0" max="2000" step="25" />
           </div>
+          <span class="validation-error" id="err-subsequentRepairCost" role="alert"></span>
         </div>
       </div>
     </OptionPanel>
@@ -211,6 +216,7 @@ const relatedGuides = [
           <span class="currency-prefix">$</span>
           <input type="number" id="input-buy-price" value={BUY_VS_REPAIR_DEFAULTS.replacementPrice} min="50" max="10000" step="25" />
         </div>
+        <span class="validation-error" id="err-replacementPrice" role="alert"></span>
       </div>
 
       <div class="form-row-2">
@@ -220,6 +226,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-buy-install" value={BUY_VS_REPAIR_DEFAULTS.installationAndDisposalFee} min="0" max="1000" step="10" />
           </div>
+          <span class="validation-error" id="err-installationAndDisposalFee" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-buy-life">Expected Useful Lifespan</label>
@@ -227,6 +234,7 @@ const relatedGuides = [
             <input type="number" id="input-buy-life" value={BUY_VS_REPAIR_DEFAULTS.replacementExpectedLifespanYears} min="1" max="25" step="1" />
             <span class="unit-label">years</span>
           </div>
+          <span class="validation-error" id="err-replacementExpectedLifespanYears" role="alert"></span>
         </div>
       </div>
 
@@ -236,6 +244,7 @@ const relatedGuides = [
           <span class="currency-prefix">$</span>
           <input type="number" id="input-new-energy" value={BUY_VS_REPAIR_DEFAULTS.replacementAnnualOperatingCost} min="0" max="1000" step="5" />
         </div>
+        <span class="validation-error" id="err-replacementAnnualOperatingCost" role="alert"></span>
       </div>
     </OptionPanel>
   </div>
@@ -360,7 +369,8 @@ const relatedGuides = [
 </DecisionLayout>
 
 <script>
-  import { calculateBuyVsRepair, BUY_VS_REPAIR_DEFAULTS, type BuyVsRepairInput } from '../../lib/decisions/buyVsRepair';
+  import { calculateBuyVsRepair, validateBuyVsRepairInput, BUY_VS_REPAIR_DEFAULTS, type BuyVsRepairInput } from '../../lib/decisions/buyVsRepair';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function initCalculator() {
     const inputs = {
@@ -375,20 +385,36 @@ const relatedGuides = [
       replacementAnnualOperatingCost: document.getElementById('input-new-energy') as HTMLInputElement,
     };
 
+    function clearErrors() {
+      document.querySelectorAll('.validation-error').forEach((el) => {
+        el.textContent = '';
+      });
+    }
+
     function recalculate() {
+      clearErrors();
       const currentInput: BuyVsRepairInput = {
         itemName: 'Household Item',
-        repairQuote: Number(inputs.repairQuote.value) || 0,
-        expectedLifespanAfterRepairYears: Number(inputs.expectedLifespanAfterRepairYears.value) || 1,
-        currentAnnualOperatingCost: Number(inputs.currentAnnualOperatingCost.value) || 0,
-        subsequentRepairRiskPercent: Number(inputs.subsequentRepairRiskPercent.value) || 0,
-        subsequentRepairCost: Number(inputs.subsequentRepairCost.value) || 0,
-        replacementPrice: Number(inputs.replacementPrice.value) || 1,
-        installationAndDisposalFee: Number(inputs.installationAndDisposalFee.value) || 0,
-        replacementExpectedLifespanYears: Number(inputs.replacementExpectedLifespanYears.value) || 1,
-        replacementAnnualOperatingCost: Number(inputs.replacementAnnualOperatingCost.value) || 0,
+        repairQuote: parseNumericFieldOrNaN(inputs.repairQuote?.value),
+        expectedLifespanAfterRepairYears: parseNumericFieldOrNaN(inputs.expectedLifespanAfterRepairYears?.value),
+        currentAnnualOperatingCost: parseNumericFieldOrNaN(inputs.currentAnnualOperatingCost?.value),
+        subsequentRepairRiskPercent: parseNumericFieldOrNaN(inputs.subsequentRepairRiskPercent?.value),
+        subsequentRepairCost: parseNumericFieldOrNaN(inputs.subsequentRepairCost?.value),
+        replacementPrice: parseNumericFieldOrNaN(inputs.replacementPrice?.value),
+        installationAndDisposalFee: parseNumericFieldOrNaN(inputs.installationAndDisposalFee?.value),
+        replacementExpectedLifespanYears: parseNumericFieldOrNaN(inputs.replacementExpectedLifespanYears?.value),
+        replacementAnnualOperatingCost: parseNumericFieldOrNaN(inputs.replacementAnnualOperatingCost?.value),
         warrantyYears: 2,
       };
+
+      const validation = validateBuyVsRepairInput(currentInput);
+      if (!validation.valid) {
+        for (const [field, msg] of Object.entries(validation.errors)) {
+          const errorEl = document.getElementById(`err-${field}`);
+          if (errorEl) errorEl.textContent = msg;
+        }
+        return;
+      }
 
       const result = calculateBuyVsRepair(currentInput);
 
@@ -518,6 +544,13 @@ const relatedGuides = [
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-text-main);
+  }
+  .validation-error {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-status-danger);
+    margin-top: 2px;
+    min-height: 1rem;
   }
   .form-row-2 {
     display: grid;

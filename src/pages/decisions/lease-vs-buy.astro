@@ -179,6 +179,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-vehicle-msrp" value={LEASE_VS_BUY_DEFAULTS.vehicleMSRP} min="10000" max="250000" step="500" />
           </div>
+          <span class="validation-error" id="err-vehicleMSRP" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-term-months">Analysis Term</label>
@@ -186,6 +187,7 @@ const relatedGuides = [
             <input type="number" id="input-term-months" value={LEASE_VS_BUY_DEFAULTS.analysisTermMonths} min="12" max="60" step="12" />
             <span class="unit-label">months</span>
           </div>
+          <span class="validation-error" id="err-analysisTermMonths" role="alert"></span>
         </div>
       </div>
     </div>
@@ -199,6 +201,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-lease-down" value={LEASE_VS_BUY_DEFAULTS.leaseDownPayment} min="0" max="25000" step="250" />
           </div>
+          <span class="validation-error" id="err-leaseDownPayment" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-lease-monthly">Monthly Lease Payment</label>
@@ -206,6 +209,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-lease-monthly" value={LEASE_VS_BUY_DEFAULTS.leaseMonthlyPayment} min="100" max="5000" step="10" />
           </div>
+          <span class="validation-error" id="err-leaseMonthlyPayment" role="alert"></span>
         </div>
       </div>
 
@@ -216,6 +220,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-lease-fees" value={LEASE_VS_BUY_DEFAULTS.leaseFees} min="0" max="5000" step="50" />
           </div>
+          <span class="validation-error" id="err-leaseFees" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-lease-insurance">Annual Insurance</label>
@@ -223,6 +228,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-lease-insurance" value={LEASE_VS_BUY_DEFAULTS.leaseAnnualInsurance} min="0" max="15000" step="50" />
           </div>
+          <span class="validation-error" id="err-leaseAnnualInsurance" role="alert"></span>
         </div>
       </div>
 
@@ -232,6 +238,7 @@ const relatedGuides = [
           <span class="currency-prefix">$</span>
           <input type="number" id="input-lease-maint" value={LEASE_VS_BUY_DEFAULTS.leaseAnnualMaintenance} min="0" max="5000" step="50" />
         </div>
+        <span class="validation-error" id="err-leaseAnnualMaintenance" role="alert"></span>
       </div>
     </OptionPanel>
 
@@ -244,6 +251,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-buy-down" value={LEASE_VS_BUY_DEFAULTS.purchaseDownPayment} min="0" max="100000" step="500" />
           </div>
+          <span class="validation-error" id="err-purchaseDownPayment" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-loan-term">Loan Term</label>
@@ -251,6 +259,7 @@ const relatedGuides = [
             <input type="number" id="input-loan-term" value={LEASE_VS_BUY_DEFAULTS.loanTermMonths} min="24" max="84" step="12" />
             <span class="unit-label">months</span>
           </div>
+          <span class="validation-error" id="err-loanTermMonths" role="alert"></span>
         </div>
       </div>
 
@@ -261,6 +270,7 @@ const relatedGuides = [
             <input type="number" id="input-loan-rate" value={LEASE_VS_BUY_DEFAULTS.loanInterestRatePercent} min="0" max="25" step="0.1" />
             <span class="unit-label">% APR</span>
           </div>
+          <span class="validation-error" id="err-loanInterestRatePercent" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-sales-tax">State / Local Sales Tax</label>
@@ -268,6 +278,7 @@ const relatedGuides = [
             <input type="number" id="input-sales-tax" value={LEASE_VS_BUY_DEFAULTS.salesTaxPercent} min="0" max="15" step="0.1" />
             <span class="unit-label">%</span>
           </div>
+          <span class="validation-error" id="err-salesTaxPercent" role="alert"></span>
         </div>
       </div>
 
@@ -278,6 +289,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-buy-insurance" value={LEASE_VS_BUY_DEFAULTS.buyAnnualInsurance} min="0" max="15000" step="50" />
           </div>
+          <span class="validation-error" id="err-buyAnnualInsurance" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-buy-maint">Annual Maintenance</label>
@@ -285,6 +297,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-buy-maint" value={LEASE_VS_BUY_DEFAULTS.buyAnnualMaintenance} min="0" max="5000" step="50" />
           </div>
+          <span class="validation-error" id="err-buyAnnualMaintenance" role="alert"></span>
         </div>
       </div>
 
@@ -294,6 +307,7 @@ const relatedGuides = [
           <input type="number" id="input-buy-resale" value={LEASE_VS_BUY_DEFAULTS.vehicleResaleValuePercent} min="10" max="90" step="1" />
           <span class="unit-label">% of MSRP</span>
         </div>
+        <span class="validation-error" id="err-vehicleResaleValuePercent" role="alert"></span>
       </div>
     </OptionPanel>
   </div>
@@ -418,7 +432,8 @@ const relatedGuides = [
 </DecisionLayout>
 
 <script>
-  import { calculateLeaseVsBuy, LEASE_VS_BUY_DEFAULTS, type LeaseVsBuyInput } from '../../lib/decisions/leaseVsBuy';
+  import { calculateLeaseVsBuy, validateLeaseVsBuyInput, LEASE_VS_BUY_DEFAULTS, type LeaseVsBuyInput } from '../../lib/decisions/leaseVsBuy';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function initCalculator() {
     const inputs = {
@@ -438,24 +453,42 @@ const relatedGuides = [
       vehicleResaleValuePercent: document.getElementById('input-buy-resale') as HTMLInputElement,
     };
 
+    function clearErrors() {
+      document.querySelectorAll('.validation-error').forEach((el) => {
+        el.textContent = '';
+      });
+    }
+
     function recalculate() {
+      clearErrors();
+      const msrp = parseNumericFieldOrNaN(inputs.vehicleMSRP?.value);
       const currentInput: LeaseVsBuyInput = {
-        vehicleMSRP: Number(inputs.vehicleMSRP.value) || LEASE_VS_BUY_DEFAULTS.vehicleMSRP,
-        purchasePrice: Number(inputs.vehicleMSRP.value) || LEASE_VS_BUY_DEFAULTS.vehicleMSRP,
-        analysisTermMonths: Number(inputs.analysisTermMonths.value) || LEASE_VS_BUY_DEFAULTS.analysisTermMonths,
-        leaseDownPayment: Number(inputs.leaseDownPayment.value) || 0,
-        leaseMonthlyPayment: Number(inputs.leaseMonthlyPayment.value) || LEASE_VS_BUY_DEFAULTS.leaseMonthlyPayment,
-        leaseFees: Number(inputs.leaseFees.value) || 0,
-        leaseAnnualInsurance: Number(inputs.leaseAnnualInsurance.value) || LEASE_VS_BUY_DEFAULTS.leaseAnnualInsurance,
-        leaseAnnualMaintenance: Number(inputs.leaseAnnualMaintenance.value) || LEASE_VS_BUY_DEFAULTS.leaseAnnualMaintenance,
-        purchaseDownPayment: Number(inputs.purchaseDownPayment.value) || LEASE_VS_BUY_DEFAULTS.purchaseDownPayment,
-        loanTermMonths: Number(inputs.loanTermMonths.value) || LEASE_VS_BUY_DEFAULTS.loanTermMonths,
-        loanInterestRatePercent: Number(inputs.loanInterestRatePercent.value) || LEASE_VS_BUY_DEFAULTS.loanInterestRatePercent,
-        salesTaxPercent: Number(inputs.salesTaxPercent.value) || LEASE_VS_BUY_DEFAULTS.salesTaxPercent,
-        buyAnnualInsurance: Number(inputs.buyAnnualInsurance.value) || LEASE_VS_BUY_DEFAULTS.buyAnnualInsurance,
-        buyAnnualMaintenance: Number(inputs.buyAnnualMaintenance.value) || LEASE_VS_BUY_DEFAULTS.buyAnnualMaintenance,
-        vehicleResaleValuePercent: Number(inputs.vehicleResaleValuePercent.value) || LEASE_VS_BUY_DEFAULTS.vehicleResaleValuePercent,
+        vehicleMSRP: msrp,
+        purchasePrice: msrp,
+        analysisTermMonths: parseNumericFieldOrNaN(inputs.analysisTermMonths?.value),
+        leaseDownPayment: parseNumericFieldOrNaN(inputs.leaseDownPayment?.value),
+        leaseMonthlyPayment: parseNumericFieldOrNaN(inputs.leaseMonthlyPayment?.value),
+        leaseFees: parseNumericFieldOrNaN(inputs.leaseFees?.value),
+        leaseAnnualInsurance: parseNumericFieldOrNaN(inputs.leaseAnnualInsurance?.value),
+        leaseAnnualMaintenance: parseNumericFieldOrNaN(inputs.leaseAnnualMaintenance?.value),
+        purchaseDownPayment: parseNumericFieldOrNaN(inputs.purchaseDownPayment?.value),
+        loanTermMonths: parseNumericFieldOrNaN(inputs.loanTermMonths?.value),
+        loanInterestRatePercent: parseNumericFieldOrNaN(inputs.loanInterestRatePercent?.value),
+        salesTaxPercent: parseNumericFieldOrNaN(inputs.salesTaxPercent?.value),
+        buyAnnualInsurance: parseNumericFieldOrNaN(inputs.buyAnnualInsurance?.value),
+        buyAnnualMaintenance: parseNumericFieldOrNaN(inputs.buyAnnualMaintenance?.value),
+        vehicleResaleValuePercent: parseNumericFieldOrNaN(inputs.vehicleResaleValuePercent?.value),
       };
+
+      const validation = validateLeaseVsBuyInput(currentInput);
+      if (!validation.valid) {
+        for (const [field, msg] of Object.entries(validation.errors)) {
+          const targetField = field === 'purchasePrice' ? 'vehicleMSRP' : field;
+          const errorEl = document.getElementById(`err-${targetField}`);
+          if (errorEl) errorEl.textContent = msg;
+        }
+        return;
+      }
 
       const result = calculateLeaseVsBuy(currentInput);
 
@@ -611,6 +644,13 @@ const relatedGuides = [
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-text-main);
+  }
+  .validation-error {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-status-danger);
+    margin-top: 2px;
+    min-height: 1rem;
   }
   .form-row-2 {
     display: grid;

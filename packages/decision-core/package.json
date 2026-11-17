@@ -1,0 +1,62 @@
+{
+  "name": "@decision-tools/decision-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./formatters": {
+      "types": "./src/formatters/index.ts",
+      "default": "./src/formatters/index.ts"
+    },
+    "./rentVsBuy": {
+      "types": "./src/calculators/rentVsBuy.ts",
+      "default": "./src/calculators/rentVsBuy.ts"
+    },
+    "./jobOffer": {
+      "types": "./src/calculators/jobOffer.ts",
+      "default": "./src/calculators/jobOffer.ts"
+    },
+    "./leaseVsBuy": {
+      "types": "./src/calculators/leaseVsBuy.ts",
+      "default": "./src/calculators/leaseVsBuy.ts"
+    },
+    "./gasVsEv": {
+      "types": "./src/calculators/gasVsEv.ts",
+      "default": "./src/calculators/gasVsEv.ts"
+    },
+    "./buyVsRepair": {
+      "types": "./src/calculators/buyVsRepair.ts",
+      "default": "./src/calculators/buyVsRepair.ts"
+    },
+    "./diyVsHire": {
+      "types": "./src/calculators/diyVsHire.ts",
+      "default": "./src/calculators/diyVsHire.ts"
+    },
+    "./debtVsInvest": {
+      "types": "./src/calculators/debtVsInvest.ts",
+      "default": "./src/calculators/debtVsInvest.ts"
+    },
+    "./buyVsSubscribe": {
+      "types": "./src/calculators/buyVsSubscribe.ts",
+      "default": "./src/calculators/buyVsSubscribe.ts"
+    },
+    "./newVsUsed": {
+      "types": "./src/calculators/newVsUsed.ts",
+      "default": "./src/calculators/newVsUsed.ts"
+    },
+    "./bulkBuy": {
+      "types": "./src/calculators/bulkBuy.ts",
+      "default": "./src/calculators/bulkBuy.ts"
+    }
+  },
+  "dependencies": {
+    "@decision-tools/shared-types": "workspace:*",
+    "@decision-tools/validation": "workspace:*"
+  }
+}

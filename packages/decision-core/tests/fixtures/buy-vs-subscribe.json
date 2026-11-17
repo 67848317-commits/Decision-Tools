@@ -1,0 +1,416 @@
+{
+  "calculator": "buy-vs-subscribe",
+  "capturedFrom": "src/lib/decisions/buyVsSubscribe.ts",
+  "locale": "en-US",
+  "tolerancePolicy": {
+    "integerFields": 0,
+    "decimalFields": 0.000001
+  },
+  "scenarios": [
+    {
+      "id": "defaults",
+      "description": "Default Buy vs Subscribe baseline parameters (monthly cycle)",
+      "input": {
+        "itemName": "Software or Equipment",
+        "horizonYears": 3,
+        "purchasePrice": 600,
+        "setupOrActivationCost": 40,
+        "annualMaintenanceCost": 50,
+        "estimatedResaleValue": 120,
+        "billingCycle": "monthly",
+        "monthlySubscriptionPrice": 30,
+        "annualSubscriptionPrice": 300,
+        "signupFee": 20,
+        "annualRecurringFees": 0
+      },
+      "expected": {
+        "itemName": "Software or Equipment",
+        "horizonYears": 3,
+        "activeBillingCycle": "monthly",
+        "totalBuyCost": 670,
+        "annualizedBuyCost": 223,
+        "buyCost3Year": 670,
+        "buyCost5Year": 770,
+        "netCapitalCostAfterResale": 520,
+        "totalSubscribeCost": 1100,
+        "annualizedSubscribeCost": 367,
+        "subscribeCost3Year": 1100,
+        "subscribeCost5Year": 1820,
+        "effectiveAnnualSubscriptionRate": 360,
+        "costDifference": 430,
+        "lowerCostOption": "buy",
+        "breakEvenMonths": 19,
+        "breakEvenDescription": "Approximately 19 months (1.6 years) to recover the upfront purchase premium through avoided subscription fees.",
+        "yearlyBreakdown": [
+          {
+            "year": 1,
+            "cumulativeBuyCost": 590,
+            "cumulativeSubscribeCost": 380,
+            "difference": 210
+          },
+          {
+            "year": 2,
+            "cumulativeBuyCost": 660,
+            "cumulativeSubscribeCost": 740,
+            "difference": -80
+          },
+          {
+            "year": 3,
+            "cumulativeBuyCost": 670,
+            "cumulativeSubscribeCost": 1100,
+            "difference": -430
+          }
+        ],
+        "summaryText": "Under these assumptions, the estimated purchase cost is $430 lower over 3 years ($670 vs. $1,100). The one-time purchase requires higher upfront capital ($640 vs. $20), but avoids $1,080 in cumulative subscription fees. Approximately 19 months (1.6 years) to recover the upfront purchase premium through avoided subscription fees."
+      }
+    },
+    {
+      "id": "annual-billing-cycle",
+      "description": "Annual subscription billing cycle with discounted yearly rate",
+      "input": {
+        "itemName": "Software or Equipment",
+        "horizonYears": 4,
+        "purchasePrice": 600,
+        "setupOrActivationCost": 40,
+        "annualMaintenanceCost": 50,
+        "estimatedResaleValue": 120,
+        "billingCycle": "annual",
+        "monthlySubscriptionPrice": 30,
+        "annualSubscriptionPrice": 300,
+        "signupFee": 20,
+        "annualRecurringFees": 0
+      },
+      "expected": {
+        "itemName": "Software or Equipment",
+        "horizonYears": 4,
+        "activeBillingCycle": "annual",
+        "totalBuyCost": 720,
+        "annualizedBuyCost": 180,
+        "buyCost3Year": 670,
+        "buyCost5Year": 770,
+        "netCapitalCostAfterResale": 520,
+        "totalSubscribeCost": 1220,
+        "annualizedSubscribeCost": 305,
+        "subscribeCost3Year": 920,
+        "subscribeCost5Year": 1520,
+        "effectiveAnnualSubscriptionRate": 300,
+        "costDifference": 500,
+        "lowerCostOption": "buy",
+        "breakEvenMonths": 24,
+        "breakEvenDescription": "Approximately 24 months (2.0 years) to recover the upfront purchase premium through avoided subscription fees.",
+        "yearlyBreakdown": [
+          {
+            "year": 1,
+            "cumulativeBuyCost": 585,
+            "cumulativeSubscribeCost": 320,
+            "difference": 265
+          },
+          {
+            "year": 2,
+            "cumulativeBuyCost": 650,
+            "cumulativeSubscribeCost": 620,
+            "difference": 30
+          },
+          {
+            "year": 3,
+            "cumulativeBuyCost": 715,
+            "cumulativeSubscribeCost": 920,
+            "difference": -205
+          },
+          {
+            "year": 4,
+            "cumulativeBuyCost": 720,
+            "cumulativeSubscribeCost": 1220,
+            "difference": -500
+          }
+        ],
+        "summaryText": "Under these assumptions, the estimated purchase cost is $500 lower over 4 years ($720 vs. $1,220). The one-time purchase requires higher upfront capital ($640 vs. $20), but avoids $1,200 in cumulative subscription fees. Approximately 24 months (2.0 years) to recover the upfront purchase premium through avoided subscription fees."
+      }
+    },
+    {
+      "id": "direction-flip-subscribe-wins",
+      "description": "Expensive purchase + high maintenance vs low subscription -> Subscribe lower cost",
+      "input": {
+        "itemName": "Cloud CAD Suite",
+        "horizonYears": 3,
+        "purchasePrice": 2800,
+        "setupOrActivationCost": 200,
+        "annualMaintenanceCost": 300,
+        "estimatedResaleValue": 0,
+        "billingCycle": "monthly",
+        "monthlySubscriptionPrice": 25,
+        "annualSubscriptionPrice": 250,
+        "signupFee": 0,
+        "annualRecurringFees": 0
+      },
+      "expected": {
+        "itemName": "Cloud CAD Suite",
+        "horizonYears": 3,
+        "activeBillingCycle": "monthly",
+        "totalBuyCost": 3900,
+        "annualizedBuyCost": 1300,
+        "buyCost3Year": 3900,
+        "buyCost5Year": 4500,
+        "netCapitalCostAfterResale": 3000,
+        "totalSubscribeCost": 900,
+        "annualizedSubscribeCost": 300,
+        "subscribeCost3Year": 900,
+        "subscribeCost5Year": 1500,
+        "effectiveAnnualSubscriptionRate": 300,
+        "costDifference": 3000,
+        "lowerCostOption": "subscribe",
+        "breakEvenMonths": null,
+        "breakEvenDescription": "No break-even point exists: recurring ownership maintenance equals or exceeds subscription fees.",
+        "yearlyBreakdown": [
+          {
+            "year": 1,
+            "cumulativeBuyCost": 3300,
+            "cumulativeSubscribeCost": 300,
+            "difference": 3000
+          },
+          {
+            "year": 2,
+            "cumulativeBuyCost": 3600,
+            "cumulativeSubscribeCost": 600,
+            "difference": 3000
+          },
+          {
+            "year": 3,
+            "cumulativeBuyCost": 3900,
+            "cumulativeSubscribeCost": 900,
+            "difference": 3000
+          }
+        ],
+        "summaryText": "Under these assumptions, the estimated subscription cost is $3,000 lower over 3 years ($900 vs. $3,900). Subscribing preserves upfront capital and costs an estimated $300 per year compared to $1,300 per year for purchase and maintenance."
+      }
+    },
+    {
+      "id": "zero-fees-and-resale",
+      "description": "Valid zeros: $0 setup, $0 maintenance, $0 resale, $0 signup fee, $0 recurring add-ons",
+      "input": {
+        "itemName": "Zero Overhead App",
+        "horizonYears": 3,
+        "purchasePrice": 360,
+        "setupOrActivationCost": 0,
+        "annualMaintenanceCost": 0,
+        "estimatedResaleValue": 0,
+        "billingCycle": "monthly",
+        "monthlySubscriptionPrice": 15,
+        "annualSubscriptionPrice": 150,
+        "signupFee": 0,
+        "annualRecurringFees": 0
+      },
+      "expected": {
+        "itemName": "Zero Overhead App",
+        "horizonYears": 3,
+        "activeBillingCycle": "monthly",
+        "totalBuyCost": 360,
+        "annualizedBuyCost": 120,
+        "buyCost3Year": 360,
+        "buyCost5Year": 360,
+        "netCapitalCostAfterResale": 360,
+        "totalSubscribeCost": 540,
+        "annualizedSubscribeCost": 180,
+        "subscribeCost3Year": 540,
+        "subscribeCost5Year": 900,
+        "effectiveAnnualSubscriptionRate": 180,
+        "costDifference": 180,
+        "lowerCostOption": "buy",
+        "breakEvenMonths": 24,
+        "breakEvenDescription": "Approximately 24 months (2.0 years) to recover the upfront purchase premium through avoided subscription fees.",
+        "yearlyBreakdown": [
+          {
+            "year": 1,
+            "cumulativeBuyCost": 360,
+            "cumulativeSubscribeCost": 180,
+            "difference": 180
+          },
+          {
+            "year": 2,
+            "cumulativeBuyCost": 360,
+            "cumulativeSubscribeCost": 360,
+            "difference": 0
+          },
+          {
+            "year": 3,
+            "cumulativeBuyCost": 360,
+            "cumulativeSubscribeCost": 540,
+            "difference": -180
+          }
+        ],
+        "summaryText": "Under these assumptions, the estimated purchase cost is $180 lower over 3 years ($360 vs. $540). The one-time purchase requires higher upfront capital ($360 vs. $0), but avoids $540 in cumulative subscription fees. Approximately 24 months (2.0 years) to recover the upfront purchase premium through avoided subscription fees."
+      }
+    },
+    {
+      "id": "zero-subscription-no-breakeven",
+      "description": "$0 subscription price yielding null breakEvenMonths",
+      "input": {
+        "itemName": "Software or Equipment",
+        "horizonYears": 3,
+        "purchasePrice": 600,
+        "setupOrActivationCost": 40,
+        "annualMaintenanceCost": 50,
+        "estimatedResaleValue": 120,
+        "billingCycle": "monthly",
+        "monthlySubscriptionPrice": 0,
+        "annualSubscriptionPrice": 0,
+        "signupFee": 0,
+        "annualRecurringFees": 0
+      },
+      "expected": {
+        "itemName": "Software or Equipment",
+        "horizonYears": 3,
+        "activeBillingCycle": "monthly",
+        "totalBuyCost": 670,
+        "annualizedBuyCost": 223,
+        "buyCost3Year": 670,
+        "buyCost5Year": 770,
+        "netCapitalCostAfterResale": 520,
+        "totalSubscribeCost": 0,
+        "annualizedSubscribeCost": 0,
+        "subscribeCost3Year": 0,
+        "subscribeCost5Year": 0,
+        "effectiveAnnualSubscriptionRate": 0,
+        "costDifference": 670,
+        "lowerCostOption": "subscribe",
+        "breakEvenMonths": null,
+        "breakEvenDescription": "No break-even point exists: recurring ownership maintenance equals or exceeds subscription fees.",
+        "yearlyBreakdown": [
+          {
+            "year": 1,
+            "cumulativeBuyCost": 590,
+            "cumulativeSubscribeCost": 0,
+            "difference": 590
+          },
+          {
+            "year": 2,
+            "cumulativeBuyCost": 660,
+            "cumulativeSubscribeCost": 0,
+            "difference": 660
+          },
+          {
+            "year": 3,
+            "cumulativeBuyCost": 670,
+            "cumulativeSubscribeCost": 0,
+            "difference": 670
+          }
+        ],
+        "summaryText": "Under these assumptions, the estimated subscription cost is $670 lower over 3 years ($0 vs. $670). Subscribing preserves upfront capital and costs an estimated $0 per year compared to $223 per year for purchase and maintenance."
+      }
+    },
+    {
+      "id": "immediate-breakeven",
+      "description": "Purchase upfront is lower than signup fee -> 0-month immediate break-even",
+      "input": {
+        "itemName": "Immediate Breakeven Hardware",
+        "horizonYears": 2,
+        "purchasePrice": 50,
+        "setupOrActivationCost": 0,
+        "annualMaintenanceCost": 0,
+        "estimatedResaleValue": 0,
+        "billingCycle": "monthly",
+        "monthlySubscriptionPrice": 20,
+        "annualSubscriptionPrice": 200,
+        "signupFee": 100,
+        "annualRecurringFees": 0
+      },
+      "expected": {
+        "itemName": "Immediate Breakeven Hardware",
+        "horizonYears": 2,
+        "activeBillingCycle": "monthly",
+        "totalBuyCost": 50,
+        "annualizedBuyCost": 25,
+        "buyCost3Year": 50,
+        "buyCost5Year": 50,
+        "netCapitalCostAfterResale": 50,
+        "totalSubscribeCost": 580,
+        "annualizedSubscribeCost": 290,
+        "subscribeCost3Year": 820,
+        "subscribeCost5Year": 1300,
+        "effectiveAnnualSubscriptionRate": 240,
+        "costDifference": 530,
+        "lowerCostOption": "buy",
+        "breakEvenMonths": 0,
+        "breakEvenDescription": "Immediate break-even (purchase costs less upfront and equal or less to maintain).",
+        "yearlyBreakdown": [
+          {
+            "year": 1,
+            "cumulativeBuyCost": 50,
+            "cumulativeSubscribeCost": 340,
+            "difference": -290
+          },
+          {
+            "year": 2,
+            "cumulativeBuyCost": 50,
+            "cumulativeSubscribeCost": 580,
+            "difference": -530
+          },
+          {
+            "year": 3,
+            "cumulativeBuyCost": 50,
+            "cumulativeSubscribeCost": 820,
+            "difference": -770
+          }
+        ],
+        "summaryText": "Under these assumptions, the estimated purchase cost is $530 lower over 2 years ($50 vs. $580). The one-time purchase requires higher upfront capital ($50 vs. $100), but avoids $480 in cumulative subscription fees. Immediate break-even (purchase costs less upfront and equal or less to maintain)."
+      }
+    },
+    {
+      "id": "equal-cost",
+      "description": "Exact tie where totalBuyCost equals totalSubscribeCost",
+      "input": {
+        "itemName": "Equal Software",
+        "horizonYears": 2,
+        "purchasePrice": 240,
+        "setupOrActivationCost": 0,
+        "annualMaintenanceCost": 0,
+        "estimatedResaleValue": 0,
+        "billingCycle": "monthly",
+        "monthlySubscriptionPrice": 10,
+        "annualSubscriptionPrice": 120,
+        "signupFee": 0,
+        "annualRecurringFees": 0
+      },
+      "expected": {
+        "itemName": "Equal Software",
+        "horizonYears": 2,
+        "activeBillingCycle": "monthly",
+        "totalBuyCost": 240,
+        "annualizedBuyCost": 120,
+        "buyCost3Year": 240,
+        "buyCost5Year": 240,
+        "netCapitalCostAfterResale": 240,
+        "totalSubscribeCost": 240,
+        "annualizedSubscribeCost": 120,
+        "subscribeCost3Year": 360,
+        "subscribeCost5Year": 600,
+        "effectiveAnnualSubscriptionRate": 120,
+        "costDifference": 0,
+        "lowerCostOption": "equal",
+        "breakEvenMonths": 24,
+        "breakEvenDescription": "Approximately 24 months (2.0 years) to recover the upfront purchase premium through avoided subscription fees.",
+        "yearlyBreakdown": [
+          {
+            "year": 1,
+            "cumulativeBuyCost": 240,
+            "cumulativeSubscribeCost": 120,
+            "difference": 120
+          },
+          {
+            "year": 2,
+            "cumulativeBuyCost": 240,
+            "cumulativeSubscribeCost": 240,
+            "difference": 0
+          },
+          {
+            "year": 3,
+            "cumulativeBuyCost": 240,
+            "cumulativeSubscribeCost": 360,
+            "difference": -120
+          }
+        ],
+        "summaryText": "Under these assumptions, both options result in identical estimated total costs of $240 over 2 years. The primary trade-off is conserving upfront capital via a subscription versus retaining physical ownership and residual value through a purchase."
+      }
+    }
+  ]
+}

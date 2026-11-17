@@ -188,6 +188,7 @@ const faqList: FAQItem[] = [
         </div>
         <span id="horizon-help" class="field-help">Time period over which total ownership costs and ending equity are evaluated.</span>
       </div>
+      <span class="validation-error" id="err-horizon-years" role="alert"></span>
     </div>
 
     <!-- 2 Column Options Grid -->
@@ -678,9 +679,11 @@ const faqList: FAQItem[] = [
 <script>
   import {
     calculateNewVsUsed,
+    validateNewVsUsedInput,
     NEW_VS_USED_DEFAULTS,
     type NewVsUsedInput,
   } from '../../lib/decisions/newVsUsed';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function initNewVsUsed() {
     const horizonInput = document.getElementById('input-horizon-years') as HTMLInputElement;
@@ -705,34 +708,70 @@ const faqList: FAQItem[] = [
     const usedOpInput = document.getElementById('input-used-op') as HTMLInputElement;
     const usedResaleInput = document.getElementById('input-used-resale') as HTMLInputElement;
 
+    const errorMap: Record<string, string> = {
+      horizonYears: 'err-horizon-years',
+      newPurchasePrice: 'err-new-price',
+      newDownPayment: 'err-new-down',
+      newFinancingApr: 'err-new-apr',
+      newLoanTermMonths: 'err-new-term',
+      newAnnualInsurance: 'err-new-ins',
+      newAnnualMaintenance: 'err-new-maint',
+      newAnnualOperatingCost: 'err-new-op',
+      newResaleValue: 'err-new-resale',
+      usedPurchasePrice: 'err-used-price',
+      usedDownPayment: 'err-used-down',
+      usedFinancingApr: 'err-used-apr',
+      usedLoanTermMonths: 'err-used-term',
+      usedAnnualInsurance: 'err-used-ins',
+      usedAnnualMaintenance: 'err-used-maint',
+      usedAnnualOperatingCost: 'err-used-op',
+      usedResaleValue: 'err-used-resale',
+    };
+
+    function clearErrors() {
+      document.querySelectorAll('.validation-error').forEach((el) => {
+        el.textContent = '';
+      });
+    }
+
     function recalculate() {
-      const horizonYears = Math.max(0.5, Math.min(20, Number(horizonInput?.value) || 5));
+      clearErrors();
 
       const input: NewVsUsedInput = {
-        horizonYears,
+        horizonYears: parseNumericFieldOrNaN(horizonInput?.value),
         newOption: {
           label: 'New Vehicle / Asset',
-          purchasePrice: Math.max(0, Number(newPriceInput?.value) || 0),
-          downPayment: Math.max(0, Number(newDownInput?.value) || 0),
-          financingApr: Math.max(0, Number(newAprInput?.value) || 0),
-          loanTermMonths: Math.max(1, Number(newTermInput?.value) || 60),
-          annualInsurance: Math.max(0, Number(newInsInput?.value) || 0),
-          annualMaintenance: Math.max(0, Number(newMaintInput?.value) || 0),
-          annualOperatingCost: Math.max(0, Number(newOpInput?.value) || 0),
-          expectedResaleValue: Math.max(0, Number(newResaleInput?.value) || 0),
+          purchasePrice: parseNumericFieldOrNaN(newPriceInput?.value),
+          downPayment: parseNumericFieldOrNaN(newDownInput?.value),
+          financingApr: parseNumericFieldOrNaN(newAprInput?.value),
+          loanTermMonths: parseNumericFieldOrNaN(newTermInput?.value),
+          annualInsurance: parseNumericFieldOrNaN(newInsInput?.value),
+          annualMaintenance: parseNumericFieldOrNaN(newMaintInput?.value),
+          annualOperatingCost: parseNumericFieldOrNaN(newOpInput?.value),
+          expectedResaleValue: parseNumericFieldOrNaN(newResaleInput?.value),
         },
         usedOption: {
           label: 'Used Vehicle / Asset',
-          purchasePrice: Math.max(0, Number(usedPriceInput?.value) || 0),
-          downPayment: Math.max(0, Number(usedDownInput?.value) || 0),
-          financingApr: Math.max(0, Number(usedAprInput?.value) || 0),
-          loanTermMonths: Math.max(1, Number(usedTermInput?.value) || 48),
-          annualInsurance: Math.max(0, Number(usedInsInput?.value) || 0),
-          annualMaintenance: Math.max(0, Number(usedMaintInput?.value) || 0),
-          annualOperatingCost: Math.max(0, Number(usedOpInput?.value) || 0),
-          expectedResaleValue: Math.max(0, Number(usedResaleInput?.value) || 0),
+          purchasePrice: parseNumericFieldOrNaN(usedPriceInput?.value),
+          downPayment: parseNumericFieldOrNaN(usedDownInput?.value),
+          financingApr: parseNumericFieldOrNaN(usedAprInput?.value),
+          loanTermMonths: parseNumericFieldOrNaN(usedTermInput?.value),
+          annualInsurance: parseNumericFieldOrNaN(usedInsInput?.value),
+          annualMaintenance: parseNumericFieldOrNaN(usedMaintInput?.value),
+          annualOperatingCost: parseNumericFieldOrNaN(usedOpInput?.value),
+          expectedResaleValue: parseNumericFieldOrNaN(usedResaleInput?.value),
         },
       };
+
+      const validation = validateNewVsUsedInput(input);
+      if (!validation.valid) {
+        for (const [field, msg] of Object.entries(validation.errors)) {
+          const id = errorMap[field];
+          const errorEl = id ? document.getElementById(id) : null;
+          if (errorEl) errorEl.textContent = msg;
+        }
+        return;
+      }
 
       const result = calculateNewVsUsed(input);
 

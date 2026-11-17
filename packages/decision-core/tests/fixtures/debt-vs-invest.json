@@ -1,0 +1,619 @@
+{
+  "calculator": "debt-vs-invest",
+  "capturedFrom": "src/lib/decisions/debtVsInvest.ts",
+  "locale": "en-US",
+  "tolerancePolicy": {
+    "integerFields": 0,
+    "decimalFields": 0.000001
+  },
+  "scenarios": [
+    {
+      "id": "defaults",
+      "description": "Default Debt vs Invest baseline parameters",
+      "input": {
+        "extraMonthlyCash": 500,
+        "debtBalance": 20000,
+        "debtInterestRatePercent": 18,
+        "debtMinimumMonthlyPayment": 500,
+        "expectedInvestmentReturnPercent": 8.5,
+        "investmentTaxRatePercent": 15,
+        "horizonYears": 5
+      },
+      "expected": {
+        "horizonYears": 5,
+        "extraMonthlyCash": 500,
+        "optionADebtFreeMonth": 24,
+        "optionATotalInterestPaid": 3957,
+        "optionAFinalDebtBalance": 0,
+        "optionAFinalPortfolioValue": 40119,
+        "optionANetFinancialPosition": 40119,
+        "optionBTotalInterestPaid": 10757,
+        "optionBFinalDebtBalance": 757,
+        "optionBFinalPortfolioValue": 36006,
+        "optionBNetFinancialPosition": 35249,
+        "netPositionDifference": 4870,
+        "higherNetOption": "debt_first",
+        "fixedInterestRate": 18,
+        "contractualInterestRate": 18,
+        "guaranteedInterestRate": 18,
+        "breakdown": [
+          {
+            "year": 1,
+            "debtFirstRemainingBalance": 10871,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -10871,
+            "investFirstRemainingBalance": 17392,
+            "investFirstInvestedBalance": 6203,
+            "investFirstNetWorth": -11189,
+            "differenceInNetWorth": 318
+          },
+          {
+            "year": 2,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 43,
+            "debtFirstNetWorth": 43,
+            "investFirstRemainingBalance": 14273,
+            "investFirstInvestedBalance": 12869,
+            "investFirstNetWorth": -1405,
+            "differenceInNetWorth": 1448
+          },
+          {
+            "year": 3,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 12452,
+            "debtFirstNetWorth": 12452,
+            "investFirstRemainingBalance": 10545,
+            "investFirstInvestedBalance": 20033,
+            "investFirstNetWorth": 9488,
+            "differenceInNetWorth": 2964
+          },
+          {
+            "year": 4,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 25788,
+            "debtFirstNetWorth": 25788,
+            "investFirstRemainingBalance": 6087,
+            "investFirstInvestedBalance": 27732,
+            "investFirstNetWorth": 21645,
+            "differenceInNetWorth": 4143
+          },
+          {
+            "year": 5,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 40119,
+            "debtFirstNetWorth": 40119,
+            "investFirstRemainingBalance": 757,
+            "investFirstInvestedBalance": 36006,
+            "investFirstNetWorth": 35249,
+            "differenceInNetWorth": 4871
+          }
+        ],
+        "summaryText": "Over 5 years, allocating surplus cash to eliminate debt first yields an estimated net financial position that is $4,870 higher than investing simultaneously ($40,119 vs. $35,249). Eliminating the 18% contractual interest rate provides interest charges avoided of $6,801 without exposure to market volatility, freeing up monthly cash flow by month 24."
+      }
+    },
+    {
+      "id": "direction-flip-invest-wins",
+      "description": "Low 3.0% debt APR vs 9.5% investment return where investing yields higher net position",
+      "input": {
+        "extraMonthlyCash": 600,
+        "debtBalance": 30000,
+        "debtInterestRatePercent": 3,
+        "debtMinimumMonthlyPayment": 550,
+        "expectedInvestmentReturnPercent": 9.5,
+        "investmentTaxRatePercent": 15,
+        "horizonYears": 7
+      },
+      "expected": {
+        "horizonYears": 7,
+        "extraMonthlyCash": 600,
+        "optionADebtFreeMonth": 28,
+        "optionATotalInterestPaid": 1062,
+        "optionAFinalDebtBalance": 0,
+        "optionAFinalPortfolioValue": 79556,
+        "optionANetFinancialPosition": 79556,
+        "optionBTotalInterestPaid": 2293,
+        "optionBFinalDebtBalance": 0,
+        "optionBFinalPortfolioValue": 67458,
+        "optionBNetFinancialPosition": 67458,
+        "netPositionDifference": 12098,
+        "higherNetOption": "debt_first",
+        "fixedInterestRate": 3,
+        "contractualInterestRate": 3,
+        "guaranteedInterestRate": 3,
+        "breakdown": [
+          {
+            "year": 1,
+            "debtFirstRemainingBalance": 16921,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -16921,
+            "investFirstRemainingBalance": 24221,
+            "investFirstInvestedBalance": 7473,
+            "investFirstNetWorth": -16748,
+            "differenceInNetWorth": -173
+          },
+          {
+            "year": 2,
+            "debtFirstRemainingBalance": 3444,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -3444,
+            "investFirstRemainingBalance": 18266,
+            "investFirstInvestedBalance": 15571,
+            "investFirstNetWorth": -2695,
+            "differenceInNetWorth": -750
+          },
+          {
+            "year": 3,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 10621,
+            "debtFirstNetWorth": 10621,
+            "investFirstRemainingBalance": 12130,
+            "investFirstInvestedBalance": 24349,
+            "investFirstNetWorth": 12219,
+            "differenceInNetWorth": -1598
+          },
+          {
+            "year": 4,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 25833,
+            "debtFirstNetWorth": 25833,
+            "investFirstRemainingBalance": 5808,
+            "investFirstInvestedBalance": 33862,
+            "investFirstNetWorth": 28054,
+            "differenceInNetWorth": -2221
+          },
+          {
+            "year": 5,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 42320,
+            "debtFirstNetWorth": 42320,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 44172,
+            "investFirstNetWorth": 44172,
+            "differenceInNetWorth": -1852
+          },
+          {
+            "year": 6,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 60190,
+            "debtFirstNetWorth": 60190,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 55347,
+            "investFirstNetWorth": 55347,
+            "differenceInNetWorth": 4843
+          },
+          {
+            "year": 7,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 79556,
+            "debtFirstNetWorth": 79556,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 67458,
+            "investFirstNetWorth": 67458,
+            "differenceInNetWorth": 12098
+          }
+        ],
+        "summaryText": "Over 7 years, allocating surplus cash to eliminate debt first yields an estimated net financial position that is $12,098 higher than investing simultaneously ($79,556 vs. $67,458). Eliminating the 3% contractual interest rate provides interest charges avoided of $1,231 without exposure to market volatility, freeing up monthly cash flow by month 28."
+      }
+    },
+    {
+      "id": "direction-flip-invest-wins-active-loan",
+      "description": "3.0% debt APR vs 10% return over 5yr while loan remains active -> invest_first wins",
+      "input": {
+        "extraMonthlyCash": 600,
+        "debtBalance": 50000,
+        "debtInterestRatePercent": 3,
+        "debtMinimumMonthlyPayment": 300,
+        "expectedInvestmentReturnPercent": 10,
+        "investmentTaxRatePercent": 15,
+        "horizonYears": 5
+      },
+      "expected": {
+        "horizonYears": 5,
+        "extraMonthlyCash": 600,
+        "optionADebtFreeMonth": 60,
+        "optionATotalInterestPaid": 3899,
+        "optionAFinalDebtBalance": 0,
+        "optionAFinalPortfolioValue": 101,
+        "optionANetFinancialPosition": 101,
+        "optionBTotalInterestPaid": 6687,
+        "optionBFinalDebtBalance": 38687,
+        "optionBFinalPortfolioValue": 44665,
+        "optionBNetFinancialPosition": 5979,
+        "netPositionDifference": 5878,
+        "higherNetOption": "invest_first",
+        "fixedInterestRate": 3,
+        "contractualInterestRate": 3,
+        "guaranteedInterestRate": 3,
+        "breakdown": [
+          {
+            "year": 1,
+            "debtFirstRemainingBalance": 40571,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -40571,
+            "investFirstRemainingBalance": 47871,
+            "investFirstInvestedBalance": 7487,
+            "investFirstNetWorth": -40384,
+            "differenceInNetWorth": -187
+          },
+          {
+            "year": 2,
+            "debtFirstRemainingBalance": 30855,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -30855,
+            "investFirstRemainingBalance": 45677,
+            "investFirstInvestedBalance": 15636,
+            "investFirstNetWorth": -30041,
+            "differenceInNetWorth": -815
+          },
+          {
+            "year": 3,
+            "debtFirstRemainingBalance": 20844,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -20844,
+            "investFirstRemainingBalance": 43416,
+            "investFirstInvestedBalance": 24506,
+            "investFirstNetWorth": -18911,
+            "differenceInNetWorth": -1933
+          },
+          {
+            "year": 4,
+            "debtFirstRemainingBalance": 10528,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -10528,
+            "investFirstRemainingBalance": 41087,
+            "investFirstInvestedBalance": 34159,
+            "investFirstNetWorth": -6928,
+            "differenceInNetWorth": -3600
+          },
+          {
+            "year": 5,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 101,
+            "debtFirstNetWorth": 101,
+            "investFirstRemainingBalance": 38687,
+            "investFirstInvestedBalance": 44665,
+            "investFirstNetWorth": 5979,
+            "differenceInNetWorth": -5877
+          }
+        ],
+        "summaryText": "Over 5 years, investing surplus cash while maintaining minimum debt payments produces an estimated net financial position that is $5,878 higher ($5,979 vs. $101). Because the prospective after-tax investment return (8.5%) exceeds the net borrowing cost of the debt, modeled investment compounding outpaces contractual interest charges over this horizon. However, actual market returns remain uncertain."
+      }
+    },
+    {
+      "id": "zero-apr-zero-extra-zero-tax",
+      "description": "Valid zeros: 0% APR debt, $0 extra cash, 0% tax rate, 0% return",
+      "input": {
+        "extraMonthlyCash": 0,
+        "debtBalance": 12000,
+        "debtInterestRatePercent": 0,
+        "debtMinimumMonthlyPayment": 300,
+        "expectedInvestmentReturnPercent": 0,
+        "investmentTaxRatePercent": 0,
+        "horizonYears": 3
+      },
+      "expected": {
+        "horizonYears": 3,
+        "extraMonthlyCash": 0,
+        "optionADebtFreeMonth": 36,
+        "optionATotalInterestPaid": 0,
+        "optionAFinalDebtBalance": 1200,
+        "optionAFinalPortfolioValue": 0,
+        "optionANetFinancialPosition": -1200,
+        "optionBTotalInterestPaid": 0,
+        "optionBFinalDebtBalance": 1200,
+        "optionBFinalPortfolioValue": 0,
+        "optionBNetFinancialPosition": -1200,
+        "netPositionDifference": 0,
+        "higherNetOption": "equal",
+        "fixedInterestRate": 0,
+        "contractualInterestRate": 0,
+        "guaranteedInterestRate": 0,
+        "breakdown": [
+          {
+            "year": 1,
+            "debtFirstRemainingBalance": 8400,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -8400,
+            "investFirstRemainingBalance": 8400,
+            "investFirstInvestedBalance": 0,
+            "investFirstNetWorth": -8400,
+            "differenceInNetWorth": 0
+          },
+          {
+            "year": 2,
+            "debtFirstRemainingBalance": 4800,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -4800,
+            "investFirstRemainingBalance": 4800,
+            "investFirstInvestedBalance": 0,
+            "investFirstNetWorth": -4800,
+            "differenceInNetWorth": 0
+          },
+          {
+            "year": 3,
+            "debtFirstRemainingBalance": 1200,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -1200,
+            "investFirstRemainingBalance": 1200,
+            "investFirstInvestedBalance": 0,
+            "investFirstNetWorth": -1200,
+            "differenceInNetWorth": 0
+          }
+        ],
+        "summaryText": "Over 3 years, both debt acceleration and concurrent investing result in comparable modeled net financial positions ($-1,200)."
+      }
+    },
+    {
+      "id": "negative-net-financial-position",
+      "description": "High debt balance over short 1-year horizon yielding negative net financial positions",
+      "input": {
+        "extraMonthlyCash": 200,
+        "debtBalance": 60000,
+        "debtInterestRatePercent": 22,
+        "debtMinimumMonthlyPayment": 1500,
+        "expectedInvestmentReturnPercent": 7,
+        "investmentTaxRatePercent": 15,
+        "horizonYears": 1
+      },
+      "expected": {
+        "horizonYears": 1,
+        "extraMonthlyCash": 200,
+        "optionADebtFreeMonth": 12,
+        "optionATotalInterestPaid": 12428,
+        "optionAFinalDebtBalance": 52028,
+        "optionAFinalPortfolioValue": 0,
+        "optionANetFinancialPosition": -52028,
+        "optionBTotalInterestPaid": 12685,
+        "optionBFinalDebtBalance": 54685,
+        "optionBFinalPortfolioValue": 2467,
+        "optionBNetFinancialPosition": -52219,
+        "netPositionDifference": 191,
+        "higherNetOption": "debt_first",
+        "fixedInterestRate": 22,
+        "contractualInterestRate": 22,
+        "guaranteedInterestRate": 22,
+        "breakdown": [
+          {
+            "year": 1,
+            "debtFirstRemainingBalance": 52028,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -52028,
+            "investFirstRemainingBalance": 54685,
+            "investFirstInvestedBalance": 2467,
+            "investFirstNetWorth": -52219,
+            "differenceInNetWorth": 191
+          }
+        ],
+        "summaryText": "Over 1 years, allocating surplus cash to eliminate debt first yields an estimated net financial position that is $191 higher than investing simultaneously ($-52,028 vs. $-52,219). Eliminating the 22% contractual interest rate provides interest charges avoided of $257 without exposure to market volatility, freeing up monthly cash flow by month 12."
+      }
+    },
+    {
+      "id": "high-debt-long-horizon",
+      "description": "High-balance $85k debt over 15-year simulation",
+      "input": {
+        "extraMonthlyCash": 1000,
+        "debtBalance": 85000,
+        "debtInterestRatePercent": 9.5,
+        "debtMinimumMonthlyPayment": 1200,
+        "expectedInvestmentReturnPercent": 8,
+        "investmentTaxRatePercent": 20,
+        "horizonYears": 15
+      },
+      "expected": {
+        "horizonYears": 15,
+        "extraMonthlyCash": 1000,
+        "optionADebtFreeMonth": 47,
+        "optionATotalInterestPaid": 16862,
+        "optionAFinalDebtBalance": 0,
+        "optionAFinalPortfolioValue": 427504,
+        "optionANetFinancialPosition": 427504,
+        "optionBTotalInterestPaid": 40201,
+        "optionBFinalDebtBalance": 0,
+        "optionBFinalPortfolioValue": 300946,
+        "optionBNetFinancialPosition": 300946,
+        "netPositionDifference": 126558,
+        "higherNetOption": "debt_first",
+        "fixedInterestRate": 9.5,
+        "contractualInterestRate": 9.5,
+        "guaranteedInterestRate": 9.5,
+        "breakdown": [
+          {
+            "year": 1,
+            "debtFirstRemainingBalance": 65856,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -65856,
+            "investFirstRemainingBalance": 78392,
+            "investFirstInvestedBalance": 12358,
+            "investFirstNetWorth": -66034,
+            "differenceInNetWorth": 178
+          },
+          {
+            "year": 2,
+            "debtFirstRemainingBalance": 44811,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -44811,
+            "investFirstRemainingBalance": 71129,
+            "investFirstInvestedBalance": 25531,
+            "investFirstNetWorth": -45597,
+            "differenceInNetWorth": 786
+          },
+          {
+            "year": 3,
+            "debtFirstRemainingBalance": 21678,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": -21678,
+            "investFirstRemainingBalance": 63144,
+            "investFirstInvestedBalance": 39572,
+            "investFirstNetWorth": -23572,
+            "differenceInNetWorth": 1893
+          },
+          {
+            "year": 4,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 3747,
+            "debtFirstNetWorth": 3747,
+            "investFirstRemainingBalance": 54367,
+            "investFirstInvestedBalance": 54539,
+            "investFirstNetWorth": 172,
+            "differenceInNetWorth": 3575
+          },
+          {
+            "year": 5,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 31182,
+            "debtFirstNetWorth": 31182,
+            "investFirstRemainingBalance": 44719,
+            "investFirstInvestedBalance": 70492,
+            "investFirstNetWorth": 25773,
+            "differenceInNetWorth": 5409
+          },
+          {
+            "year": 6,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 60425,
+            "debtFirstNetWorth": 60425,
+            "investFirstRemainingBalance": 34114,
+            "investFirstInvestedBalance": 87497,
+            "investFirstNetWorth": 53383,
+            "differenceInNetWorth": 7042
+          },
+          {
+            "year": 7,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 91596,
+            "debtFirstNetWorth": 91596,
+            "investFirstRemainingBalance": 22455,
+            "investFirstInvestedBalance": 105622,
+            "investFirstNetWorth": 83166,
+            "differenceInNetWorth": 8430
+          },
+          {
+            "year": 8,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 124822,
+            "debtFirstNetWorth": 124822,
+            "investFirstRemainingBalance": 9640,
+            "investFirstInvestedBalance": 124942,
+            "investFirstNetWorth": 115302,
+            "differenceInNetWorth": 9520
+          },
+          {
+            "year": 9,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 160237,
+            "debtFirstNetWorth": 160237,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 145535,
+            "investFirstNetWorth": 145535,
+            "differenceInNetWorth": 14702
+          },
+          {
+            "year": 10,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 197987,
+            "debtFirstNetWorth": 197987,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 167486,
+            "investFirstNetWorth": 167486,
+            "differenceInNetWorth": 30501
+          },
+          {
+            "year": 11,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 238225,
+            "debtFirstNetWorth": 238225,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 190883,
+            "investFirstNetWorth": 190883,
+            "differenceInNetWorth": 47342
+          },
+          {
+            "year": 12,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 281115,
+            "debtFirstNetWorth": 281115,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 215823,
+            "investFirstNetWorth": 215823,
+            "differenceInNetWorth": 65292
+          },
+          {
+            "year": 13,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 326832,
+            "debtFirstNetWorth": 326832,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 242407,
+            "investFirstNetWorth": 242407,
+            "differenceInNetWorth": 84425
+          },
+          {
+            "year": 14,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 375562,
+            "debtFirstNetWorth": 375562,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 270742,
+            "investFirstNetWorth": 270742,
+            "differenceInNetWorth": 104820
+          },
+          {
+            "year": 15,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 427504,
+            "debtFirstNetWorth": 427504,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 300946,
+            "investFirstNetWorth": 300946,
+            "differenceInNetWorth": 126559
+          }
+        ],
+        "summaryText": "Over 15 years, allocating surplus cash to eliminate debt first yields an estimated net financial position that is $126,558 higher than investing simultaneously ($427,504 vs. $300,946). Eliminating the 9.5% contractual interest rate provides interest charges avoided of $23,339 without exposure to market volatility, freeing up monthly cash flow by month 47."
+      }
+    },
+    {
+      "id": "equal-net-position",
+      "description": "Exact tie where debt payoff and invest produce identical net financial positions",
+      "input": {
+        "extraMonthlyCash": 0,
+        "debtBalance": 12000,
+        "debtInterestRatePercent": 0,
+        "debtMinimumMonthlyPayment": 1000,
+        "expectedInvestmentReturnPercent": 0,
+        "investmentTaxRatePercent": 0,
+        "horizonYears": 1
+      },
+      "expected": {
+        "horizonYears": 1,
+        "extraMonthlyCash": 0,
+        "optionADebtFreeMonth": 12,
+        "optionATotalInterestPaid": 0,
+        "optionAFinalDebtBalance": 0,
+        "optionAFinalPortfolioValue": 0,
+        "optionANetFinancialPosition": 0,
+        "optionBTotalInterestPaid": 0,
+        "optionBFinalDebtBalance": 0,
+        "optionBFinalPortfolioValue": 0,
+        "optionBNetFinancialPosition": 0,
+        "netPositionDifference": 0,
+        "higherNetOption": "equal",
+        "fixedInterestRate": 0,
+        "contractualInterestRate": 0,
+        "guaranteedInterestRate": 0,
+        "breakdown": [
+          {
+            "year": 1,
+            "debtFirstRemainingBalance": 0,
+            "debtFirstInvestedBalance": 0,
+            "debtFirstNetWorth": 0,
+            "investFirstRemainingBalance": 0,
+            "investFirstInvestedBalance": 0,
+            "investFirstNetWorth": 0,
+            "differenceInNetWorth": 0
+          }
+        ],
+        "summaryText": "Over 1 years, both debt acceleration and concurrent investing result in comparable modeled net financial positions ($0)."
+      }
+    }
+  ]
+}

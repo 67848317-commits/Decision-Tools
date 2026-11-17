@@ -560,7 +560,7 @@ const faqList: FAQItem[] = [
               type="number"
               id="input-vehicle-cost-per-mile"
               value={JOB_OFFER_DEFAULTS_A.estimatedVehicleCostPerMile ?? 0.725}
-              min="0.10"
+              min="0"
               max="2.00"
               step="0.005"
               class="input-field"
@@ -770,25 +770,24 @@ const faqList: FAQItem[] = [
     JOB_OFFER_DEFAULTS_B,
     type JobOfferDetails,
   } from '../../lib/decisions/jobOffer';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function getJobOffersFromDOM(): { offerA: JobOfferDetails; offerB: JobOfferDetails } {
     const vehicleCostInput = document.getElementById('input-vehicle-cost-per-mile') as HTMLInputElement;
-    const vehicleCostPerMile = vehicleCostInput && !isNaN(parseFloat(vehicleCostInput.value))
-      ? parseFloat(vehicleCostInput.value)
-      : (JOB_OFFER_DEFAULTS_A.estimatedVehicleCostPerMile ?? 0.725);
+    const vehicleCostPerMile = parseNumericFieldOrNaN(vehicleCostInput?.value);
 
     const offerA: JobOfferDetails = {
       title: (document.getElementById('input-a-title') as HTMLInputElement)?.value || 'Offer A',
-      baseSalary: parseFloat((document.getElementById('input-a-salary') as HTMLInputElement)?.value) || 0,
-      annualBonus: parseFloat((document.getElementById('input-a-bonus') as HTMLInputElement)?.value) || 0,
-      employerMatchPercent: parseFloat((document.getElementById('input-a-match') as HTMLInputElement)?.value) || 0,
-      employeeContributionForMatchPercent: parseFloat((document.getElementById('input-a-match') as HTMLInputElement)?.value) || 0,
-      annualHealthInsuranceCost: parseFloat((document.getElementById('input-a-health') as HTMLInputElement)?.value) || 0,
-      paidVacationDays: parseFloat((document.getElementById('input-a-vacation') as HTMLInputElement)?.value) || 0,
-      commuteMilesOneWay: parseFloat((document.getElementById('input-a-distance') as HTMLInputElement)?.value) || 0,
-      commuteDaysPerWeek: parseFloat((document.getElementById('input-a-commute-days') as HTMLInputElement)?.value) || 0,
-      remoteDaysPerWeek: parseFloat((document.getElementById('input-a-remote-days') as HTMLInputElement)?.value) || 0,
-      otherCompensationAnnual: parseFloat((document.getElementById('input-a-other') as HTMLInputElement)?.value) || 0,
+      baseSalary: parseNumericFieldOrNaN((document.getElementById('input-a-salary') as HTMLInputElement)?.value),
+      annualBonus: parseNumericFieldOrNaN((document.getElementById('input-a-bonus') as HTMLInputElement)?.value),
+      employerMatchPercent: parseNumericFieldOrNaN((document.getElementById('input-a-match') as HTMLInputElement)?.value),
+      employeeContributionForMatchPercent: parseNumericFieldOrNaN((document.getElementById('input-a-match') as HTMLInputElement)?.value),
+      annualHealthInsuranceCost: parseNumericFieldOrNaN((document.getElementById('input-a-health') as HTMLInputElement)?.value),
+      paidVacationDays: parseNumericFieldOrNaN((document.getElementById('input-a-vacation') as HTMLInputElement)?.value),
+      commuteMilesOneWay: parseNumericFieldOrNaN((document.getElementById('input-a-distance') as HTMLInputElement)?.value),
+      commuteDaysPerWeek: parseNumericFieldOrNaN((document.getElementById('input-a-commute-days') as HTMLInputElement)?.value),
+      remoteDaysPerWeek: parseNumericFieldOrNaN((document.getElementById('input-a-remote-days') as HTMLInputElement)?.value),
+      otherCompensationAnnual: parseNumericFieldOrNaN((document.getElementById('input-a-other') as HTMLInputElement)?.value),
       estimatedVehicleCostPerMile: vehicleCostPerMile,
       averageCommuteSpeedMph: 35,
       annualWorkWeeks: 50,
@@ -796,16 +795,16 @@ const faqList: FAQItem[] = [
 
     const offerB: JobOfferDetails = {
       title: (document.getElementById('input-b-title') as HTMLInputElement)?.value || 'Offer B',
-      baseSalary: parseFloat((document.getElementById('input-b-salary') as HTMLInputElement)?.value) || 0,
-      annualBonus: parseFloat((document.getElementById('input-b-bonus') as HTMLInputElement)?.value) || 0,
-      employerMatchPercent: parseFloat((document.getElementById('input-b-match') as HTMLInputElement)?.value) || 0,
-      employeeContributionForMatchPercent: parseFloat((document.getElementById('input-b-match') as HTMLInputElement)?.value) || 0,
-      annualHealthInsuranceCost: parseFloat((document.getElementById('input-b-health') as HTMLInputElement)?.value) || 0,
-      paidVacationDays: parseFloat((document.getElementById('input-b-vacation') as HTMLInputElement)?.value) || 0,
-      commuteMilesOneWay: parseFloat((document.getElementById('input-b-distance') as HTMLInputElement)?.value) || 0,
-      commuteDaysPerWeek: parseFloat((document.getElementById('input-b-commute-days') as HTMLInputElement)?.value) || 0,
-      remoteDaysPerWeek: parseFloat((document.getElementById('input-b-remote-days') as HTMLInputElement)?.value) || 0,
-      otherCompensationAnnual: parseFloat((document.getElementById('input-b-other') as HTMLInputElement)?.value) || 0,
+      baseSalary: parseNumericFieldOrNaN((document.getElementById('input-b-salary') as HTMLInputElement)?.value),
+      annualBonus: parseNumericFieldOrNaN((document.getElementById('input-b-bonus') as HTMLInputElement)?.value),
+      employerMatchPercent: parseNumericFieldOrNaN((document.getElementById('input-b-match') as HTMLInputElement)?.value),
+      employeeContributionForMatchPercent: parseNumericFieldOrNaN((document.getElementById('input-b-match') as HTMLInputElement)?.value),
+      annualHealthInsuranceCost: parseNumericFieldOrNaN((document.getElementById('input-b-health') as HTMLInputElement)?.value),
+      paidVacationDays: parseNumericFieldOrNaN((document.getElementById('input-b-vacation') as HTMLInputElement)?.value),
+      commuteMilesOneWay: parseNumericFieldOrNaN((document.getElementById('input-b-distance') as HTMLInputElement)?.value),
+      commuteDaysPerWeek: parseNumericFieldOrNaN((document.getElementById('input-b-commute-days') as HTMLInputElement)?.value),
+      remoteDaysPerWeek: parseNumericFieldOrNaN((document.getElementById('input-b-remote-days') as HTMLInputElement)?.value),
+      otherCompensationAnnual: parseNumericFieldOrNaN((document.getElementById('input-b-other') as HTMLInputElement)?.value),
       estimatedVehicleCostPerMile: vehicleCostPerMile,
       averageCommuteSpeedMph: 35,
       annualWorkWeeks: 50,
@@ -836,8 +835,10 @@ const faqList: FAQItem[] = [
       if (valA.errors.employerMatchPercent) document.getElementById('err-a-match')!.textContent = valA.errors.employerMatchPercent;
       if (valA.errors.annualHealthInsuranceCost) document.getElementById('err-a-health')!.textContent = valA.errors.annualHealthInsuranceCost;
       if (valA.errors.paidVacationDays) document.getElementById('err-a-vacation')!.textContent = valA.errors.paidVacationDays;
+      if (valA.errors.otherCompensationAnnual) document.getElementById('err-a-other')!.textContent = valA.errors.otherCompensationAnnual;
       if (valA.errors.commuteMilesOneWay) document.getElementById('err-a-distance')!.textContent = valA.errors.commuteMilesOneWay;
       if (valA.errors.commuteDaysPerWeek) document.getElementById('err-a-commute-days')!.textContent = valA.errors.commuteDaysPerWeek;
+      if (valA.errors.remoteDaysPerWeek) document.getElementById('err-a-remote-days')!.textContent = valA.errors.remoteDaysPerWeek;
       if (valA.errors.estimatedVehicleCostPerMile) document.getElementById('err-vehicle-cost-per-mile')!.textContent = valA.errors.estimatedVehicleCostPerMile;
     }
 
@@ -848,8 +849,10 @@ const faqList: FAQItem[] = [
       if (valB.errors.employerMatchPercent) document.getElementById('err-b-match')!.textContent = valB.errors.employerMatchPercent;
       if (valB.errors.annualHealthInsuranceCost) document.getElementById('err-b-health')!.textContent = valB.errors.annualHealthInsuranceCost;
       if (valB.errors.paidVacationDays) document.getElementById('err-b-vacation')!.textContent = valB.errors.paidVacationDays;
+      if (valB.errors.otherCompensationAnnual) document.getElementById('err-b-other')!.textContent = valB.errors.otherCompensationAnnual;
       if (valB.errors.commuteMilesOneWay) document.getElementById('err-b-distance')!.textContent = valB.errors.commuteMilesOneWay;
       if (valB.errors.commuteDaysPerWeek) document.getElementById('err-b-commute-days')!.textContent = valB.errors.commuteDaysPerWeek;
+      if (valB.errors.remoteDaysPerWeek) document.getElementById('err-b-remote-days')!.textContent = valB.errors.remoteDaysPerWeek;
       if (valB.errors.estimatedVehicleCostPerMile && !valA.errors.estimatedVehicleCostPerMile) {
         document.getElementById('err-vehicle-cost-per-mile')!.textContent = valB.errors.estimatedVehicleCostPerMile;
       }

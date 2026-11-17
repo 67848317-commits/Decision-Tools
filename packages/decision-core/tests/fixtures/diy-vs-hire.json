@@ -1,0 +1,185 @@
+{
+  "calculator": "diy-vs-hire",
+  "capturedFrom": "src/lib/decisions/diyVsHire.ts",
+  "locale": "en-US",
+  "tolerancePolicy": {
+    "integerFields": 0,
+    "decimalFields": 0.000001
+  },
+  "scenarios": [
+    {
+      "id": "defaults",
+      "description": "Default DIY vs Hire baseline parameters",
+      "input": {
+        "projectName": "Home Improvement Project",
+        "diyMaterialsCost": 280,
+        "diyToolsEquipmentCost": 150,
+        "diyEstimatedHours": 18,
+        "personalHourlyRate": 35,
+        "diyReworkRiskPercent": 15,
+        "contractorQuote": 1100,
+        "homeownerCoordinationHours": 2
+      },
+      "expected": {
+        "projectName": "Home Improvement Project",
+        "diyDirectCashOutlay": 430,
+        "diyOpportunityCostOfTime": 630,
+        "diyRiskAdjustedBuffer": 42,
+        "diyTotalEconomicCost": 1102,
+        "contractorDirectQuote": 1100,
+        "contractorCoordinationTimeValue": 70,
+        "contractorTotalEconomicCost": 1170,
+        "directCashSavedByDiy": 670,
+        "netEconomicDifference": 68,
+        "lowerEconomicCostOption": "diy",
+        "breakEvenHourlyRate": 39.25,
+        "summaryText": "Executing this project DIY saves an estimated $670 in direct out-of-pocket cash compared to hiring a contractor ($430 vs. $1,100). After valuing your 18 hours of labor at $35/hr, the total economic cost of DIY remains $68 lower than hiring. Hiring results in a lower total economic cost if your personal time is valued above $39.25/hour."
+      }
+    },
+    {
+      "id": "direction-flip-hire-wins",
+      "description": "High personal hourly rate and long hours where hiring has lower economic cost",
+      "input": {
+        "projectName": "Bathroom Tile Install",
+        "diyMaterialsCost": 650,
+        "diyToolsEquipmentCost": 350,
+        "diyEstimatedHours": 36,
+        "personalHourlyRate": 75,
+        "diyReworkRiskPercent": 25,
+        "contractorQuote": 2400,
+        "homeownerCoordinationHours": 3
+      },
+      "expected": {
+        "projectName": "Bathroom Tile Install",
+        "diyDirectCashOutlay": 1000,
+        "diyOpportunityCostOfTime": 2700,
+        "diyRiskAdjustedBuffer": 163,
+        "diyTotalEconomicCost": 3863,
+        "contractorDirectQuote": 2400,
+        "contractorCoordinationTimeValue": 225,
+        "contractorTotalEconomicCost": 2625,
+        "directCashSavedByDiy": 1400,
+        "netEconomicDifference": 1238,
+        "lowerEconomicCostOption": "hire",
+        "breakEvenHourlyRate": 37.48,
+        "summaryText": "While DIY requires $1,400 less direct cash than hiring a professional ($1,000 vs. $2,400), hiring results in an estimated economic cost that is $1,238 lower when factoring in your 36 personal hours at $75/hr. The implied wage of doing it yourself ($37.48/hr) is lower than your chosen time valuation ($75/hr)."
+      }
+    },
+    {
+      "id": "zero-rate-zero-tools-zero-risk",
+      "description": "Valid zeros: $0/hr personal rate, $0 tools, $0 materials, 0% rework risk, 0 coord hours",
+      "input": {
+        "projectName": "Zero Cost Yard Prep",
+        "diyMaterialsCost": 0,
+        "diyToolsEquipmentCost": 0,
+        "diyEstimatedHours": 6,
+        "personalHourlyRate": 0,
+        "diyReworkRiskPercent": 0,
+        "contractorQuote": 450,
+        "homeownerCoordinationHours": 0
+      },
+      "expected": {
+        "projectName": "Zero Cost Yard Prep",
+        "diyDirectCashOutlay": 0,
+        "diyOpportunityCostOfTime": 0,
+        "diyRiskAdjustedBuffer": 0,
+        "diyTotalEconomicCost": 0,
+        "contractorDirectQuote": 450,
+        "contractorCoordinationTimeValue": 0,
+        "contractorTotalEconomicCost": 450,
+        "directCashSavedByDiy": 450,
+        "netEconomicDifference": 450,
+        "lowerEconomicCostOption": "diy",
+        "breakEvenHourlyRate": 75,
+        "summaryText": "Executing this project DIY saves an estimated $450 in direct out-of-pocket cash compared to hiring a contractor ($0 vs. $450). After valuing your 6 hours of labor at $0/hr, the total economic cost of DIY remains $450 lower than hiring. Hiring results in a lower total economic cost if your personal time is valued above $75.00/hour."
+      }
+    },
+    {
+      "id": "negative-cash-savings-clamped-breakeven",
+      "description": "DIY materials + tools exceed contractor quote -> breakEvenHourlyRate clamped to 0",
+      "input": {
+        "projectName": "Over-tooled Project",
+        "diyMaterialsCost": 800,
+        "diyToolsEquipmentCost": 500,
+        "diyEstimatedHours": 10,
+        "personalHourlyRate": 25,
+        "diyReworkRiskPercent": 10,
+        "contractorQuote": 900,
+        "homeownerCoordinationHours": 2
+      },
+      "expected": {
+        "projectName": "Over-tooled Project",
+        "diyDirectCashOutlay": 1300,
+        "diyOpportunityCostOfTime": 250,
+        "diyRiskAdjustedBuffer": 80,
+        "diyTotalEconomicCost": 1630,
+        "contractorDirectQuote": 900,
+        "contractorCoordinationTimeValue": 50,
+        "contractorTotalEconomicCost": 950,
+        "directCashSavedByDiy": 0,
+        "netEconomicDifference": 680,
+        "lowerEconomicCostOption": "hire",
+        "breakEvenHourlyRate": 0,
+        "summaryText": "While DIY requires $0 less direct cash than hiring a professional ($1,300 vs. $900), hiring results in an estimated economic cost that is $680 lower when factoring in your 10 personal hours at $25/hr. The implied wage of doing it yourself ($-60.00/hr) is lower than your chosen time valuation ($25/hr)."
+      }
+    },
+    {
+      "id": "high-cost-renovation",
+      "description": "High-cost deck build project",
+      "input": {
+        "projectName": "Composite Deck Build",
+        "diyMaterialsCost": 5200,
+        "diyToolsEquipmentCost": 750,
+        "diyEstimatedHours": 95,
+        "personalHourlyRate": 45,
+        "diyReworkRiskPercent": 15,
+        "contractorQuote": 13500,
+        "homeownerCoordinationHours": 6
+      },
+      "expected": {
+        "projectName": "Composite Deck Build",
+        "diyDirectCashOutlay": 5950,
+        "diyOpportunityCostOfTime": 4275,
+        "diyRiskAdjustedBuffer": 780,
+        "diyTotalEconomicCost": 11005,
+        "contractorDirectQuote": 13500,
+        "contractorCoordinationTimeValue": 270,
+        "contractorTotalEconomicCost": 13770,
+        "directCashSavedByDiy": 7550,
+        "netEconomicDifference": 2765,
+        "lowerEconomicCostOption": "diy",
+        "breakEvenHourlyRate": 76.07,
+        "summaryText": "Executing this project DIY saves an estimated $7,550 in direct out-of-pocket cash compared to hiring a contractor ($5,950 vs. $13,500). After valuing your 95 hours of labor at $45/hr, the total economic cost of DIY remains $2,765 lower than hiring. Hiring results in a lower total economic cost if your personal time is valued above $76.07/hour."
+      }
+    },
+    {
+      "id": "equal-economic-cost",
+      "description": "Exact tie where diyTotalEconomicCost equals contractorTotalEconomicCost",
+      "input": {
+        "projectName": "Equal Project",
+        "diyMaterialsCost": 400,
+        "diyToolsEquipmentCost": 100,
+        "diyEstimatedHours": 12,
+        "personalHourlyRate": 50,
+        "diyReworkRiskPercent": 0,
+        "contractorQuote": 1000,
+        "homeownerCoordinationHours": 2
+      },
+      "expected": {
+        "projectName": "Equal Project",
+        "diyDirectCashOutlay": 500,
+        "diyOpportunityCostOfTime": 600,
+        "diyRiskAdjustedBuffer": 0,
+        "diyTotalEconomicCost": 1100,
+        "contractorDirectQuote": 1000,
+        "contractorCoordinationTimeValue": 100,
+        "contractorTotalEconomicCost": 1100,
+        "directCashSavedByDiy": 500,
+        "netEconomicDifference": 0,
+        "lowerEconomicCostOption": "equal",
+        "breakEvenHourlyRate": 50,
+        "summaryText": "Both doing it yourself and hiring a contractor produce an identical total economic impact of $1,100 based on your $50/hr valuation of personal time."
+      }
+    }
+  ]
+}

@@ -169,15 +169,17 @@ const relatedGuides = [
           <label for="input-extra-cash">Extra Monthly Cash Available</label>
           <div class="input-with-prefix">
             <span class="currency-prefix">$</span>
-            <input type="number" id="input-extra-cash" value={DEBT_VS_INVEST_DEFAULTS.extraMonthlyCash} min="50" max="10000" step="50" />
+            <input type="number" id="input-extra-cash" value={DEBT_VS_INVEST_DEFAULTS.extraMonthlyCash} min="0" max="10000" step="50" />
           </div>
+          <span class="validation-error" id="err-extraMonthlyCash" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-horizon-years">Simulation Horizon</label>
           <div class="input-with-unit">
-            <input type="number" id="input-horizon-years" value={DEBT_VS_INVEST_DEFAULTS.horizonYears} min="1" max="25" step="1" />
+            <input type="number" id="input-horizon-years" value={DEBT_VS_INVEST_DEFAULTS.horizonYears} min="1" max="30" step="1" />
             <span class="unit-label">years</span>
           </div>
+          <span class="validation-error" id="err-horizonYears" role="alert"></span>
         </div>
       </div>
     </div>
@@ -188,17 +190,19 @@ const relatedGuides = [
         <label for="input-debt-balance">Current Outstanding Balance</label>
         <div class="input-with-prefix">
           <span class="currency-prefix">$</span>
-          <input type="number" id="input-debt-balance" value={DEBT_VS_INVEST_DEFAULTS.debtBalance} min="500" max="250000" step="500" />
+          <input type="number" id="input-debt-balance" value={DEBT_VS_INVEST_DEFAULTS.debtBalance} min="0" max="250000" step="500" />
         </div>
+        <span class="validation-error" id="err-debtBalance" role="alert"></span>
       </div>
 
       <div class="form-row-2">
         <div class="form-group">
           <label for="input-debt-rate">Debt Interest Rate (APR)</label>
           <div class="input-with-unit">
-            <input type="number" id="input-debt-rate" value={DEBT_VS_INVEST_DEFAULTS.debtInterestRatePercent} min="0.5" max="36" step="0.25" />
+            <input type="number" id="input-debt-rate" value={DEBT_VS_INVEST_DEFAULTS.debtInterestRatePercent} min="0" max="36" step="0.25" />
             <span class="unit-label">% APR</span>
           </div>
+          <span class="validation-error" id="err-debtInterestRatePercent" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-debt-min">Minimum Monthly Payment</label>
@@ -206,6 +210,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-debt-min" value={DEBT_VS_INVEST_DEFAULTS.debtMinimumMonthlyPayment} min="25" max="5000" step="25" />
           </div>
+          <span class="validation-error" id="err-debtMinimumMonthlyPayment" role="alert"></span>
         </div>
       </div>
     </OptionPanel>
@@ -215,9 +220,10 @@ const relatedGuides = [
       <div class="form-group">
         <label for="input-invest-return">Expected Annual Market Return</label>
         <div class="input-with-unit">
-          <input type="number" id="input-invest-return" value={DEBT_VS_INVEST_DEFAULTS.expectedInvestmentReturnPercent} min="1.0" max="20.0" step="0.5" />
+          <input type="number" id="input-invest-return" value={DEBT_VS_INVEST_DEFAULTS.expectedInvestmentReturnPercent} min="-50" max="20.0" step="0.5" />
           <span class="unit-label">% / yr</span>
         </div>
+        <span class="validation-error" id="err-expectedInvestmentReturnPercent" role="alert"></span>
       </div>
 
       <div class="form-group">
@@ -226,6 +232,7 @@ const relatedGuides = [
           <input type="number" id="input-tax-rate" value={DEBT_VS_INVEST_DEFAULTS.investmentTaxRatePercent} min="0" max="45" step="1" />
           <span class="unit-label">% tax</span>
         </div>
+        <span class="validation-error" id="err-investmentTaxRatePercent" role="alert"></span>
       </div>
     </OptionPanel>
   </div>
@@ -350,7 +357,8 @@ const relatedGuides = [
 </DecisionLayout>
 
 <script>
-  import { calculateDebtVsInvest, DEBT_VS_INVEST_DEFAULTS, type DebtVsInvestInput } from '../../lib/decisions/debtVsInvest';
+  import { calculateDebtVsInvest, validateDebtVsInvestInput, DEBT_VS_INVEST_DEFAULTS, type DebtVsInvestInput } from '../../lib/decisions/debtVsInvest';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function initCalculator() {
     const inputs = {
@@ -363,16 +371,32 @@ const relatedGuides = [
       investmentTaxRatePercent: document.getElementById('input-tax-rate') as HTMLInputElement,
     };
 
+    function clearErrors() {
+      document.querySelectorAll('.validation-error').forEach((el) => {
+        el.textContent = '';
+      });
+    }
+
     function recalculate() {
+      clearErrors();
       const currentInput: DebtVsInvestInput = {
-        extraMonthlyCash: Number(inputs.extraMonthlyCash.value) || DEBT_VS_INVEST_DEFAULTS.extraMonthlyCash,
-        horizonYears: Number(inputs.horizonYears.value) || DEBT_VS_INVEST_DEFAULTS.horizonYears,
-        debtBalance: Number(inputs.debtBalance.value) || DEBT_VS_INVEST_DEFAULTS.debtBalance,
-        debtInterestRatePercent: Number(inputs.debtInterestRatePercent.value) || DEBT_VS_INVEST_DEFAULTS.debtInterestRatePercent,
-        debtMinimumMonthlyPayment: Number(inputs.debtMinimumMonthlyPayment.value) || DEBT_VS_INVEST_DEFAULTS.debtMinimumMonthlyPayment,
-        expectedInvestmentReturnPercent: Number(inputs.expectedInvestmentReturnPercent.value) || DEBT_VS_INVEST_DEFAULTS.expectedInvestmentReturnPercent,
-        investmentTaxRatePercent: Number(inputs.investmentTaxRatePercent.value) || 0,
+        extraMonthlyCash: parseNumericFieldOrNaN(inputs.extraMonthlyCash?.value),
+        horizonYears: parseNumericFieldOrNaN(inputs.horizonYears?.value),
+        debtBalance: parseNumericFieldOrNaN(inputs.debtBalance?.value),
+        debtInterestRatePercent: parseNumericFieldOrNaN(inputs.debtInterestRatePercent?.value),
+        debtMinimumMonthlyPayment: parseNumericFieldOrNaN(inputs.debtMinimumMonthlyPayment?.value),
+        expectedInvestmentReturnPercent: parseNumericFieldOrNaN(inputs.expectedInvestmentReturnPercent?.value),
+        investmentTaxRatePercent: parseNumericFieldOrNaN(inputs.investmentTaxRatePercent?.value),
       };
+
+      const validation = validateDebtVsInvestInput(currentInput);
+      if (!validation.valid) {
+        for (const [field, msg] of Object.entries(validation.errors)) {
+          const errorEl = document.getElementById(`err-${field}`);
+          if (errorEl) errorEl.textContent = msg;
+        }
+        return;
+      }
 
       const result = calculateDebtVsInvest(currentInput);
 
@@ -521,6 +545,13 @@ const relatedGuides = [
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-text-main);
+  }
+  .validation-error {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-status-danger);
+    margin-top: 2px;
+    min-height: 1rem;
   }
   .form-row-2 {
     display: grid;

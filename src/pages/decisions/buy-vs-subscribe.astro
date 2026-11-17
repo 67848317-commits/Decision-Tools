@@ -169,6 +169,7 @@ const faqList: FAQItem[] = [
         </div>
         <span id="horizon-help" class="field-help">Length of time you anticipate actively using the asset or software.</span>
       </div>
+      <span class="validation-error" id="err-horizon-years" role="alert"></span>
     </div>
 
     <!-- 2 Column Options Grid -->
@@ -523,10 +524,12 @@ const faqList: FAQItem[] = [
 <script>
   import {
     calculateBuyVsSubscribe,
+    validateBuyVsSubscribeInput,
     BUY_VS_SUBSCRIBE_DEFAULTS,
     type BuyVsSubscribeInput,
     type SubscriptionBillingCycle,
   } from '../../lib/decisions/buyVsSubscribe';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function initBuyVsSubscribe() {
     const horizonInput = document.getElementById('input-horizon-years') as HTMLInputElement;
@@ -540,32 +543,51 @@ const faqList: FAQItem[] = [
     const signupInput = document.getElementById('input-signup-fee') as HTMLInputElement;
     const addonsInput = document.getElementById('input-annual-addons') as HTMLInputElement;
 
-    function recalculate() {
-      const horizonYears = Math.max(0.25, Math.min(25, Number(horizonInput?.value) || 3));
-      const purchasePrice = Math.max(0, Number(purchaseInput?.value) || 0);
-      const setupCost = Math.max(0, Number(setupInput?.value) || 0);
-      const annualMaint = Math.max(0, Number(maintInput?.value) || 0);
-      const resaleVal = Math.max(0, Number(resaleInput?.value) || 0);
+    const errorMap: Record<string, string> = {
+      horizonYears: 'err-horizon-years',
+      purchasePrice: 'err-purchase-price',
+      setupOrActivationCost: 'err-setup-cost',
+      annualMaintenanceCost: 'err-annual-maint',
+      estimatedResaleValue: 'err-resale-val',
+      monthlySubscriptionPrice: 'err-monthly-sub',
+      annualSubscriptionPrice: 'err-annual-sub',
+      signupFee: 'err-signup-fee',
+      annualRecurringFees: 'err-annual-addons',
+    };
 
+    function clearErrors() {
+      document.querySelectorAll('.validation-error').forEach((el) => {
+        el.textContent = '';
+      });
+    }
+
+    function recalculate() {
+      clearErrors();
       const cycle = (cycleSelect?.value as SubscriptionBillingCycle) || 'monthly';
-      const monthlySub = Math.max(0, Number(monthlySubInput?.value) || 0);
-      const annualSub = Math.max(0, Number(annualSubInput?.value) || 0);
-      const signupFee = Math.max(0, Number(signupInput?.value) || 0);
-      const annualAddons = Math.max(0, Number(addonsInput?.value) || 0);
 
       const input: BuyVsSubscribeInput = {
         itemName: 'Software or Equipment',
-        horizonYears,
-        purchasePrice,
-        setupOrActivationCost: setupCost,
-        annualMaintenanceCost: annualMaint,
-        estimatedResaleValue: resaleVal,
+        horizonYears: parseNumericFieldOrNaN(horizonInput?.value),
+        purchasePrice: parseNumericFieldOrNaN(purchaseInput?.value),
+        setupOrActivationCost: parseNumericFieldOrNaN(setupInput?.value),
+        annualMaintenanceCost: parseNumericFieldOrNaN(maintInput?.value),
+        estimatedResaleValue: parseNumericFieldOrNaN(resaleInput?.value),
         billingCycle: cycle,
-        monthlySubscriptionPrice: monthlySub,
-        annualSubscriptionPrice: annualSub,
-        signupFee,
-        annualRecurringFees: annualAddons,
+        monthlySubscriptionPrice: parseNumericFieldOrNaN(monthlySubInput?.value),
+        annualSubscriptionPrice: parseNumericFieldOrNaN(annualSubInput?.value),
+        signupFee: parseNumericFieldOrNaN(signupInput?.value),
+        annualRecurringFees: parseNumericFieldOrNaN(addonsInput?.value),
       };
+
+      const validation = validateBuyVsSubscribeInput(input);
+      if (!validation.valid) {
+        for (const [field, msg] of Object.entries(validation.errors)) {
+          const id = errorMap[field];
+          const errorEl = id ? document.getElementById(id) : null;
+          if (errorEl) errorEl.textContent = msg;
+        }
+        return;
+      }
 
       const result = calculateBuyVsSubscribe(input);
 

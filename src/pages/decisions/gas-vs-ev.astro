@@ -179,16 +179,18 @@ const relatedGuides = [
         <div class="form-group">
           <label for="input-annual-miles">Annual Miles Driven</label>
           <div class="input-with-unit">
-            <input type="number" id="input-annual-miles" value={GAS_VS_EV_DEFAULTS.annualMiles} min="1000" max="60000" step="500" />
+            <input type="number" id="input-annual-miles" value={GAS_VS_EV_DEFAULTS.annualMiles} min="500" max="60000" step="500" />
             <span class="unit-label">mi/yr</span>
           </div>
+          <span class="validation-error" id="err-annualMiles" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-horizon-years">Operating Horizon</label>
           <div class="input-with-unit">
-            <input type="number" id="input-horizon-years" value={GAS_VS_EV_DEFAULTS.horizonYears} min="1" max="15" step="1" />
+            <input type="number" id="input-horizon-years" value={GAS_VS_EV_DEFAULTS.horizonYears} min="1" max="20" step="1" />
             <span class="unit-label">years</span>
           </div>
+          <span class="validation-error" id="err-horizonYears" role="alert"></span>
         </div>
       </div>
     </div>
@@ -201,6 +203,7 @@ const relatedGuides = [
           <span class="currency-prefix">$</span>
           <input type="number" id="input-gas-price" value={GAS_VS_EV_DEFAULTS.gasVehiclePrice} min="5000" max="250000" step="500" />
         </div>
+        <span class="validation-error" id="err-gasVehiclePrice" role="alert"></span>
       </div>
 
       <div class="form-row-2">
@@ -210,13 +213,15 @@ const relatedGuides = [
             <input type="number" id="input-gas-mpg" value={GAS_VS_EV_DEFAULTS.gasMpg} min="10" max="70" step="1" />
             <span class="unit-label">mpg</span>
           </div>
+          <span class="validation-error" id="err-gasMpg" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-gas-per-gallon">Gas Price ($/gal)</label>
           <div class="input-with-prefix">
             <span class="currency-prefix">$</span>
-            <input type="number" id="input-gas-per-gallon" value={GAS_VS_EV_DEFAULTS.gasPricePerGallon} min="1.00" max="10.00" step="0.05" />
+            <input type="number" id="input-gas-per-gallon" value={GAS_VS_EV_DEFAULTS.gasPricePerGallon} min="0" max="10.00" step="0.05" />
           </div>
+          <span class="validation-error" id="err-gasPricePerGallon" role="alert"></span>
         </div>
       </div>
 
@@ -227,6 +232,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-gas-maint" value={GAS_VS_EV_DEFAULTS.gasAnnualMaintenance} min="0" max="10000" step="50" />
           </div>
+          <span class="validation-error" id="err-gasAnnualMaintenance" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-gas-insurance">Annual Insurance</label>
@@ -234,15 +240,17 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-gas-insurance" value={GAS_VS_EV_DEFAULTS.gasInsuranceAnnual} min="0" max="15000" step="50" />
           </div>
+          <span class="validation-error" id="err-gasInsuranceAnnual" role="alert"></span>
         </div>
       </div>
 
       <div class="form-group">
         <label for="input-gas-resale">Estimated Retained Resale Value (%)</label>
         <div class="input-with-unit">
-          <input type="number" id="input-gas-resale" value={GAS_VS_EV_DEFAULTS.gasResaleValuePercent} min="10" max="90" step="1" />
+          <input type="number" id="input-gas-resale" value={GAS_VS_EV_DEFAULTS.gasResaleValuePercent} min="0" max="100" step="1" />
           <span class="unit-label">% of price</span>
         </div>
+        <span class="validation-error" id="err-gasResaleValuePercent" role="alert"></span>
       </div>
     </OptionPanel>
 
@@ -254,6 +262,7 @@ const relatedGuides = [
           <span class="currency-prefix">$</span>
           <input type="number" id="input-ev-price" value={GAS_VS_EV_DEFAULTS.evVehiclePrice} min="5000" max="250000" step="500" />
         </div>
+        <span class="validation-error" id="err-evVehiclePrice" role="alert"></span>
       </div>
 
       <div class="form-row-2">
@@ -263,13 +272,15 @@ const relatedGuides = [
             <input type="number" id="input-ev-efficiency" value={GAS_VS_EV_DEFAULTS.evEfficiencyMilesPerKwh} min="1.0" max="6.0" step="0.1" />
             <span class="unit-label">mi/kWh</span>
           </div>
+          <span class="validation-error" id="err-evEfficiencyMilesPerKwh" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-ev-elec-rate">Electricity Rate ($/kWh)</label>
           <div class="input-with-prefix">
             <span class="currency-prefix">$</span>
-            <input type="number" id="input-ev-elec-rate" value={GAS_VS_EV_DEFAULTS.electricityCostPerKwh} min="0.04" max="1.00" step="0.01" />
+            <input type="number" id="input-ev-elec-rate" value={GAS_VS_EV_DEFAULTS.electricityCostPerKwh} min="0" max="1.00" step="0.01" />
           </div>
+          <span class="validation-error" id="err-electricityCostPerKwh" role="alert"></span>
         </div>
       </div>
 
@@ -280,6 +291,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-ev-tax-credit" value={GAS_VS_EV_DEFAULTS.evTaxCredit} min="0" max="15000" step="250" />
           </div>
+          <span class="validation-error" id="err-evTaxCredit" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-ev-charger">Home Charger & Install</label>
@@ -287,6 +299,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-ev-charger" value={GAS_VS_EV_DEFAULTS.evHomeChargerInstall} min="0" max="5000" step="50" />
           </div>
+          <span class="validation-error" id="err-evHomeChargerInstall" role="alert"></span>
         </div>
       </div>
 
@@ -297,6 +310,7 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-ev-maint" value={GAS_VS_EV_DEFAULTS.evAnnualMaintenance} min="0" max="10000" step="50" />
           </div>
+          <span class="validation-error" id="err-evAnnualMaintenance" role="alert"></span>
         </div>
         <div class="form-group">
           <label for="input-ev-insurance">Annual Insurance</label>
@@ -304,15 +318,17 @@ const relatedGuides = [
             <span class="currency-prefix">$</span>
             <input type="number" id="input-ev-insurance" value={GAS_VS_EV_DEFAULTS.evInsuranceAnnual} min="0" max="15000" step="50" />
           </div>
+          <span class="validation-error" id="err-evInsuranceAnnual" role="alert"></span>
         </div>
       </div>
 
       <div class="form-group">
         <label for="input-ev-resale">Estimated Retained Resale Value (%)</label>
         <div class="input-with-unit">
-          <input type="number" id="input-ev-resale" value={GAS_VS_EV_DEFAULTS.evResaleValuePercent} min="10" max="90" step="1" />
+          <input type="number" id="input-ev-resale" value={GAS_VS_EV_DEFAULTS.evResaleValuePercent} min="0" max="100" step="1" />
           <span class="unit-label">% of price</span>
         </div>
+        <span class="validation-error" id="err-evResaleValuePercent" role="alert"></span>
       </div>
     </OptionPanel>
   </div>
@@ -438,7 +454,8 @@ const relatedGuides = [
 </DecisionLayout>
 
 <script>
-  import { calculateGasVsEv, GAS_VS_EV_DEFAULTS, type GasVsEvInput } from '../../lib/decisions/gasVsEv';
+  import { calculateGasVsEv, validateGasVsEvInput, GAS_VS_EV_DEFAULTS, type GasVsEvInput } from '../../lib/decisions/gasVsEv';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function initCalculator() {
     const inputs = {
@@ -460,25 +477,41 @@ const relatedGuides = [
       evResaleValuePercent: document.getElementById('input-ev-resale') as HTMLInputElement,
     };
 
+    function clearErrors() {
+      document.querySelectorAll('.validation-error').forEach((el) => {
+        el.textContent = '';
+      });
+    }
+
     function recalculate() {
+      clearErrors();
       const currentInput: GasVsEvInput = {
-        annualMiles: Number(inputs.annualMiles.value) || GAS_VS_EV_DEFAULTS.annualMiles,
-        horizonYears: Number(inputs.horizonYears.value) || GAS_VS_EV_DEFAULTS.horizonYears,
-        gasVehiclePrice: Number(inputs.gasVehiclePrice.value) || GAS_VS_EV_DEFAULTS.gasVehiclePrice,
-        gasMpg: Number(inputs.gasMpg.value) || GAS_VS_EV_DEFAULTS.gasMpg,
-        gasPricePerGallon: Number(inputs.gasPricePerGallon.value) || GAS_VS_EV_DEFAULTS.gasPricePerGallon,
-        gasAnnualMaintenance: Number(inputs.gasAnnualMaintenance.value) || GAS_VS_EV_DEFAULTS.gasAnnualMaintenance,
-        gasInsuranceAnnual: Number(inputs.gasInsuranceAnnual.value) || GAS_VS_EV_DEFAULTS.gasInsuranceAnnual,
-        gasResaleValuePercent: Number(inputs.gasResaleValuePercent.value) || GAS_VS_EV_DEFAULTS.gasResaleValuePercent,
-        evVehiclePrice: Number(inputs.evVehiclePrice.value) || GAS_VS_EV_DEFAULTS.evVehiclePrice,
-        evEfficiencyMilesPerKwh: Number(inputs.evEfficiencyMilesPerKwh.value) || GAS_VS_EV_DEFAULTS.evEfficiencyMilesPerKwh,
-        electricityCostPerKwh: Number(inputs.electricityCostPerKwh.value) || GAS_VS_EV_DEFAULTS.electricityCostPerKwh,
-        evTaxCredit: Number(inputs.evTaxCredit.value) || 0,
-        evHomeChargerInstall: Number(inputs.evHomeChargerInstall.value) || 0,
-        evAnnualMaintenance: Number(inputs.evAnnualMaintenance.value) || GAS_VS_EV_DEFAULTS.evAnnualMaintenance,
-        evInsuranceAnnual: Number(inputs.evInsuranceAnnual.value) || GAS_VS_EV_DEFAULTS.evInsuranceAnnual,
-        evResaleValuePercent: Number(inputs.evResaleValuePercent.value) || GAS_VS_EV_DEFAULTS.evResaleValuePercent,
+        annualMiles: parseNumericFieldOrNaN(inputs.annualMiles?.value),
+        horizonYears: parseNumericFieldOrNaN(inputs.horizonYears?.value),
+        gasVehiclePrice: parseNumericFieldOrNaN(inputs.gasVehiclePrice?.value),
+        gasMpg: parseNumericFieldOrNaN(inputs.gasMpg?.value),
+        gasPricePerGallon: parseNumericFieldOrNaN(inputs.gasPricePerGallon?.value),
+        gasAnnualMaintenance: parseNumericFieldOrNaN(inputs.gasAnnualMaintenance?.value),
+        gasInsuranceAnnual: parseNumericFieldOrNaN(inputs.gasInsuranceAnnual?.value),
+        gasResaleValuePercent: parseNumericFieldOrNaN(inputs.gasResaleValuePercent?.value),
+        evVehiclePrice: parseNumericFieldOrNaN(inputs.evVehiclePrice?.value),
+        evEfficiencyMilesPerKwh: parseNumericFieldOrNaN(inputs.evEfficiencyMilesPerKwh?.value),
+        electricityCostPerKwh: parseNumericFieldOrNaN(inputs.electricityCostPerKwh?.value),
+        evTaxCredit: parseNumericFieldOrNaN(inputs.evTaxCredit?.value),
+        evHomeChargerInstall: parseNumericFieldOrNaN(inputs.evHomeChargerInstall?.value),
+        evAnnualMaintenance: parseNumericFieldOrNaN(inputs.evAnnualMaintenance?.value),
+        evInsuranceAnnual: parseNumericFieldOrNaN(inputs.evInsuranceAnnual?.value),
+        evResaleValuePercent: parseNumericFieldOrNaN(inputs.evResaleValuePercent?.value),
       };
+
+      const validation = validateGasVsEvInput(currentInput);
+      if (!validation.valid) {
+        for (const [field, msg] of Object.entries(validation.errors)) {
+          const errorEl = document.getElementById(`err-${field}`);
+          if (errorEl) errorEl.textContent = msg;
+        }
+        return;
+      }
 
       const result = calculateGasVsEv(currentInput);
 
@@ -637,6 +670,13 @@ const relatedGuides = [
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-text-main);
+  }
+  .validation-error {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-status-danger);
+    margin-top: 2px;
+    min-height: 1rem;
   }
   .form-row-2 {
     display: grid;

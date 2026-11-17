@@ -1,0 +1,215 @@
+{
+  "calculator": "bulk-buy",
+  "capturedFrom": "src/lib/decisions/bulkBuy.ts",
+  "locale": "en-US",
+  "tolerancePolicy": {
+    "integerFields": 0,
+    "decimalFields": 0.000001
+  },
+  "scenarios": [
+    {
+      "id": "defaults",
+      "description": "Default Bulk Buy baseline parameters",
+      "input": {
+        "itemName": "Pantry Staples / Paper Goods",
+        "normalUnitPrice": 4.5,
+        "normalQuantity": 1,
+        "bulkPackagePrice": 34,
+        "bulkQuantity": 12,
+        "expectedMonthlyUsage": 2,
+        "storageCost": 3,
+        "expectedWastePercent": 10
+      },
+      "expected": {
+        "itemName": "Pantry Staples / Paper Goods",
+        "normalCostPerUnit": 4.5,
+        "nominalBulkCostPerUnit": 2.83,
+        "nominalEquivalentCost": 54,
+        "nominalSavings": 20,
+        "nominalSavingsPercent": 37,
+        "effectiveUsableQuantity": 10.8,
+        "effectiveBulkCostPerUsableUnit": 3.43,
+        "effectiveNormalCostForUsable": 48.6,
+        "effectiveTotalBulkOutlay": 37,
+        "effectiveSavings": 11.6,
+        "effectiveSavingsPercent": 23.9,
+        "breakEvenUnits": 8.2,
+        "breakEvenWastePercent": 31.5,
+        "monthsToConsumeBulk": 6,
+        "monthsToConsumeUsable": 5.4,
+        "isEffectiveSavingsPositive": true,
+        "summaryText": "Under these assumptions, purchasing the bulk package yields an estimated effective net savings of $11.60 (23.9% savings) compared to purchasing equivalent standard units. Accounting for 10% expected spoilage (1.2 units discarded) and $3.00 in storage overhead, the effective cost is $3.43 per usable unit versus $4.50 for standard units. You must consume at least 8.2 of the 12 units to recover the bulk outlay."
+      }
+    },
+    {
+      "id": "direction-flip-negative-savings",
+      "description": "High waste (40%) and storage overhead ($15) yielding negative effective savings",
+      "input": {
+        "itemName": "Perishable Produce Box",
+        "normalUnitPrice": 4.5,
+        "normalQuantity": 1,
+        "bulkPackagePrice": 36,
+        "bulkQuantity": 10,
+        "expectedMonthlyUsage": 3,
+        "storageCost": 15,
+        "expectedWastePercent": 40
+      },
+      "expected": {
+        "itemName": "Perishable Produce Box",
+        "normalCostPerUnit": 4.5,
+        "nominalBulkCostPerUnit": 3.6,
+        "nominalEquivalentCost": 45,
+        "nominalSavings": 9,
+        "nominalSavingsPercent": 20,
+        "effectiveUsableQuantity": 6,
+        "effectiveBulkCostPerUsableUnit": 8.5,
+        "effectiveNormalCostForUsable": 27,
+        "effectiveTotalBulkOutlay": 51,
+        "effectiveSavings": -24,
+        "effectiveSavingsPercent": -88.9,
+        "breakEvenUnits": 11.3,
+        "breakEvenWastePercent": 0,
+        "monthsToConsumeBulk": 3.3,
+        "monthsToConsumeUsable": 2,
+        "isEffectiveSavingsPositive": false,
+        "summaryText": "Under these assumptions, purchasing bulk results in an estimated net loss of $24.00 relative to buying standard units as needed. Even though the bulk sticker price is $3.60/unit, factoring in 40% spoilage and $15.00 in storage raises the effective cost to $8.50 per usable unit (higher than the standard retail cost of $4.50/unit)."
+      }
+    },
+    {
+      "id": "zero-storage-zero-waste",
+      "description": "Valid zeros: $0 storage cost and 0% spoilage waste",
+      "input": {
+        "itemName": "Non-Perishable Paper Towels",
+        "normalUnitPrice": 3,
+        "normalQuantity": 1,
+        "bulkPackagePrice": 24,
+        "bulkQuantity": 12,
+        "expectedMonthlyUsage": 4,
+        "storageCost": 0,
+        "expectedWastePercent": 0
+      },
+      "expected": {
+        "itemName": "Non-Perishable Paper Towels",
+        "normalCostPerUnit": 3,
+        "nominalBulkCostPerUnit": 2,
+        "nominalEquivalentCost": 36,
+        "nominalSavings": 12,
+        "nominalSavingsPercent": 33.3,
+        "effectiveUsableQuantity": 12,
+        "effectiveBulkCostPerUsableUnit": 2,
+        "effectiveNormalCostForUsable": 36,
+        "effectiveTotalBulkOutlay": 24,
+        "effectiveSavings": 12,
+        "effectiveSavingsPercent": 33.3,
+        "breakEvenUnits": 8,
+        "breakEvenWastePercent": 33.3,
+        "monthsToConsumeBulk": 3,
+        "monthsToConsumeUsable": 3,
+        "isEffectiveSavingsPositive": true,
+        "summaryText": "Under these assumptions, purchasing the bulk package yields an estimated effective net savings of $12.00 (33.3% savings) compared to purchasing equivalent standard units. Accounting for 0% expected spoilage (0.0 units discarded) and $0.00 in storage overhead, the effective cost is $2.00 per usable unit versus $3.00 for standard units. You must consume at least 8 of the 12 units to recover the bulk outlay."
+      }
+    },
+    {
+      "id": "boundary-high-waste-99",
+      "description": "Boundary 99% waste producing steep effective per-unit cost",
+      "input": {
+        "itemName": "Ultra-Perishable Item",
+        "normalUnitPrice": 5,
+        "normalQuantity": 1,
+        "bulkPackagePrice": 30,
+        "bulkQuantity": 10,
+        "expectedMonthlyUsage": 1,
+        "storageCost": 5,
+        "expectedWastePercent": 99
+      },
+      "expected": {
+        "itemName": "Ultra-Perishable Item",
+        "normalCostPerUnit": 5,
+        "nominalBulkCostPerUnit": 3,
+        "nominalEquivalentCost": 50,
+        "nominalSavings": 20,
+        "nominalSavingsPercent": 40,
+        "effectiveUsableQuantity": 0.1,
+        "effectiveBulkCostPerUsableUnit": 350,
+        "effectiveNormalCostForUsable": 0.5,
+        "effectiveTotalBulkOutlay": 35,
+        "effectiveSavings": -34.5,
+        "effectiveSavingsPercent": -6900,
+        "breakEvenUnits": 7,
+        "breakEvenWastePercent": 30,
+        "monthsToConsumeBulk": 10,
+        "monthsToConsumeUsable": 0.1,
+        "isEffectiveSavingsPositive": false,
+        "summaryText": "Under these assumptions, purchasing bulk results in an estimated net loss of $34.50 relative to buying standard units as needed. Even though the bulk sticker price is $3.00/unit, factoring in 99% spoilage and $5.00 in storage raises the effective cost to $350.00 per usable unit (higher than the standard retail cost of $5.00/unit)."
+      }
+    },
+    {
+      "id": "multi-unit-normal-pack",
+      "description": "Multi-unit standard retail pack (4-pack vs 24-pack)",
+      "input": {
+        "itemName": "Sparkling Water Cans",
+        "normalUnitPrice": 6,
+        "normalQuantity": 4,
+        "bulkPackagePrice": 24,
+        "bulkQuantity": 24,
+        "expectedMonthlyUsage": 12,
+        "storageCost": 0,
+        "expectedWastePercent": 0
+      },
+      "expected": {
+        "itemName": "Sparkling Water Cans",
+        "normalCostPerUnit": 1.5,
+        "nominalBulkCostPerUnit": 1,
+        "nominalEquivalentCost": 36,
+        "nominalSavings": 12,
+        "nominalSavingsPercent": 33.3,
+        "effectiveUsableQuantity": 24,
+        "effectiveBulkCostPerUsableUnit": 1,
+        "effectiveNormalCostForUsable": 36,
+        "effectiveTotalBulkOutlay": 24,
+        "effectiveSavings": 12,
+        "effectiveSavingsPercent": 33.3,
+        "breakEvenUnits": 16,
+        "breakEvenWastePercent": 33.3,
+        "monthsToConsumeBulk": 2,
+        "monthsToConsumeUsable": 2,
+        "isEffectiveSavingsPositive": true,
+        "summaryText": "Under these assumptions, purchasing the bulk package yields an estimated effective net savings of $12.00 (33.3% savings) compared to purchasing equivalent standard units. Accounting for 0% expected spoilage (0.0 units discarded) and $0.00 in storage overhead, the effective cost is $1.00 per usable unit versus $1.50 for standard units. You must consume at least 16 of the 24 units to recover the bulk outlay."
+      }
+    },
+    {
+      "id": "equal-effective-cost",
+      "description": "Exact tie where effectiveSavings equals 0",
+      "input": {
+        "itemName": "Break-Even Goods",
+        "normalUnitPrice": 5,
+        "normalQuantity": 1,
+        "bulkPackagePrice": 45,
+        "bulkQuantity": 10,
+        "expectedMonthlyUsage": 2,
+        "storageCost": 5,
+        "expectedWastePercent": 0
+      },
+      "expected": {
+        "itemName": "Break-Even Goods",
+        "normalCostPerUnit": 5,
+        "nominalBulkCostPerUnit": 4.5,
+        "nominalEquivalentCost": 50,
+        "nominalSavings": 5,
+        "nominalSavingsPercent": 10,
+        "effectiveUsableQuantity": 10,
+        "effectiveBulkCostPerUsableUnit": 5,
+        "effectiveNormalCostForUsable": 50,
+        "effectiveTotalBulkOutlay": 50,
+        "effectiveSavings": 0,
+        "effectiveSavingsPercent": 0,
+        "breakEvenUnits": 10,
+        "breakEvenWastePercent": 0,
+        "monthsToConsumeBulk": 5,
+        "monthsToConsumeUsable": 5,
+        "isEffectiveSavingsPositive": false,
+        "summaryText": "Under these assumptions, both bulk purchasing and buying standard units result in identical effective costs ($50.00 total, or $5.00 per usable unit). Spoilage waste and storage overhead fully offset the volume discount."
+      }
+    }
+  ]
+}

@@ -185,6 +185,7 @@ const faqList: FAQItem[] = [
         </div>
         <span id="horizon-help" class="field-help">Length of time you anticipate residing in the home.</span>
       </div>
+      <span class="validation-error" id="err-horizonYears" role="alert"></span>
     </div>
 
     <!-- 2 Column Options Grid -->
@@ -639,20 +640,21 @@ const faqList: FAQItem[] = [
 
 <script>
   import { calculateRentVsBuy, validateRentVsBuyInput, RENT_VS_BUY_DEFAULTS, type RentVsBuyInput } from '../../lib/decisions/rentVsBuy';
+  import { parseNumericFieldOrNaN } from '@decision-tools/validation';
 
   function getInputsFromDOM(): RentVsBuyInput {
-    const horizonYears = parseFloat((document.getElementById('input-horizon-years') as HTMLInputElement)?.value) || 1;
-    const monthlyRent = parseFloat((document.getElementById('input-monthly-rent') as HTMLInputElement)?.value) || 0;
-    const annualRentIncreasePercent = parseFloat((document.getElementById('input-rent-increase') as HTMLInputElement)?.value) || 0;
-    const homePrice = parseFloat((document.getElementById('input-home-price') as HTMLInputElement)?.value) || 0;
-    const downPayment = parseFloat((document.getElementById('input-down-payment') as HTMLInputElement)?.value) || 0;
-    const mortgageRatePercent = parseFloat((document.getElementById('input-mortgage-rate') as HTMLInputElement)?.value) || 0;
-    const loanTermYears = parseFloat((document.getElementById('input-loan-term') as HTMLInputElement)?.value) || 30;
-    const closingCostsPurchase = parseFloat((document.getElementById('input-closing-costs') as HTMLInputElement)?.value) || 0;
-    const propertyTaxRatePercent = parseFloat((document.getElementById('input-tax-rate') as HTMLInputElement)?.value) || 0;
-    const homeInsuranceAnnual = parseFloat((document.getElementById('input-insurance') as HTMLInputElement)?.value) || 0;
-    const annualMaintenancePercent = parseFloat((document.getElementById('input-maintenance') as HTMLInputElement)?.value) || 0;
-    const expectedAppreciationPercent = parseFloat((document.getElementById('input-appreciation') as HTMLInputElement)?.value) || 0;
+    const horizonYears = parseNumericFieldOrNaN((document.getElementById('input-horizon-years') as HTMLInputElement)?.value);
+    const monthlyRent = parseNumericFieldOrNaN((document.getElementById('input-monthly-rent') as HTMLInputElement)?.value);
+    const annualRentIncreasePercent = parseNumericFieldOrNaN((document.getElementById('input-rent-increase') as HTMLInputElement)?.value);
+    const homePrice = parseNumericFieldOrNaN((document.getElementById('input-home-price') as HTMLInputElement)?.value);
+    const downPayment = parseNumericFieldOrNaN((document.getElementById('input-down-payment') as HTMLInputElement)?.value);
+    const mortgageRatePercent = parseNumericFieldOrNaN((document.getElementById('input-mortgage-rate') as HTMLInputElement)?.value);
+    const loanTermYears = parseNumericFieldOrNaN((document.getElementById('input-loan-term') as HTMLInputElement)?.value);
+    const closingCostsPurchase = parseNumericFieldOrNaN((document.getElementById('input-closing-costs') as HTMLInputElement)?.value);
+    const propertyTaxRatePercent = parseNumericFieldOrNaN((document.getElementById('input-tax-rate') as HTMLInputElement)?.value);
+    const homeInsuranceAnnual = parseNumericFieldOrNaN((document.getElementById('input-insurance') as HTMLInputElement)?.value);
+    const annualMaintenancePercent = parseNumericFieldOrNaN((document.getElementById('input-maintenance') as HTMLInputElement)?.value);
+    const expectedAppreciationPercent = parseNumericFieldOrNaN((document.getElementById('input-appreciation') as HTMLInputElement)?.value);
 
     return {
       horizonYears,
